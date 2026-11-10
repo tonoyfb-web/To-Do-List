@@ -5,37 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MeetNote — Meetings & Tasks</title>
 <style>
-:root{--ink:#202b3c;--muted:#718096;--line:#e6eaf0;--blue:#4f6df5;--blue-dark:#3b56d9;--bg:#f5f7fc;--danger:#c54242}
+:root{
+  --ink:#202b3c;--muted:#748198;--line:#e5eaf2;--blue:#526cf5;
+  --blue-dark:#3e55d8;--bg:#f4f6fb;--danger:#c54242;
+}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 button,input,select{font:inherit}
-header{background:linear-gradient(120deg,#e8edff,#e4f4ff);border-bottom:1px solid #e6eaf4}
-.header-inner{max-width:1180px;margin:auto;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+header{background:linear-gradient(120deg,#e9edff,#e5f5ff);border-bottom:1px solid #e4eaf3}
+.header-inner{max-width:1200px;margin:auto;padding:19px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px}
-.logo{width:44px;height:44px;border-radius:15px;background:var(--blue);color:white;display:grid;place-items:center;font-size:22px;font-weight:800;box-shadow:0 6px 14px #4f6df533}
-.brand h1{margin:0;font-size:21px;letter-spacing:-.4px}
-.brand p{color:#687791;font-size:12px;margin:2px 0 0}
-.header-user{display:flex;align-items:center;gap:9px;color:#687791;font-size:13px}
-.wrap{max-width:1180px;margin:30px auto;padding:0 24px}
-.topline{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:20px}
-.topline h2{font-size:26px;letter-spacing:-.7px;margin:0}
+.logo{width:44px;height:44px;border-radius:15px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:22px;font-weight:800;box-shadow:0 7px 18px #526cf533}
+.brand h1{margin:0;font-size:21px;letter-spacing:-.45px}
+.brand p{margin:2px 0 0;color:#687791;font-size:12px}
+.header-user{color:#63718a;font-size:13px}
+.wrap{max-width:1200px;margin:30px auto;padding:0 26px}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:21px}
+.topline h2{margin:0;font-size:27px;letter-spacing:-.8px}
 .muted{font-size:13px;color:var(--muted)}
-.status{font-size:12px;color:#687791}
-.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.top-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.status{font-size:12px;color:#63718a}
 .layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px;align-items:start}
-.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 28px #29385b08}
-.panel h3{font-size:16px;margin:0 0 15px}
-label{display:block;color:#64728a;font-size:12px;font-weight:700;margin:13px 0 5px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:19px;padding:20px;box-shadow:0 9px 28px #29385b09}
+.panel h3{margin:0 0 15px;font-size:16px}
+label{display:block;margin:13px 0 5px;color:#64728a;font-size:12px;font-weight:700}
 input,select{width:100%;padding:10px 12px;border:1px solid #dce2ec;border-radius:10px;background:#fff;color:var(--ink);outline:none}
-input:focus,select:focus,#editor:focus{border-color:#91a5ff;box-shadow:0 0 0 3px #4f6df51a}
+input:focus,select:focus,#editor:focus{border-color:#91a5ff;box-shadow:0 0 0 3px #526cf51a}
 .row{display:flex;gap:9px}
 .row>*{flex:1;min-width:0}
-button{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;transition:.15s}
+button{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:white;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}
 button:hover{background:var(--blue-dark);transform:translateY(-1px)}
 button:disabled{opacity:.55;cursor:not-allowed;transform:none}
 button.secondary{background:#fff;color:#47566e;border:1px solid var(--line)}
 button.secondary:hover{background:#f7f8fc}
 button.danger{background:#fff2f2;color:var(--danger);border:1px solid #ffdddd}
+button.danger:hover{background:#ffe8e8}
 .toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:7px;border:1px solid var(--line);border-radius:10px;background:#fafbfe;margin-top:7px}
 .tool{padding:6px 9px;border:1px solid #e5e9f0;background:#fff;color:#34445d;border-radius:7px;font-size:13px}
 .color-wrap{display:flex;align-items:center;gap:5px;color:#64728a;font-size:11px}
@@ -48,19 +52,19 @@ button.danger{background:#fff2f2;color:var(--danger);border:1px solid #ffdddd}
 .filters{display:flex;gap:8px;flex-wrap:wrap}
 .filters input{width:210px}
 .filters select{width:auto}
-.view-controls{display:flex;padding:3px;background:#f1f3f8;border-radius:10px;gap:3px}
+.view-controls{display:flex;gap:3px;padding:3px;background:#f1f3f8;border-radius:10px}
 .view-controls button{padding:7px 11px;background:transparent;color:#657189}
 .view-controls button.active{background:#fff;color:#344fc2;box-shadow:0 1px 4px #1c294012}
 #notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
 #notes.list-view{grid-template-columns:1fr}
-.note{background:#fff;border:1px solid #e9eaf0;border-radius:15px;padding:16px;box-shadow:0 4px 14px #27345008;min-width:0}
+.note{min-width:0;padding:16px;background:#fff;border:1px solid #e9eaf0;border-radius:15px;box-shadow:0 4px 14px #27345008}
 .note.overdue{border-color:#f0c6c6;background:#fffafa}
-.note h4{font-size:16px;line-height:1.35;margin:0 0 7px;overflow-wrap:anywhere}
-.note-date{font-size:12px;color:#7b879a;margin-bottom:11px}
-.note-body{white-space:pre-wrap;overflow-wrap:anywhere;min-height:24px}
+.note h4{margin:0 0 7px;font-size:16px;line-height:1.35;overflow-wrap:anywhere}
+.note-date{margin-bottom:11px;color:#7b879a;font-size:12px}
+.note-body{min-height:24px;white-space:pre-wrap;overflow-wrap:anywhere}
 .note-body ul,.note-body ol{padding-left:22px}
-.note-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px;padding-top:10px;border-top:1px solid #edf0f3}
-.reminder{font-size:11px;color:#87621a}
+.note-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:13px;padding-top:10px;border-top:1px solid #edf0f3}
+.reminder{margin-top:8px;color:#87621a;font-size:11px}
 .note-actions{display:flex;gap:6px}
 .note-actions button{padding:6px 9px;font-size:11px}
 .note-summary{display:flex;align-items:center;gap:12px;cursor:pointer;list-style:none}
@@ -73,19 +77,19 @@ button.danger{background:#fff2f2;color:var(--danger);border:1px solid #ffdddd}
 .list-view details[open] .note-foot{display:flex}
 .list-view details[open] .note-date{margin-top:10px}
 .list-view details[open] .note-body{margin-top:8px}
-.empty{grid-column:1/-1;text-align:center;padding:48px 15px;color:#748198;border:1px dashed #d5dce8;border-radius:14px}
-.empty b{display:block;color:#45536a;margin-bottom:4px}
-dialog{border:0;border-radius:16px;padding:24px;width:min(420px,calc(100% - 32px));box-shadow:0 20px 70px #18274433}
+.empty{grid-column:1/-1;padding:48px 15px;border:1px dashed #d5dce8;border-radius:14px;text-align:center;color:#748198}
+.empty b{display:block;margin-bottom:4px;color:#45536a}
+dialog{width:min(420px,calc(100% - 32px));padding:24px;border:0;border-radius:18px;box-shadow:0 20px 70px #18274433}
 dialog::backdrop{background:#17243c77}
 dialog h2{margin:0 0 5px;font-size:20px}
 .dialog-actions{display:flex;gap:8px;margin-top:16px}
 .dialog-actions button{flex:1}
-.auth-error{min-height:20px;color:#b53c3c;font-size:13px;margin-top:8px}
-footer{text-align:center;padding:28px;color:#8a96a7;font-size:12px}
+.auth-error{min-height:20px;margin-top:8px;color:#b53c3c;font-size:13px}
+footer{padding:28px;text-align:center;color:#8a96a7;font-size:12px}
 @media(max-width:850px){.layout{grid-template-columns:1fr}}
 @media(max-width:600px){
   .header-inner{padding:17px}
-  .wrap{padding:0 14px;margin:20px auto}
+  .wrap{margin:20px auto;padding:0 14px}
   #notes{grid-template-columns:1fr}
   .filters{width:100%}
   .filters input,.filters select{flex:1;width:auto}
@@ -111,7 +115,7 @@ footer{text-align:center;padding:28px;color:#8a96a7;font-size:12px}
       <div class="muted">Plan meetings and keep track of what needs doing.</div>
     </div>
     <div class="top-actions">
-      <span class="status" id="appStatus" aria-live="polite">Connect Supabase to load your tasks.</span>
+      <span class="status" id="appStatus" aria-live="polite">Connecting…</span>
       <button id="accountBtn" type="button" class="secondary">Sign in</button>
       <button id="enableNotify" type="button" class="secondary">Enable notifications</button>
     </div>
@@ -189,18 +193,17 @@ footer{text-align:center;padding:28px;color:#8a96a7;font-size:12px}
 
 <dialog id="accountDialog">
   <form id="authForm">
-    <h2 id="authHeading">Sign in to MeetNote</h2>
-    <p class="muted">Your tasks are securely saved to your Supabase account.</p>
+    <h2>Sign in to MeetNote</h2>
+    <p class="muted">Sign in with your existing Supabase account.</p>
     <label for="authEmail">Email</label>
     <input id="authEmail" type="email" autocomplete="email" required>
     <label for="authPassword">Password</label>
-    <input id="authPassword" type="password" autocomplete="current-password" required minlength="6">
+    <input id="authPassword" type="password" autocomplete="current-password" required>
     <div class="auth-error" id="authError" aria-live="polite"></div>
     <div class="dialog-actions">
       <button type="submit" id="authSubmit">Sign in</button>
-      <button type="button" class="secondary" id="switchAuth">Create account</button>
+      <button type="button" class="secondary" id="closeDialog">Cancel</button>
     </div>
-    <button type="button" class="secondary" id="closeDialog" style="width:100%;margin-top:9px">Cancel</button>
   </form>
 </dialog>
 
@@ -209,7 +212,7 @@ footer{text-align:center;padding:28px;color:#8a96a7;font-size:12px}
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-/* Replace these values with your Supabase project URL and publishable key. */
+/* Replace with your Supabase project URL and publishable key. */
 const SUPABASE_URL='https://eabnbkysvhbbhrgpetkz.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx';
 const configured=!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
@@ -219,7 +222,6 @@ const $=id=>document.getElementById(id);
 const editor=$('editor');
 let items=[];
 let user=null;
-let authMode='signin';
 let currentView=localStorage.getItem('meetnote_view')||'grid';
 
 function setStatus(message){$('appStatus').textContent=message}
@@ -230,52 +232,29 @@ function setView(view){
   $('listViewBtn').classList.toggle('active',view==='list');
   localStorage.setItem('meetnote_view',view);
 }
-function dateTime(n){
-  if(!n.date)return null;
-  return new Date(`${n.date}T${n.time||'00:00'}:00`);
-}
-function esc(s){
-  return String(s??'').replace(/[&<>"']/g,c=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-function fmt(d){
-  return d.toLocaleString(undefined,{
-    weekday:'short',year:'numeric',month:'short',day:'numeric',
-    hour:'2-digit',minute:'2-digit'
-  });
-}
+function dateTime(n){return n.date?new Date(`${n.date}T${n.time||'00:00'}:00`):null}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmt(d){return d.toLocaleString(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
 function safeNotes(html){
   const doc=new DOMParser().parseFromString(String(html||''),'text/html');
   doc.querySelectorAll('script,style,iframe,object,embed,link,meta').forEach(el=>el.remove());
-  doc.body.querySelectorAll('*').forEach(el=>{
-    [...el.attributes].forEach(attr=>{
-      if(attr.name.toLowerCase().startsWith('on')||
-         ((attr.name==='href'||attr.name==='src')&&/^\s*javascript:/i.test(attr.value))){
-        el.removeAttribute(attr.name);
-      }
-    });
-  });
+  doc.body.querySelectorAll('*').forEach(el=>[...el.attributes].forEach(attr=>{
+    if(attr.name.toLowerCase().startsWith('on')||
+      ((attr.name==='href'||attr.name==='src')&&/^\s*javascript:/i.test(attr.value)))el.removeAttribute(attr.name);
+  }));
   return doc.body.innerHTML;
 }
 function render(){
-  const query=$('search').value.trim().toLowerCase();
-  const filter=$('filter').value;
-  const now=new Date();
+  const query=$('search').value.trim().toLowerCase(),filter=$('filter').value,now=new Date();
   const sorted=[...items].sort((a,b)=>{
     const da=dateTime(a),db=dateTime(b);
-    if(!da)return db?1:0;
-    if(!db)return -1;
-    return da-db;
+    if(!da)return db?1:0;if(!db)return -1;return da-db;
   });
   const filtered=sorted.filter(n=>{
     const dt=dateTime(n);
-    const searchText=(n.title+' '+String(n.notes||'').replace(/<[^>]*>/g,' ')).toLowerCase();
-    const dateMatch=filter==='all'||
-      (filter==='undated'&&!dt)||
-      (filter==='upcoming'&&dt&&dt>=now)||
-      (filter==='past'&&dt&&dt<now);
-    return searchText.includes(query)&&dateMatch;
+    const text=(n.title+' '+String(n.notes||'').replace(/<[^>]*>/g,' ')).toLowerCase();
+    const match=filter==='all'||(filter==='undated'&&!dt)||(filter==='upcoming'&&dt&&dt>=now)||(filter==='past'&&dt&&dt<now);
+    return text.includes(query)&&match;
   });
   $('count').textContent=`${items.length} item${items.length===1?'':'s'} · ${filtered.length} shown`;
   if(!filtered.length){
@@ -284,25 +263,13 @@ function render(){
   }
   $('notes').innerHTML=filtered.map((n,index)=>{
     const dt=dateTime(n),past=Boolean(dt&&dt<now);
-    const reminder=n.reminder!==null&&n.reminder!==undefined
-      ? `Reminder: ${Number(n.reminder)===0?'at time':n.reminder+' min before'}`
-      : '';
-    const details=`
-      <div class="note-date">${dt?esc(fmt(dt))+(past?' · Past':''):'No date set · Task'}</div>
-      <div class="note-body">${safeNotes(n.notes)||'<span class="muted">No notes added.</span>'}</div>
-      ${reminder?`<div class="reminder">${esc(reminder)}</div>`:''}
-      <div class="note-foot">
-        <span class="muted">${esc(n.alarm===false?'Alarm off':'')}</span>
-        <div class="note-actions">
-          <button class="secondary" type="button" data-edit="${esc(n.id)}">Edit</button>
-          <button class="danger" type="button" data-delete="${esc(n.id)}">Delete</button>
-        </div>
-      </div>`;
-    if(currentView==='list'){
-      return `<article class="note ${past?'overdue':''}"><details>
-        <summary class="note-summary"><span class="note-number">${index+1}.</span><h4>${esc(n.title)}</h4><span aria-hidden="true">▾</span></summary>
-        ${details}</details></article>`;
-    }
+    const reminder=n.reminder!=null?`<div class="reminder">Reminder: ${Number(n.reminder)===0?'at time':esc(n.reminder+' min before')}</div>`:'';
+    const details=`<div class="note-date">${dt?esc(fmt(dt))+(past?' · Past':''):'No date set · Task'}</div>
+      <div class="note-body">${safeNotes(n.notes)||'<span class="muted">No notes added.</span>'}</div>${reminder}
+      <div class="note-foot"><span class="muted">${n.alarm===false?'Alarm off':''}</span>
+      <div class="note-actions"><button class="secondary" type="button" data-edit="${esc(n.id)}">Edit</button>
+      <button class="danger" type="button" data-delete="${esc(n.id)}">Delete</button></div></div>`;
+    if(currentView==='list')return `<article class="note ${past?'overdue':''}"><details><summary class="note-summary"><span class="note-number">${index+1}.</span><h4>${esc(n.title)}</h4><span aria-hidden="true">▾</span></summary>${details}</details></article>`;
     return `<article class="note ${past?'overdue':''}"><h4>${esc(n.title)}</h4>${details}</article>`;
   }).join('');
   $('notes').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>editNote(b.dataset.edit)));
@@ -311,57 +278,34 @@ function render(){
 async function loadItems(){
   if(!supabase||!user)return;
   setStatus('Loading your tasks…');
-  const {data,error}=await supabase.from('tasks').select('*')
-    .order('date',{ascending:true,nullsFirst:false}).order('time',{ascending:true});
+  const {data,error}=await supabase.from('tasks').select('*').order('date',{ascending:true,nullsFirst:false}).order('time',{ascending:true});
   if(error){setStatus('Could not load tasks: '+error.message);return}
-  items=(data||[]).map(row=>({
-    id:row.id,user_id:row.user_id,title:row.title,date:row.date||'',
-    time:(row.time||'').slice(0,5),notes:row.notes||'',
-    reminder:row.reminder,alarm:row.alarm
-  }));
-  setStatus('Signed in');
+  items=(data||[]).map(row=>({id:row.id,title:row.title,date:row.date||'',time:(row.time||'').slice(0,5),notes:row.notes||'',reminder:row.reminder,alarm:row.alarm,notified:false}));
+  setStatus('Signed in · your tasks are synced');
   render();
 }
 function resetForm(){
-  $('noteForm').reset();
-  $('editId').value='';
-  editor.innerHTML='';
-  $('formTitle').textContent='Add a schedule / task';
-  $('saveBtn').textContent='Save schedule';
+  $('noteForm').reset();$('editId').value='';editor.innerHTML='';
+  $('formTitle').textContent='Add a schedule / task';$('saveBtn').textContent='Save schedule';
 }
 async function saveTask(event){
   event.preventDefault();
-  if(!user){setStatus('Sign in to save tasks.');openAccountDialog();return}
-  const id=$('editId').value;
-  const hasDate=Boolean($('date').value);
-  const payload={
-    user_id:user.id,
-    title:$('title').value.trim(),
-    date:hasDate?$('date').value:null,
-    time:hasDate&&$('time').value?$('time').value:null,
-    notes:editor.innerHTML,
-    reminder:hasDate&&$('reminder').value!==''?Number($('reminder').value):null,
-    alarm:$('alarm').value==='yes'
-  };
+  if(!user){setStatus('Sign in to save tasks.');openSignIn();return}
+  const id=$('editId').value,hasDate=Boolean($('date').value);
+  const payload={user_id:user.id,title:$('title').value.trim(),date:hasDate?$('date').value:null,
+    time:hasDate&&$('time').value?$('time').value:null,notes:editor.innerHTML,
+    reminder:hasDate&&$('reminder').value!==''?Number($('reminder').value):null,alarm:$('alarm').value==='yes'};
   $('saveBtn').disabled=true;
-  const result=id
-    ?await supabase.from('tasks').update(payload).eq('id',id).select().single()
-    :await supabase.from('tasks').insert(payload).select().single();
+  const result=id?await supabase.from('tasks').update(payload).eq('id',id).select().single():await supabase.from('tasks').insert(payload).select().single();
   $('saveBtn').disabled=false;
   if(result.error){setStatus('Save failed: '+result.error.message);return}
-  resetForm();
-  await loadItems();
+  resetForm();await loadItems();
 }
 function editNote(id){
-  const n=items.find(x=>x.id===id);
-  if(!n)return;
-  $('editId').value=n.id;$('title').value=n.title;$('date').value=n.date||'';
-  $('time').value=n.time||'';
-  $('reminder').value=n.reminder==null?'':String(n.reminder);
-  $('alarm').value=n.alarm===false?'no':'yes';
-  editor.innerHTML=n.notes||'';
-  $('formTitle').textContent='Edit schedule / task';
-  $('saveBtn').textContent='Update schedule';
+  const n=items.find(x=>x.id===id);if(!n)return;
+  $('editId').value=n.id;$('title').value=n.title;$('date').value=n.date||'';$('time').value=n.time||'';
+  $('reminder').value=n.reminder==null?'':String(n.reminder);$('alarm').value=n.alarm===false?'no':'yes';
+  editor.innerHTML=n.notes||'';$('formTitle').textContent='Edit schedule / task';$('saveBtn').textContent='Update schedule';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 async function deleteNote(id){
@@ -370,69 +314,29 @@ async function deleteNote(id){
   if(error){setStatus('Delete failed: '+error.message);return}
   await loadItems();
 }
-
-function openAccountDialog(){
-  if(!configured){setStatus('Add your Supabase URL and publishable key in the HTML first.');return}
-  $('authError').textContent='';
-  $('accountDialog').showModal();
+function openSignIn(){
+  if(!configured){setStatus('Add your Supabase project URL and publishable key in the HTML first.');return}
+  $('authError').textContent='';$('accountDialog').showModal();
 }
-function setAuthMode(mode){
-  authMode=mode;
-  $('authHeading').textContent=mode==='signin'?'Sign in to MeetNote':'Create your account';
-  $('authSubmit').textContent=mode==='signin'?'Sign in':'Create account';
-  $('switchAuth').textContent=mode==='signin'?'Create account':'Back to sign in';
-  $('authError').textContent='';
-}
-async function submitAuth(event){
+async function signIn(event){
   event.preventDefault();
-  if(!supabase){$('authError').textContent='Supabase is not configured.';return}
-  const email=$('authEmail').value.trim();
-  const password=$('authPassword').value;
+  const email=$('authEmail').value.trim(),password=$('authPassword').value;
   $('authSubmit').disabled=true;
-  let result;
-  if(authMode==='signin'){
-    result=await supabase.auth.signInWithPassword({email,password});
-  }else{
-    result=await supabase.auth.signUp({email,password});
-  }
+  const {error}=await supabase.auth.signInWithPassword({email,password});
   $('authSubmit').disabled=false;
-  if(result.error){$('authError').textContent=result.error.message;return}
-  if(authMode==='signup'&&!result.data.session){
-    $('authError').textContent='Account created. Check your email to confirm, then sign in.';
-    return;
-  }
+  if(error){$('authError').textContent=error.message;return}
   $('accountDialog').close();
 }
 async function signOut(){
   const {error}=await supabase.auth.signOut();
   if(error)setStatus('Sign out failed: '+error.message);
 }
-
 function updateAccountUI(){
-  const el=$('headerUser');
-  const btn=$('accountBtn');
-  if(user){
-    el.textContent=user.email||'Signed in';
-    btn.textContent='Sign out';
-    btn.onclick=signOut;
-  }else{
-    el.textContent='';
-    btn.textContent='Sign in';
-    btn.onclick=openAccountDialog;
-  }
+  $('headerUser').textContent=user?(user.email||'Signed in'):'';
+  $('accountBtn').textContent=user?'Sign out':'Sign in';
+  $('accountBtn').onclick=user?signOut:openSignIn;
 }
 
-function notificationStatus(){
-  if(!('Notification'in window))return 'This browser does not support notifications.';
-  if(!window.isSecureContext)return 'Notifications require HTTPS or localhost.';
-  if(Notification.permission==='granted')return 'Notifications are enabled. Keep this page open for reminders.';
-  if(Notification.permission==='denied')return 'Notifications are blocked. Allow them in your browser site settings.';
-  return 'Click Enable notifications and allow permission in your browser prompt.';
-}
-function showNotificationStatus(message){
-  setStatus(message);
-  updateNotificationButton();
-}
 function updateNotificationButton(){
   const button=$('enableNotify');
   if(!('Notification'in window)){button.textContent='Notifications unavailable';button.disabled=true;return}
@@ -442,54 +346,31 @@ function updateNotificationButton(){
     Notification.permission==='denied'?'Notifications blocked':'Enable notifications';
 }
 async function enableNotifications(){
-  if(!('Notification'in window)){
-    showNotificationStatus('This browser does not support desktop notifications.');
-    return;
-  }
-  if(!window.isSecureContext){
-    showNotificationStatus('Notifications require HTTPS or localhost. Open this site securely, then try again.');
-    return;
-  }
+  if(!('Notification'in window)){setStatus('This browser does not support desktop notifications.');return}
+  if(!window.isSecureContext){setStatus('Notifications require HTTPS or localhost. Open this site securely, then try again.');return}
   try{
     const permission=await Notification.requestPermission();
     updateNotificationButton();
-    if(permission==='granted'){
-      showNotificationStatus('Notifications enabled. Keep this page open for reminders.');
-      checkReminders();
-    }else if(permission==='denied'){
-      showNotificationStatus('Permission was denied. Enable notifications in your browser site settings.');
-    }else{
-      showNotificationStatus('Notification permission was dismissed. Click the button to try again.');
-    }
-  }catch(error){
-    showNotificationStatus('Could not request notification permission: '+error.message);
-  }
+    if(permission==='granted'){setStatus('Notifications enabled. Keep this page open for reminders.');checkReminders()}
+    else if(permission==='denied')setStatus('Notifications were blocked. Allow them in your browser site settings.')
+    else setStatus('Permission prompt dismissed. Click Enable notifications to try again.');
+  }catch(error){setStatus('Could not request notification permission: '+error.message)}
 }
 function beep(){
-  try{
-    const C=window.AudioContext||window.webkitAudioContext;
-    if(!C)return;
-    const c=new C(),o=c.createOscillator(),g=c.createGain();
-    o.connect(g);g.connect(c.destination);
-    o.frequency.value=880;
-    g.gain.setValueAtTime(.18,c.currentTime);
-    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+1);
-    o.start();o.stop(c.currentTime+1);
+  try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+    const c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);
+    o.frequency.value=880;g.gain.setValueAtTime(.18,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+1);o.start();o.stop(c.currentTime+1);
   }catch(e){}
 }
 function checkReminders(){
   if(!('Notification'in window)||Notification.permission!=='granted'||!user)return;
   const now=new Date();
   items.forEach(n=>{
-    const dt=dateTime(n);
-    if(!dt||n.reminder==null||n.notified)return;
+    const dt=dateTime(n);if(!dt||n.reminder==null||n.notified)return;
     const trigger=new Date(dt.getTime()-Number(n.reminder)*60000);
     if(now>=trigger&&now<=new Date(dt.getTime()+5*60000)){
-      try{
-        new Notification('MeetNote reminder: '+n.title,{body:'Scheduled for '+fmt(dt),tag:'meetnote-'+n.id});
-        if(n.alarm!==false)beep();
-        n.notified=true;
-      }catch(e){}
+      try{new Notification('MeetNote reminder: '+n.title,{body:'Scheduled for '+fmt(dt),tag:'meetnote-'+n.id});if(n.alarm!==false)beep();n.notified=true}catch(e){}
     }
   });
 }
@@ -500,47 +381,31 @@ $('search').addEventListener('input',render);
 $('filter').addEventListener('change',render);
 $('gridViewBtn').addEventListener('click',()=>{setView('grid');render()});
 $('listViewBtn').addEventListener('click',()=>{setView('list');render()});
-$('accountBtn').addEventListener('click',openAccountDialog);
-$('authForm').addEventListener('submit',submitAuth);
-$('switchAuth').addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));
+$('authForm').addEventListener('submit',signIn);
 $('closeDialog').addEventListener('click',()=>$('accountDialog').close());
 $('enableNotify').addEventListener('click',enableNotifications);
-
-document.querySelectorAll('[data-cmd]').forEach(button=>button.addEventListener('click',()=>{
-  editor.focus();
-  const command=button.dataset.cmd;
-  document.execCommand(command,false,command==='hiliteColor'?$('highlightColor').value:null);
+document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>{
+  editor.focus();document.execCommand(b.dataset.cmd,false,b.dataset.cmd==='hiliteColor'?$('highlightColor').value:null);
 }));
 $('textColor').addEventListener('input',e=>{editor.focus();document.execCommand('foreColor',false,e.target.value)});
 $('highlightColor').addEventListener('input',e=>{editor.focus();document.execCommand('hiliteColor',false,e.target.value)});
 $('date').addEventListener('change',()=>{
-  const hasDate=Boolean($('date').value);
-  $('reminder').disabled=!hasDate;
-  $('time').disabled=!hasDate;
+  const hasDate=Boolean($('date').value);$('reminder').disabled=!hasDate;$('time').disabled=!hasDate;
 });
 
-setView(currentView);
-updateNotificationButton();
-updateAccountUI();
-render();
+setView(currentView);updateNotificationButton();updateAccountUI();render();
 setInterval(checkReminders,15000);
 window.addEventListener('focus',updateNotificationButton);
 
 if(configured){
   supabase.auth.onAuthStateChange((_event,session)=>{
-    user=session?.user||null;
-    updateAccountUI();
-    items=[];
-    render();
-    if(user)void loadItems();
-    else setStatus('Sign in to view your Supabase tasks.');
+    user=session?.user||null;updateAccountUI();items=[];render();
+    if(user)void loadItems();else setStatus('Sign in to view your Supabase tasks.');
   });
   supabase.auth.getSession().then(({data,error})=>{
     if(error){setStatus('Could not check sign-in status: '+error.message);return}
-    user=data.session?.user||null;
-    updateAccountUI();
-    if(user)void loadItems();
-    else setStatus('Sign in to view your Supabase tasks.');
+    user=data.session?.user||null;updateAccountUI();
+    if(user)void loadItems();else setStatus('Sign in to view your Supabase tasks.');
   });
 }else{
   setStatus('Add your Supabase URL and publishable key in the HTML to connect.');
