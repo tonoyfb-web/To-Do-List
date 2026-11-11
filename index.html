@@ -13,9 +13,10 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 button,input,select{font:inherit}
 header{background:linear-gradient(120deg,#e9edff,#e5f5ff);border-bottom:1px solid #e4eaf3}
-.header-inner{max-width:1200px;margin:auto;padding:19px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.header-inner{max-width:1200px;margin:auto;padding:16px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px}
-.logo{width:44px;height:44px;border-radius:15px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:22px;font-weight:800;box-shadow:0 7px 18px #526cf533}
+.logo-img{width:52px;height:52px;object-fit:contain;display:block}
+.logo-fallback{display:none;width:52px;height:52px}
 .brand h1{margin:0;font-size:21px;letter-spacing:-.45px}
 .brand p{margin:2px 0 0;color:#687791;font-size:12px}
 .header-user{color:#63718a;font-size:13px}
@@ -25,14 +26,8 @@ header{background:linear-gradient(120deg,#e9edff,#e5f5ff);border-bottom:1px soli
 .muted{font-size:13px;color:var(--muted)}
 .top-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .status{font-size:12px;color:#63718a}
-.layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px;align-items:start}
-.panel{background:#fff;border:1px solid var(--line);border-radius:19px;padding:20px;box-shadow:0 9px 28px #29385b09}
-.panel h3{margin:0 0 15px;font-size:16px}
-label{display:block;margin:13px 0 5px;color:#64728a;font-size:12px;font-weight:700}
-input,select{width:100%;padding:10px 12px;border:1px solid #dce2ec;border-radius:10px;background:#fff;color:var(--ink);outline:none}
-input:focus,select:focus,#editor:focus{border-color:#91a5ff;box-shadow:0 0 0 3px #526cf51a}
-.row{display:flex;gap:9px}
-.row>*{flex:1;min-width:0}
+.icon{width:16px;height:16px;flex:0 0 16px;vertical-align:-3px}
+.btn-icon{display:inline-flex;align-items:center;gap:7px}
 button{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:white;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}
 button:hover{background:var(--blue-dark);transform:translateY(-1px)}
 button:disabled{opacity:.55;cursor:not-allowed;transform:none}
@@ -40,17 +35,25 @@ button.secondary{background:#fff;color:#47566e;border:1px solid var(--line)}
 button.secondary:hover{background:#f7f8fc}
 button.danger{background:#fff2f2;color:var(--danger);border:1px solid #ffdddd}
 button.danger:hover{background:#ffe8e8}
+.add-btn{padding:11px 18px;box-shadow:0 8px 18px #526cf533}
+label{display:block;margin:13px 0 5px;color:#64728a;font-size:12px;font-weight:700}
+input,select{width:100%;padding:10px 12px;border:1px solid #dce2ec;border-radius:10px;background:#fff;color:var(--ink);outline:none}
+input:focus,select:focus,#editor:focus{border-color:#91a5ff;box-shadow:0 0 0 3px #526cf51a}
+.row{display:flex;gap:9px}
+.row>*{flex:1;min-width:0}
 .toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:7px;border:1px solid var(--line);border-radius:10px;background:#fafbfe;margin-top:7px}
 .tool{padding:6px 9px;border:1px solid #e5e9f0;background:#fff;color:#34445d;border-radius:7px;font-size:13px}
+.tool:hover{background:#f3f6ff}
 .color-wrap{display:flex;align-items:center;gap:5px;color:#64728a;font-size:11px}
 .color-wrap input{width:27px;height:26px;padding:2px;border:0}
-#editor{min-height:125px;padding:11px;border:1px solid #dce2ec;border-radius:10px;margin-top:7px;outline:none;overflow-wrap:anywhere}
-.form-actions{display:flex;gap:8px;margin-top:15px}
+#editor{min-height:140px;padding:11px;border:1px solid #dce2ec;border-radius:10px;margin-top:7px;outline:none;overflow-wrap:anywhere}
+.form-actions{display:flex;gap:8px;margin-top:16px}
 .form-actions button{flex:1}
+.list-panel{background:#fff;border:1px solid var(--line);border-radius:19px;padding:20px;box-shadow:0 9px 28px #29385b09}
 .list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-.list-head h3{margin:0}
+.list-head h3{margin:0;font-size:18px}
 .filters{display:flex;gap:8px;flex-wrap:wrap}
-.filters input{width:210px}
+.filters input{width:220px}
 .filters select{width:auto}
 .view-controls{display:flex;gap:3px;padding:3px;background:#f1f3f8;border-radius:10px}
 .view-controls button{padding:7px 11px;background:transparent;color:#657189}
@@ -62,6 +65,7 @@ button.danger:hover{background:#ffe8e8}
 .note h4{margin:0 0 7px;font-size:16px;line-height:1.35;overflow-wrap:anywhere}
 .note-date{margin-bottom:11px;color:#7b879a;font-size:12px}
 .note-body{min-height:24px;white-space:pre-wrap;overflow-wrap:anywhere}
+.note-body:empty{display:none}
 .note-body ul,.note-body ol{padding-left:22px}
 .note-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:13px;padding-top:10px;border-top:1px solid #edf0f3}
 .reminder{margin-top:8px;color:#87621a;font-size:11px}
@@ -79,21 +83,24 @@ button.danger:hover{background:#ffe8e8}
 .list-view details[open] .note-body{margin-top:8px}
 .empty{grid-column:1/-1;padding:48px 15px;border:1px dashed #d5dce8;border-radius:14px;text-align:center;color:#748198}
 .empty b{display:block;margin-bottom:4px;color:#45536a}
-dialog{width:min(420px,calc(100% - 32px));padding:24px;border:0;border-radius:18px;box-shadow:0 20px 70px #18274433}
+dialog{width:min(620px,calc(100% - 32px));max-height:calc(100vh - 40px);padding:24px;border:0;border-radius:18px;box-shadow:0 20px 70px #18274433}
 dialog::backdrop{background:#17243c77}
 dialog h2{margin:0 0 5px;font-size:20px}
+.dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.icon-close{background:#f1f3f8;color:#47566e;padding:6px 10px;border:0}
 .dialog-actions{display:flex;gap:8px;margin-top:16px}
 .dialog-actions button{flex:1}
 .auth-error{min-height:20px;margin-top:8px;color:#b53c3c;font-size:13px}
 footer{padding:28px;text-align:center;color:#8a96a7;font-size:12px}
-@media(max-width:850px){.layout{grid-template-columns:1fr}}
+@media(max-width:850px){.wrap{padding:0 18px}}
 @media(max-width:600px){
-  .header-inner{padding:17px}
-  .wrap{margin:20px auto;padding:0 14px}
+  .header-inner{padding:14px 17px}
+  .wrap{margin:20px auto}
   #notes{grid-template-columns:1fr}
   .filters{width:100%}
   .filters input,.filters select{flex:1;width:auto}
   .top-actions{width:100%}
+  .row{flex-direction:column;gap:0}
 }
 </style>
 </head>
@@ -101,8 +108,19 @@ footer{padding:28px;text-align:center;color:#8a96a7;font-size:12px}
 <header>
   <div class="header-inner">
     <div class="brand">
-      <div class="logo">✓</div>
-      <div><h1>MeetNote</h1><p>Your Meetings, Tasks & Reminders in One Place</p></div>
+      <img class="logo-img" src="clipboard-logo.png" alt="MeetNote logo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <svg class="logo-fallback" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="16" y="14" width="68" height="82" rx="6" fill="#8b5a4f"/>
+        <rect x="26" y="22" width="50" height="70" rx="2" fill="#fff"/>
+        <rect x="38" y="6" width="24" height="14" rx="3" fill="#aab1bb"/>
+        <path d="M31 36l3 3 5-6" stroke="#22b573" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <path d="M31 50l3 3 5-6" stroke="#22b573" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <path d="M31 64l3 3 5-6" stroke="#22b573" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <rect x="31" y="74" width="8" height="8" fill="none" stroke="#333" stroke-width="1.5"/>
+        <path d="M44 38h24M44 46h24M44 54h24M44 62h24M44 78h24" stroke="#333" stroke-width="1.6"/>
+      </svg>
+      <div><h1>MeetNote</h1><p>Your meetings, tasks & reminders in one place</p></div>
     </div>
     <div class="header-user" id="headerUser"></div>
   </div>
@@ -111,86 +129,106 @@ footer{padding:28px;text-align:center;color:#8a96a7;font-size:12px}
 <main class="wrap">
   <div class="topline">
     <div>
-      <h2>My Schedule</h2>
+      <h2>My schedule</h2>
       <div class="muted">Plan meetings and keep track of what needs doing.</div>
     </div>
     <div class="top-actions">
       <span class="status" id="appStatus" aria-live="polite">Connecting…</span>
-      <button id="accountBtn" type="button" class="secondary">Sign in</button>
-      <button id="enableNotify" type="button" class="secondary">Enable notifications</button>
+      <button id="enableNotify" type="button" class="secondary btn-icon">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        Enable notifications
+      </button>
+      <button id="accountBtn" type="button" class="secondary btn-icon">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+        Sign in
+      </button>
+      <button id="addBtn" type="button" class="add-btn btn-icon">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add schedule / task
+      </button>
     </div>
   </div>
 
-  <div class="layout">
-    <section class="panel">
-      <h3 id="formTitle">Add a Schedule/Task</h3>
-      <form id="noteForm">
-        <input type="hidden" id="editId">
-        <label for="title">Meeting / task title</label>
-        <input id="title" required maxlength="120" placeholder="e.g. Prepare project update">
-        <div class="row">
-          <div><label for="date">Date <span class="muted">(optional)</span></label><input id="date" type="date"></div>
-          <div><label for="time">Time <span class="muted">(optional)</span></label><input id="time" type="time"></div>
-        </div>
-        <label>Notes & Details</label>
-        <div class="toolbar" aria-label="Text formatting">
-          <button type="button" class="tool" data-cmd="bold" title="Bold"><b>B</b></button>
-          <button type="button" class="tool" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
-          <button type="button" class="tool" data-cmd="hiliteColor" title="Highlight">🖍</button>
-          <span class="color-wrap">Text <input type="color" id="textColor" value="#263247" title="Text color"></span>
-          <span class="color-wrap">Highlight <input type="color" id="highlightColor" value="#fff19a" title="Highlight color"></span>
-          <button type="button" class="tool" data-cmd="removeFormat" title="Clear formatting">Clear</button>
-        </div>
-        <div id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Meeting notes"></div>
-        <div class="row">
-          <div>
-            <label for="reminder">Reminder</label>
-            <select id="reminder">
-              <option value="">No reminder</option>
-              <option value="0">At scheduled time</option>
-              <option value="5">5 minutes before</option>
-              <option value="10">10 minutes before</option>
-              <option value="15">15 minutes before</option>
-              <option value="30">30 minutes before</option>
-              <option value="60">1 hour before</option>
-              <option value="1440">1 day before</option>
-            </select>
-          </div>
-          <div>
-            <label for="alarm">Alarm Sound</label>
-            <select id="alarm"><option value="yes">On</option><option value="no">Off</option></select>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button type="submit" id="saveBtn">Save Schedule</button>
-          <button type="button" class="secondary" id="resetBtn">Clear</button>
-        </div>
-      </form>
-      <p class="muted" style="margin:13px 0 0">Tasks are saved to your Supabase account.</p>
-    </section>
-
-    <section class="panel">
-      <div class="list-head">
-        <div><h3>Upcoming & Saved</h3><div class="muted" id="count">0 items</div></div>
-        <div class="view-controls" aria-label="Choose layout">
-          <button type="button" class="active" id="gridViewBtn">Grid</button>
-          <button type="button" id="listViewBtn">List</button>
-        </div>
-        <div class="filters">
-          <input id="search" placeholder="Search Schedules…">
-          <select id="filter">
-            <option value="all">All items</option>
-            <option value="upcoming">Upcoming</option>
-            <option value="past">Past</option>
-            <option value="undated">Undated</option>
-          </select>
-        </div>
+  <section class="list-panel">
+    <div class="list-head">
+      <div><h3>Upcoming & saved</h3><div class="muted" id="count">0 items</div></div>
+      <div class="view-controls" aria-label="Choose layout">
+        <button type="button" class="active" id="gridViewBtn">Grid</button>
+        <button type="button" id="listViewBtn">List</button>
       </div>
-      <div id="notes"></div>
-    </section>
-  </div>
+      <div class="filters">
+        <input id="search" placeholder="Search schedules…" aria-label="Search schedules">
+        <select id="filter" aria-label="Filter schedules">
+          <option value="all">All items</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="past">Past</option>
+          <option value="undated">Undated</option>
+        </select>
+      </div>
+    </div>
+    <div id="notes"></div>
+  </section>
 </main>
 
+<!-- Add / edit task dialog -->
+<dialog id="taskDialog">
+  <form id="noteForm">
+    <div class="dialog-head">
+      <div>
+        <h2 id="formTitle">Add a schedule / task</h2>
+        <div class="muted">Fill in the details and save to your account.</div>
+      </div>
+      <button type="button" class="icon-close" id="closeTaskDialog" aria-label="Close">✕</button>
+    </div>
+
+    <input type="hidden" id="editId">
+    <label for="title">Meeting / task title</label>
+    <input id="title" required maxlength="120" placeholder="e.g. Prepare project update">
+
+    <div class="row">
+      <div><label for="date">Date <span class="muted">(optional)</span></label><input id="date" type="date"></div>
+      <div><label for="time">Time <span class="muted">(optional)</span></label><input id="time" type="time"></div>
+    </div>
+
+    <label>Notes & details</label>
+    <div class="toolbar" aria-label="Text formatting">
+      <button type="button" class="tool" data-cmd="bold" title="Bold"><b>B</b></button>
+      <button type="button" class="tool" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+      <button type="button" class="tool" data-cmd="hiliteColor" title="Highlight">🖍</button>
+      <span class="color-wrap">Text <input type="color" id="textColor" value="#263247" title="Text color"></span>
+      <span class="color-wrap">Highlight <input type="color" id="highlightColor" value="#fff19a" title="Highlight color"></span>
+      <button type="button" class="tool" data-cmd="removeFormat" title="Clear formatting">Clear</button>
+    </div>
+    <div id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Meeting notes"></div>
+
+    <div class="row">
+      <div>
+        <label for="reminder">Reminder</label>
+        <select id="reminder">
+          <option value="">No reminder</option>
+          <option value="0">At scheduled time</option>
+          <option value="5">5 minutes before</option>
+          <option value="10">10 minutes before</option>
+          <option value="15">15 minutes before</option>
+          <option value="30">30 minutes before</option>
+          <option value="60">1 hour before</option>
+          <option value="1440">1 day before</option>
+        </select>
+      </div>
+      <div>
+        <label for="alarm">Alarm sound</label>
+        <select id="alarm"><option value="yes">On</option><option value="no">Off</option></select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="secondary" id="resetBtn">Clear</button>
+      <button type="submit" id="saveBtn">Save schedule</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Sign-in dialog -->
 <dialog id="accountDialog">
   <form id="authForm">
     <h2>Sign in to MeetNote</h2>
@@ -201,8 +239,8 @@ footer{padding:28px;text-align:center;color:#8a96a7;font-size:12px}
     <input id="authPassword" type="password" autocomplete="current-password" required>
     <div class="auth-error" id="authError" aria-live="polite"></div>
     <div class="dialog-actions">
-      <button type="submit" id="authSubmit">Sign in</button>
       <button type="button" class="secondary" id="closeDialog">Cancel</button>
+      <button type="submit" id="authSubmit">Sign in</button>
     </div>
   </form>
 </dialog>
@@ -213,8 +251,8 @@ footer{padding:28px;text-align:center;color:#8a96a7;font-size:12px}
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 /* Replace with your Supabase project URL and publishable key. */
-const SUPABASE_URL='https://eabnbkysvhbbhrgpetkz.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx';
+const SUPABASE_URL='YOUR_SUPABASE_URL';
+const SUPABASE_PUBLISHABLE_KEY='YOUR_SUPABASE_PUBLISHABLE_KEY';
 const configured=!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
 const supabase=configured?createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
 
@@ -258,7 +296,7 @@ function render(){
   });
   $('count').textContent=`${items.length} item${items.length===1?'':'s'} · ${filtered.length} shown`;
   if(!filtered.length){
-    $('notes').innerHTML='<div class="empty"><b>No schedules found</b>Add a task or change the search/filter.</div>';
+    $('notes').innerHTML='<div class="empty"><b>No schedules found</b>Click “Add schedule / task” to create one, or change the search/filter.</div>';
     return;
   }
   $('notes').innerHTML=filtered.map((n,index)=>{
@@ -275,6 +313,7 @@ function render(){
   $('notes').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>editNote(b.dataset.edit)));
   $('notes').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>deleteNote(b.dataset.delete)));
 }
+
 async function loadItems(){
   if(!supabase||!user)return;
   setStatus('Loading your tasks…');
@@ -284,29 +323,61 @@ async function loadItems(){
   setStatus('Signed in · your tasks are synced');
   render();
 }
+
+function syncDateFields(){
+  const hasDate=Boolean($('date').value);
+  $('reminder').disabled=!hasDate;
+  $('time').disabled=!hasDate;
+}
 function resetForm(){
-  $('noteForm').reset();$('editId').value='';editor.innerHTML='';
-  $('formTitle').textContent='Add a schedule / task';$('saveBtn').textContent='Save schedule';
+  $('noteForm').reset();
+  $('editId').value='';
+  editor.innerHTML='';
+  $('formTitle').textContent='Add a schedule / task';
+  $('saveBtn').textContent='Save schedule';
+  syncDateFields();
+}
+function openTaskForm(){
+  if(!user){setStatus('Sign in to add schedules and tasks.');openSignIn();return}
+  resetForm();
+  $('taskDialog').showModal();
+  $('title').focus();
+}
+function editNote(id){
+  const n=items.find(x=>x.id===id);if(!n)return;
+  $('editId').value=n.id;
+  $('title').value=n.title;
+  $('date').value=n.date||'';
+  $('time').value=n.time||'';
+  $('reminder').value=n.reminder==null?'':String(n.reminder);
+  $('alarm').value=n.alarm===false?'no':'yes';
+  editor.innerHTML=n.notes||'';
+  $('formTitle').textContent='Edit schedule / task';
+  $('saveBtn').textContent='Update schedule';
+  syncDateFields();
+  $('taskDialog').showModal();
 }
 async function saveTask(event){
   event.preventDefault();
   if(!user){setStatus('Sign in to save tasks.');openSignIn();return}
   const id=$('editId').value,hasDate=Boolean($('date').value);
-  const payload={user_id:user.id,title:$('title').value.trim(),date:hasDate?$('date').value:null,
-    time:hasDate&&$('time').value?$('time').value:null,notes:editor.innerHTML,
-    reminder:hasDate&&$('reminder').value!==''?Number($('reminder').value):null,alarm:$('alarm').value==='yes'};
+  const payload={
+    user_id:user.id,
+    title:$('title').value.trim(),
+    date:hasDate?$('date').value:null,
+    time:hasDate&&$('time').value?$('time').value:null,
+    notes:editor.innerHTML,
+    reminder:hasDate&&$('reminder').value!==''?Number($('reminder').value):null,
+    alarm:$('alarm').value==='yes'
+  };
   $('saveBtn').disabled=true;
-  const result=id?await supabase.from('tasks').update(payload).eq('id',id).select().single():await supabase.from('tasks').insert(payload).select().single();
+  const result=id
+    ?await supabase.from('tasks').update(payload).eq('id',id).select().single()
+    :await supabase.from('tasks').insert(payload).select().single();
   $('saveBtn').disabled=false;
   if(result.error){setStatus('Save failed: '+result.error.message);return}
-  resetForm();await loadItems();
-}
-function editNote(id){
-  const n=items.find(x=>x.id===id);if(!n)return;
-  $('editId').value=n.id;$('title').value=n.title;$('date').value=n.date||'';$('time').value=n.time||'';
-  $('reminder').value=n.reminder==null?'':String(n.reminder);$('alarm').value=n.alarm===false?'no':'yes';
-  editor.innerHTML=n.notes||'';$('formTitle').textContent='Edit schedule / task';$('saveBtn').textContent='Update schedule';
-  window.scrollTo({top:0,behavior:'smooth'});
+  $('taskDialog').close();
+  await loadItems();
 }
 async function deleteNote(id){
   if(!confirm('Delete this task?'))return;
@@ -314,9 +385,11 @@ async function deleteNote(id){
   if(error){setStatus('Delete failed: '+error.message);return}
   await loadItems();
 }
+
 function openSignIn(){
   if(!configured){setStatus('Add your Supabase project URL and publishable key in the HTML first.');return}
-  $('authError').textContent='';$('accountDialog').showModal();
+  $('authError').textContent='';
+  $('accountDialog').showModal();
 }
 async function signIn(event){
   event.preventDefault();
@@ -333,8 +406,12 @@ async function signOut(){
 }
 function updateAccountUI(){
   $('headerUser').textContent=user?(user.email||'Signed in'):'';
-  $('accountBtn').textContent=user?'Sign out':'Sign in';
+  $('accountBtn').innerHTML=user
+    ?'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Sign out'
+    :'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Sign in';
   $('accountBtn').onclick=user?signOut:openSignIn;
+  $('addBtn').disabled=!user;
+  $('addBtn').title=user?'':'Sign in to add schedules';
 }
 
 function updateNotificationButton(){
@@ -342,7 +419,7 @@ function updateNotificationButton(){
   if(!('Notification'in window)){button.textContent='Notifications unavailable';button.disabled=true;return}
   if(!window.isSecureContext){button.textContent='Use HTTPS for notifications';button.disabled=true;return}
   button.disabled=false;
-  button.textContent=Notification.permission==='granted'?'Notifications Enabled':
+  button.textContent=Notification.permission==='granted'?'Notifications enabled':
     Notification.permission==='denied'?'Notifications blocked':'Enable notifications';
 }
 async function enableNotifications(){
@@ -352,7 +429,7 @@ async function enableNotifications(){
     const permission=await Notification.requestPermission();
     updateNotificationButton();
     if(permission==='granted'){setStatus('Notifications enabled. Keep this page open for reminders.');checkReminders()}
-    else if(permission==='denied')setStatus('Notifications were blocked. Allow them in your browser site settings.')
+    else if(permission==='denied')setStatus('Notifications were blocked. Allow them in your browser site settings.');
     else setStatus('Permission prompt dismissed. Click Enable notifications to try again.');
   }catch(error){setStatus('Could not request notification permission: '+error.message)}
 }
@@ -377,6 +454,9 @@ function checkReminders(){
 
 $('noteForm').addEventListener('submit',saveTask);
 $('resetBtn').addEventListener('click',resetForm);
+$('closeTaskDialog').addEventListener('click',()=>$('taskDialog').close());
+$('taskDialog').addEventListener('close',resetForm);
+$('addBtn').addEventListener('click',openTaskForm);
 $('search').addEventListener('input',render);
 $('filter').addEventListener('change',render);
 $('gridViewBtn').addEventListener('click',()=>{setView('grid');render()});
@@ -385,15 +465,18 @@ $('authForm').addEventListener('submit',signIn);
 $('closeDialog').addEventListener('click',()=>$('accountDialog').close());
 $('enableNotify').addEventListener('click',enableNotifications);
 document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>{
-  editor.focus();document.execCommand(b.dataset.cmd,false,b.dataset.cmd==='hiliteColor'?$('highlightColor').value:null);
+  editor.focus();
+  document.execCommand(b.dataset.cmd,false,b.dataset.cmd==='hiliteColor'?$('highlightColor').value:null);
 }));
 $('textColor').addEventListener('input',e=>{editor.focus();document.execCommand('foreColor',false,e.target.value)});
 $('highlightColor').addEventListener('input',e=>{editor.focus();document.execCommand('hiliteColor',false,e.target.value)});
-$('date').addEventListener('change',()=>{
-  const hasDate=Boolean($('date').value);$('reminder').disabled=!hasDate;$('time').disabled=!hasDate;
-});
+$('date').addEventListener('change',syncDateFields);
 
-setView(currentView);updateNotificationButton();updateAccountUI();render();
+setView(currentView);
+updateNotificationButton();
+updateAccountUI();
+syncDateFields();
+render();
 setInterval(checkReminders,15000);
 window.addEventListener('focus',updateNotificationButton);
 
@@ -408,7 +491,8 @@ if(configured){
     if(user)void loadItems();else setStatus('Sign in to view your Supabase tasks.');
   });
 }else{
-  setStatus('Add your Supabase URL and publishable key in the HTML to connect.');
+  updateAccountUI();
+  setStatus('Add your Supabase project URL and publishable key in the HTML to connect.');
 }
 </script>
 </body>
