@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MeetNote — Meetings & Tasks</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='16' y='14' width='68' height='82' rx='6' fill='%238b5a4f'/%3E%3Crect x='26' y='22' width='50' height='70' rx='2' fill='%23fff'/%3E%3Crect x='38' y='6' width='24' height='14' rx='3' fill='%23aab1bb'/%3E%3C/svg%3E">
 <style>
 :root{
   --ink:#202b3c;--muted:#748198;--line:#e5eaf2;--blue:#526cf5;
@@ -138,10 +139,7 @@ footer{padding:28px;text-align:center;color:#8a96a7;font-size:12px}
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
         Enable notifications
       </button>
-      <button id="accountBtn" type="button" class="secondary btn-icon">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
-        Sign in
-      </button>
+      <button id="accountBtn" type="button" class="secondary btn-icon"></button>
       <button id="addBtn" type="button" class="add-btn btn-icon">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Add schedule / task
@@ -250,9 +248,9 @@ footer{padding:28px;text-align:center;color:#8a96a7;font-size:12px}
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-/* Replace with your Supabase project URL and publishable key. */
-const SUPABASE_URL='YOUR_SUPABASE_URL';
-const SUPABASE_PUBLISHABLE_KEY='YOUR_SUPABASE_PUBLISHABLE_KEY';
+/* Your Supabase project settings (publishable key is safe to use in the browser). */
+const SUPABASE_URL='https://eabnbkysvhbbhrgpetkz.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx';
 const configured=!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
 const supabase=configured?createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
 
@@ -261,6 +259,17 @@ const editor=$('editor');
 let items=[];
 let user=null;
 let currentView=localStorage.getItem('meetnote_view')||'grid';
+
+/* Browser tab icon: use clipboard-logo.png if present, otherwise the built-in clipboard icon. */
+(function setFavicon(){
+  const link=document.querySelector('link[rel="icon"]')||document.createElement('link');
+  link.rel='icon';
+  if(!link.parentNode)document.head.appendChild(link);
+  const img=new Image();
+  img.onload=()=>{link.type='image/png';link.href='clipboard-logo.png'};
+  img.onerror=()=>{/* keep the built-in SVG icon already in <head> */};
+  img.src='clipboard-logo.png';
+})();
 
 function setStatus(message){$('appStatus').textContent=message}
 function setView(view){
@@ -390,14 +399,17 @@ function openSignIn(){
   if(!configured){setStatus('Add your Supabase project URL and publishable key in the HTML first.');return}
   $('authError').textContent='';
   $('accountDialog').showModal();
+  $('authEmail').focus();
 }
 async function signIn(event){
   event.preventDefault();
   const email=$('authEmail').value.trim(),password=$('authPassword').value;
+  $('authError').textContent='';
   $('authSubmit').disabled=true;
   const {error}=await supabase.auth.signInWithPassword({email,password});
   $('authSubmit').disabled=false;
   if(error){$('authError').textContent=error.message;return}
+  $('authPassword').value='';
   $('accountDialog').close();
 }
 async function signOut(){
@@ -491,7 +503,6 @@ if(configured){
     if(user)void loadItems();else setStatus('Sign in to view your Supabase tasks.');
   });
 }else{
-  updateAccountUI();
   setStatus('Add your Supabase project URL and publishable key in the HTML to connect.');
 }
 </script>
