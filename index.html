@@ -2,17 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F3F5F8" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MeetNote" />
   <title>MeetNote — Sticky Notes &amp; Desktop Reminders</title>
 
-  <!-- Inline SVG Data-URI for MeetNote Clipboard Icon (instant load + fallback) -->
+  <!-- Inline SVG + Raster PNG Data-URI Generator for Browser Tab, Mobile Home Screen & PWA Manifest -->
   <script>
     window.MEETNOTE_SVG_URI = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E";
+
+    (function generateMeetNoteRasterIcons() {
+      function drawMeetNotePng(size) {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const s = size / 128;
+
+          function roundRect(x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo((x + r) * s, y * s);
+            ctx.arcTo((x + w) * s, y * s, (x + w) * s, (y + h) * s, r * s);
+            ctx.arcTo((x + w) * s, (y + h) * s, x * s, (y + h) * s, r * s);
+            ctx.arcTo(x * s, (y + h) * s, x * s, y * s, r * s);
+            ctx.arcTo(x * s, y * s, (x + w) * s, y * s, r * s);
+            ctx.closePath();
+          }
+
+          // Clipboard board
+          ctx.fillStyle = '#7C5343';
+          roundRect(20, 18, 88, 104, 14);
+          ctx.fill();
+
+          // Top metal clip
+          ctx.fillStyle = '#A5ABB3';
+          roundRect(46, 8, 36, 20, 6);
+          ctx.fill();
+
+          // White paper sheet
+          ctx.fillStyle = '#FFFFFF';
+          roundRect(30, 30, 68, 82, 6);
+          ctx.fill();
+
+          // Three green checkmarks + slate lines
+          const rows = [48, 71, 94];
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.lineWidth = 6.5 * s;
+
+          rows.forEach((y) => {
+            ctx.strokeStyle = '#1FA966';
+            ctx.beginPath();
+            ctx.moveTo(39 * s, y * s);
+            ctx.lineTo(45 * s, (y + 6) * s);
+            ctx.lineTo(57 * s, (y - 7) * s);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#364152';
+            ctx.beginPath();
+            ctx.moveTo(65 * s, (y + 1) * s);
+            ctx.lineTo(89 * s, (y + 1) * s);
+            ctx.stroke();
+          });
+
+          return canvas.toDataURL('image/png');
+        } catch (e) {
+          return window.MEETNOTE_SVG_URI;
+        }
+      }
+
+      const png64 = drawMeetNotePng(64);
+      const png180 = drawMeetNotePng(180);
+      const png192 = drawMeetNotePng(192);
+      const png512 = drawMeetNotePng(512);
+      window.MEETNOTE_PNG_URI = png192;
+
+      const setLink = (id, rel, type, href, sizes) => {
+        let el = document.getElementById(id);
+        if (!el) {
+          el = document.createElement('link');
+          el.id = id;
+          document.head.appendChild(el);
+        }
+        el.rel = rel;
+        if (type) el.type = type;
+        if (sizes) el.sizes = sizes;
+        el.href = href;
+      };
+
+      setLink('faviconPngLink', 'icon', 'image/png', png64, '64x64');
+      setLink('shortcutIconLink', 'shortcut icon', 'image/png', png64, '64x64');
+      setLink('appleTouchIconLink', 'apple-touch-icon', 'image/png', png180, '180x180');
+
+      try {
+        const manifest = {
+          name: 'MeetNote — Sticky Notes & Reminders',
+          short_name: 'MeetNote',
+          start_url: './',
+          display: 'standalone',
+          background_color: '#F3F5F8',
+          theme_color: '#F3F5F8',
+          icons: [
+            { src: png192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: png512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+          ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        setLink('pwaManifestLink', 'manifest', 'application/manifest+json', URL.createObjectURL(manifestBlob));
+      } catch (e) {}
+    })();
   </script>
 
-  <!-- Browser Tab Favicon & Mobile/Desktop App Icons -->
+  <!-- Browser Tab Favicon & Mobile/Desktop App Icons (Immediate Fallback) -->
   <link id="faviconLink" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -40,7 +145,7 @@
       body {
         overflow-y: auto;
         overflow-x: hidden;
-        padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
       }
       /* Prevent iOS Safari auto-zoom on input focus */
       input, select, textarea {
@@ -89,9 +194,9 @@
       #desktopCanvas {
         position: static !important;
         height: auto !important;
-        min-height: calc(100vh - 140px);
-        padding-top: calc(68px + env(safe-area-inset-top, 0px)) !important;
-        padding-bottom: 24px;
+        min-height: 100dvh;
+        padding-top: calc(70px + env(safe-area-inset-top, 0px)) !important;
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -341,37 +446,37 @@
   <main id="desktopCanvas" class="w-full h-full relative pt-16 bg-[#F3F5F8]"></main>
 
   <!-- Mobile Bottom Navigation Dock (Thumb-friendly access to New Note, Notes, Alarms & Cloud Sync) -->
-  <nav id="mobileBottomNav" style="padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 pt-2 grid grid-cols-4 gap-1 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
-    <button type="button" onclick="createNewNote()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl bg-[#C4F07D]/60 active:bg-[#C4F07D] text-slate-900 font-semibold text-[11px] min-h-[48px] cursor-pointer">
-      <svg class="w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+  <nav id="mobileBottomNav" style="padding-bottom: max(12px, calc(10px + env(safe-area-inset-bottom, 0px)));" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 pt-2 grid grid-cols-4 gap-1 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
+    <button type="button" onclick="createNewNote()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl bg-[#C4F07D]/60 active:bg-[#C4F07D] text-slate-900 font-semibold text-[11px] leading-tight min-h-[52px] cursor-pointer">
+      <svg class="w-5 h-5 mb-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
-      <span>New Note</span>
+      <span class="truncate max-w-full">New Note</span>
     </button>
 
-    <button type="button" onclick="toggleNotesDrawer()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-medium text-[11px] min-h-[48px] cursor-pointer relative">
-      <svg class="w-5 h-5 mb-0.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <button type="button" onclick="toggleNotesDrawer()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-medium text-[11px] leading-tight min-h-[52px] cursor-pointer relative">
+      <svg class="w-5 h-5 mb-0.5 text-slate-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
         <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
       </svg>
-      <span>Notes (<span id="mobileNotesCount">1</span>)</span>
+      <span class="truncate max-w-full">Notes (<span id="mobileNotesCount">1</span>)</span>
     </button>
 
-    <button type="button" onclick="openAlarmsOverview()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-medium text-[11px] min-h-[48px] cursor-pointer relative">
-      <svg class="w-5 h-5 mb-0.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <button type="button" onclick="openAlarmsOverview()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-medium text-[11px] leading-tight min-h-[52px] cursor-pointer relative">
+      <svg class="w-5 h-5 mb-0.5 text-emerald-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/>
       </svg>
-      <span>Alarms (<span id="mobileAlarmCount">0</span>)</span>
+      <span class="truncate max-w-full">Alarms (<span id="mobileAlarmCount">0</span>)</span>
     </button>
 
-    <button type="button" onclick="openSupabaseModal()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-medium text-[11px] min-h-[48px] cursor-pointer relative">
-      <div class="relative">
+    <button type="button" onclick="openSupabaseModal()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-medium text-[11px] leading-tight min-h-[52px] cursor-pointer relative">
+      <div class="relative flex-shrink-0">
         <svg class="w-5 h-5 mb-0.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
         </svg>
         <span id="mobileSyncDot" class="w-2 h-2 rounded-full bg-slate-400 absolute -top-0.5 -right-1"></span>
       </div>
-      <span id="mobileSyncLabel">Backup</span>
+      <span id="mobileSyncLabel" class="truncate max-w-full">Backup</span>
     </button>
   </nav>
 
