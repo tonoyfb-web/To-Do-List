@@ -962,235 +962,626 @@
     };
     let supabaseConnected = Boolean(supabaseConfig.url && supabaseConfig.key);
     let supabaseSyncDebounce = null;
+    let highestZ = 20;
+    let savedSelectionRange = null;
+    let ringingNote = null;
+    let alarmIntervalAudio = null;
+    let deferredInstallPrompt = null;
+
+    function normalizeSupabaseUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== 'string') return '';
+      let trimmed = rawUrl.trim().replace(/\/+$/, '');
+      if (!trimmed || trimmed.includes('YOUR_PROJECT_ID')) return '';
+      if (!/^https?:\/\//i.test(trimmed)) trimmed = 'https://' + trimmed;
+      try {
+        const parsed = new URL(trimmed);
+        return parsed.origin;
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function setSyncUiState(state, labelText) {
+      const dot = document.getElementById('syncStatusDot');
+      const mobileDot = document.getElementById('mobileSyncDot');
+      const btnLabel = document.getElementById('syncBtnLabel');
+      const mobileLabel = document.getElementById('mobileSyncLabel');
+      const badge = document.getElementById('sbConnectionBadge');
+
+      const colors = {
+        connected: 'bg-emerald-500',
+        syncing: 'bg-sky-500 animate-pulse',
+        error: 'bg-red-500',
+        offline: 'bg-slate-400'
+      };
+      const dotClass = colors[state] || colors.offline;
+
+      if (dot) dot.className = `w-2 h-2 rounded-full ${dotClass}`;
+      if (mobileDot) mobileDot.className = `w-2 h-2 rounded-full ${dotClass} absolute -top-0.5 -right-1`;
+      if (btnLabel && labelText) btnLabel.textContent = labelText;
+      if (mobileLabel && labelText) mobileLabel.textContent = labelText;
+      if (badge && labelText) badge.textContent = labelText;
+    }
+
+    function setSupabaseDiagnostic(msg) {
+      const box = document.getElementById('sbDiagnosticBox');
+      if (!box) return;
+      if (!msg) {
+        box.textContent = '';
+        box.classList.add('hidden');
+      } else {
+        box.textContent = msg;
+        box.classList.remove('hidden');
+      }
+    }
+
+    function loadSupabaseConfig() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SUPABASE_CFG_KEY) || '{}');
+        if (saved.workspaceId) supabaseConfig.workspaceId = saved.workspaceId;
+        if (typeof saved.autoSync === 'boolean') supabaseConfig.autoSync = saved.autoSync;
+      } catch (e) {}
+      const validUrl = normalizeSupabaseUrl(supabaseConfig.url);
+      supabaseConnected = Boolean(validUrl && supabaseConfig.key);
+      setSyncUiState(supabaseConnected ? 'connected' : 'offline', supabaseConnected ? 'Cloud Ready' : 'Local Only');
+    }
+
+    function openSupabaseModal() {
+      hideAllMenus();
+      const wsInput = document.getElementById('sbWorkspaceInput');
+      const autoCb = document.getElementById('sbAutoSyncCheckbox');
+      if (wsInput) wsInput.value = supabaseConfig.workspaceId || 'default-desktop';
+      if (autoCb) autoCb.checked = supabaseConfig.autoSync !== false;
+      setSupabaseDiagnostic('');
+      document.getElementById('supabaseModal').classList.remove('hidden');
+    }
+
+    function saveSupabaseConfig() {
+      const wsInput = document.getElementById('sbWorkspaceInput');
+      const autoCb = document.getElementById('sbAutoSyncCheckbox');
+      supabaseConfig.workspaceId = (wsInput && wsInput.value.trim()) || 'default-desktop';
+      supabaseConfig.autoSync = autoCb ? autoCb.checked : true;
+      try {
+        localStorage.setItem(SUPABASE_CFG_KEY, JSON.stringify({
+          workspaceId: supabaseConfig.workspaceId,
+          autoSync: supabaseConfig.autoSync
+        }));
+      } catch (e) {}
+      closeModal('supabaseModal');
+      refreshAndSyncNotes(true);
+    }
+
+    function loadNotesFromStorage() {
+      try {
+        const rawNotes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        if (Array.isArray(rawNotes)) notes = rawNotes;
+      } catch (e) {
+        notes = [];
+      }
+      try {
+        const rawDeleted = JSON.parse(localStorage.getItem(DELETED_IDS_KEY) || '[]');
+        pendingDeletedIds = Array.isArray(rawDeleted) ? rawDeleted : [];
+        deletedNoteIds = new Set(pendingDeletedIds);
+      } catch (e) {
+        pendingDeletedIds = [];
         deletedNoteIds = new Set();
       }
 
       if (!Array.isArray(notes) || notes.length === 0) {
-// ... existing code ... -->
+        notes = [{
+          id: 'note_' + Date.now(),
+          title: 'New Note',
+          content: '',
+          theme: 'lime',
+          x: Math.max(24, Math.min(window.innerWidth - 360, 420)),
+          y: 78,
+          width: 340,
+          height: 360,
+          minimized: false,
+          zIndex: 11,
+          alarm: null
+        }];
+      }
+      activeNoteId = notes[0].id;
+    }
+
     function saveNotesToStorage(skipCloudSync = false) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
         localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(pendingDeletedIds));
       } catch (e) {}
       updateTopCounters();
-      if (!skipCloudSync && supabaseConnected && supabaseConfig.autoSync) {
-        scheduleSupabaseAutoBackup();
+      renderDrawerList();
+
+      if (!skipCloudSync && supabaseConnected && supabaseConfig.autoSync !== false) {
+        clearTimeout(supabaseSyncDebounce);
+        supabaseSyncDebounce = setTimeout(() => {
+          pushNotesToSupabase(false);
+        }, 900);
       }
     }
 
-    function scheduleSupabaseAutoBackup() {
-      clearTimeout(supabaseSyncDebounce);
-      setSyncUiState('syncing', 'Saving...');
-      supabaseSyncDebounce = setTimeout(() => {
-        pushNotesToSupabase(false);
-      }, 1500);
-    }
-
-    async function flushPendingDeletesToSupabase(validUrl, wsId) {
-      if (!Array.isArray(pendingDeletedIds) || pendingDeletedIds.length === 0) return;
-      const idsToDelete = [...pendingDeletedIds];
-      try {
-        const encodedIds = idsToDelete.map(id => `"${String(id).replace(/"/g, '')}"`).join(',');
-        const ws = encodeURIComponent(wsId);
-        const delRes = await fetch(
-          `${validUrl}/rest/v1/sticky_notes?workspace_id=eq.${ws}&id=in.(${encodeURIComponent(encodedIds)})`,
-          {
-            method: 'DELETE',
-            headers: {
-              'apikey': supabaseConfig.key,
-              'Authorization': `Bearer ${supabaseConfig.key}`,
-              'Prefer': 'return=minimal'
-            }
-          }
-        );
-        if (delRes.ok) {
-          pendingDeletedIds = pendingDeletedIds.filter(id => !idsToDelete.includes(id));
-          deletedNoteIds = new Set(pendingDeletedIds);
-          localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(pendingDeletedIds));
-        }
-      } catch (e) {
-        console.warn('Cloud delete flush deferred:', e);
-      }
-    }
-
-    async function pushNotesToSupabase(manualNotify = false) {
-      const validUrl = normalizeSupabaseUrl(supabaseConfig.url);
-      if (!supabaseConnected || !validUrl || !supabaseConfig.key) {
-        if (manualNotify) showToast('Configure a valid Supabase URL & Key first.');
-        return false;
-      }
-      setSyncUiState('syncing', 'Backing up...');
-      setSupabaseDiagnostic('');
-      const wsId = supabaseConfig.workspaceId || 'default-desktop';
-      await flushPendingDeletesToSupabase(validUrl, wsId);
-
-      const headers = {
+    function getSupabaseHeaders() {
+      return {
         'apikey': supabaseConfig.key,
         'Authorization': `Bearer ${supabaseConfig.key}`,
         'Content-Type': 'application/json',
         'Prefer': 'resolution=merge-duplicates,return=minimal'
       };
-
-      try {
-        let response = await fetch(`${validUrl}/rest/v1/sticky_notes?on_conflict=workspace_id`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            workspace_id: wsId,
-            notes_data: notes,
-            updated_at: new Date().toISOString()
-          })
-        });
-
-        if (!response.ok) {
-          const firstErr = await response.text();
-          if (firstErr.includes('notes_data') || firstErr.includes('PGRST204') || firstErr.includes('42703') || response.status === 400 || response.status === 404) {
-            if (notes.length > 0) {
-              const rowPayload = notes.map(n => {
-                const t = getThemeObj(n.theme);
-                return {
-                  id: n.id,
-                  workspace_id: wsId,
-                  title: n.title || 'New Note',
-                  content: n.content || '',
-                  color: t.body,
-                  header_color: t.header,
-                  x: Math.round(n.x || 100),
-                  y: Math.round(n.y || 100),
-                  width: Math.round(n.width || 330),
-                  height: Math.round(n.height || 350),
-                  minimized: !!n.minimized,
-                  z_index: n.zIndex || 10,
-                  alarms: n.alarm ? [n.alarm] : [],
-                  updated_at: new Date().toISOString()
-                };
-              });
-              response = await fetch(`${validUrl}/rest/v1/sticky_notes?on_conflict=id`, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(rowPayload)
-              });
-            } else {
-              response = { ok: true, status: 204 };
-            }
-          } else {
-            throw new Error(firstErr || `HTTP ${response.status}`);
-          }
-        }
-
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(errText || `HTTP ${response.status}`);
-        }
-
-        setSyncUiState('connected', 'Synced');
-        if (manualNotify) showToast('Notes & alarms backed up to Supabase!');
-        return true;
-      } catch (err) {
-        console.warn('Supabase backup error:', err);
-        setSyncUiState('error', 'Sync Error');
-        setSupabaseDiagnostic(`Backup failed: ${err.message}`);
-        if (manualNotify) showToast(`Cloud backup issue: ${err.message}`);
-        return false;
-      }
     }
 
-    async function refreshAndSyncNotes(manualNotify = false) {
-      const validUrl = normalizeSupabaseUrl(supabaseConfig.url);
-      if (!supabaseConnected || !validUrl || !supabaseConfig.key) {
-        if (manualNotify) showToast('Configure Supabase credentials in Backup settings first.');
+    async function flushPendingCloudDeletions(baseUrl, workspaceId) {
+      if (!pendingDeletedIds.length) return;
+      const toDelete = [...pendingDeletedIds];
+      const stillPending = [];
+      for (const noteId of toDelete) {
+        try {
+          const url = `${baseUrl}/rest/v1/sticky_notes?workspace_id=eq.${encodeURIComponent(workspaceId)}&id=eq.${encodeURIComponent(noteId)}`;
+          const res = await fetch(url, {
+            method: 'DELETE',
+            headers: getSupabaseHeaders()
+          });
+          if (!res.ok) {
+            stillPending.push(noteId);
+          }
+        } catch (e) {
+          stillPending.push(noteId);
+        }
+      }
+      pendingDeletedIds = stillPending;
+      try {
+        localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(pendingDeletedIds));
+      } catch (e) {}
+    }
+
+    async function pushNotesToSupabase(manualFeedback = false) {
+      const baseUrl = normalizeSupabaseUrl(supabaseConfig.url);
+      if (!baseUrl || !supabaseConfig.key) {
+        if (manualFeedback) showToast('Add your Supabase URL & Key at the top of the HTML script first.');
         return;
       }
 
-      const icon = document.getElementById('refreshSyncIcon');
-      if (icon) icon.classList.add('animate-spin');
+      const workspaceId = supabaseConfig.workspaceId || 'default-desktop';
       setSyncUiState('syncing', 'Syncing...');
+      setSupabaseDiagnostic('');
 
       try {
-        const wsId = supabaseConfig.workspaceId || 'default-desktop';
-        const ws = encodeURIComponent(wsId);
-        await flushPendingDeletesToSupabase(validUrl, wsId);
+        await flushPendingCloudDeletions(baseUrl, workspaceId);
 
-        const response = await fetch(`${validUrl}/rest/v1/sticky_notes?workspace_id=eq.${ws}&select=*`, {
-          method: 'GET',
-          headers: {
-            'apikey': supabaseConfig.key,
-            'Authorization': `Bearer ${supabaseConfig.key}`
-          }
+        const rows = notes.map(n => {
+          const theme = getThemeObj(n.theme);
+          return {
+            id: n.id,
+            workspace_id: workspaceId,
+            title: n.title || 'New Note',
+            content: n.content || '',
+            color: theme.body,
+            header_color: theme.header,
+            x: Math.round(n.x || 100),
+            y: Math.round(n.y || 100),
+            width: Math.round(n.width || 340),
+            height: Math.round(n.height || 360),
+            minimized: Boolean(n.minimized),
+            z_index: Math.round(n.zIndex || 10),
+            alarms: n.alarm ? [n.alarm] : []
+          };
         });
 
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(errText || `HTTP ${response.status}`);
-        }
-
-        const rows = await response.json();
-        let cloudNotes = null;
-
-        if (Array.isArray(rows) && rows.length > 0) {
-          if (Array.isArray(rows[0].notes_data)) {
-            cloudNotes = rows[0].notes_data;
-          } else if (rows[0].id) {
-            cloudNotes = rows
-              .filter(r => !deletedNoteIds.has(r.id))
-              .map(r => {
-                const matchedTheme = NOTE_THEMES.find(t => t.body.toLowerCase() === (r.color || '').toLowerCase());
-                return {
-                  id: r.id,
-                  title: r.title || 'New Note',
-                  content: r.content || '',
-                  theme: matchedTheme ? matchedTheme.id : 'lime',
-                  x: r.x || 120,
-                  y: r.y || 84,
-                  width: r.width || 330,
-                  height: r.height || 350,
-                  minimized: !!r.minimized,
-                  zIndex: r.z_index || 10,
-                  alarm: Array.isArray(r.alarms) && r.alarms.length > 0 ? r.alarms[0] : null
-                };
-              });
+        if (rows.length > 0) {
+          const res = await fetch(`${baseUrl}/rest/v1/sticky_notes?on_conflict=id`, {
+            method: 'POST',
+            headers: getSupabaseHeaders(),
+            body: JSON.stringify(rows)
+          });
+          if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errText}`);
           }
         }
 
-        if (cloudNotes && cloudNotes.length > 0) {
-          notes = cloudNotes.filter(n => !pendingDeletedIds.includes(n.id));
-          if (notes.length === 0) {
-            notes = [{
-              id: 'note_' + Date.now(),
-              title: 'New Note',
-              content: '',
-              theme: 'lime',
-              x: Math.max(24, Math.min(window.innerWidth - 360, 420)),
-              y: 78,
-              width: 340,
-              height: 360,
-              minimized: false,
-              zIndex: 11,
-              alarm: null
-            }];
-          }
-          if (!notes.some(n => n.id === activeNoteId)) {
-            activeNoteId = notes[0].id;
-          }
-          saveNotesToStorage(true);
-          renderAllNotes();
-          setSyncUiState('connected', 'Synced');
-          if (manualNotify) showToast(`Synced ${notes.length} note(s) across devices!`);
-        } else {
-          await pushNotesToSupabase(false);
-          setSyncUiState('connected', 'Synced');
-          if (manualNotify) showToast('Workspace synced with cloud!');
-        }
+        setSyncUiState('connected', 'Synced');
+        if (manualFeedback) showToast('Backed up all notes to Supabase!');
       } catch (err) {
-        console.warn('Sync refresh error:', err);
         setSyncUiState('error', 'Sync Error');
-        if (manualNotify) showToast(`Sync failed: ${err.message}`);
+        setSupabaseDiagnostic(err.message || String(err));
+        if (manualFeedback) showToast('Cloud backup failed — open Backup for details');
+      }
+    }
+
+    async function refreshAndSyncNotes(manualFeedback = false) {
+      const icon = document.getElementById('refreshSyncIcon');
+      if (icon) icon.classList.add('animate-spin');
+
+      const baseUrl = normalizeSupabaseUrl(supabaseConfig.url);
+      if (!baseUrl || !supabaseConfig.key) {
+        if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 400);
+        if (manualFeedback) showToast('Configure Supabase URL & Key in index.html to sync across devices');
+        return;
+      }
+
+      const workspaceId = supabaseConfig.workspaceId || 'default-desktop';
+      setSyncUiState('syncing', 'Syncing...');
+      setSupabaseDiagnostic('');
+
+      try {
+        await flushPendingCloudDeletions(baseUrl, workspaceId);
+
+        const queryUrl = `${baseUrl}/rest/v1/sticky_notes?workspace_id=eq.${encodeURIComponent(workspaceId)}&select=*&order=z_index.asc`;
+        const res = await fetch(queryUrl, {
+          method: 'GET',
+          headers: getSupabaseHeaders()
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errText}`);
+        }
+
+        const remoteRows = await res.json();
+        if (Array.isArray(remoteRows)) {
+          const filteredRows = remoteRows.filter(r => r && r.id && !deletedNoteIds.has(r.id));
+          if (filteredRows.length > 0) {
+            notes = filteredRows.map(r => {
+              const matchedTheme = NOTE_THEMES.find(t => t.body.toLowerCase() === String(r.color || '').toLowerCase()) || NOTE_THEMES[0];
+              const alarmObj = Array.isArray(r.alarms) && r.alarms.length > 0 ? r.alarms[0] : null;
+              return {
+                id: r.id,
+                title: r.title || 'New Note',
+                content: r.content || '',
+                theme: matchedTheme.id,
+                x: Number.isFinite(r.x) ? r.x : 120,
+                y: Number.isFinite(r.y) ? r.y : 84,
+                width: Number.isFinite(r.width) ? r.width : 340,
+                height: Number.isFinite(r.height) ? r.height : 360,
+                minimized: Boolean(r.minimized),
+                zIndex: Number.isFinite(r.z_index) ? r.z_index : 10,
+                alarm: alarmObj
+              };
+            });
+            if (!notes.some(n => n.id === activeNoteId)) {
+              activeNoteId = notes[0].id;
+            }
+            saveNotesToStorage(true);
+            renderAllNotes();
+          } else if (notes.length > 0 && pendingDeletedIds.length === 0) {
+            await pushNotesToSupabase(false);
+          }
+        }
+
+        setSyncUiState('connected', 'Synced');
+        if (manualFeedback) showToast('Notes synchronized across devices!');
+      } catch (err) {
+        setSyncUiState('error', 'Sync Error');
+        setSupabaseDiagnostic(err.message || String(err));
+        if (manualFeedback) showToast('Sync failed — check Backup status');
       } finally {
         if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 400);
       }
     }
     window.refreshAndSyncNotes = refreshAndSyncNotes;
-// ... existing code ... -->
+
+    async function pullNotesFromSupabase() {
+      await refreshAndSyncNotes(true);
+    }
+
+    function getThemeObj(themeId) {
+      return NOTE_THEMES.find(t => t.id === themeId) || NOTE_THEMES[0];
+    }
+
+    function updateTopCounters() {
+      const total = notes.length;
+      const alarmCount = notes.filter(n => n.alarm && n.alarm.enabled).length;
+      const elTotal = document.getElementById('totalNotesCount');
+      const elMobileTotal = document.getElementById('mobileNotesCount');
+      const elAlarm = document.getElementById('activeAlarmCount');
+      const elMobileAlarm = document.getElementById('mobileAlarmCount');
+      if (elTotal) elTotal.textContent = total;
+      if (elMobileTotal) elMobileTotal.textContent = total;
+      if (elAlarm) elAlarm.textContent = alarmCount;
+      if (elMobileAlarm) elMobileAlarm.textContent = alarmCount;
+    }
+
+    function showToast(message) {
+      const banner = document.getElementById('toastBanner');
+      if (!banner) return;
+      banner.textContent = message;
+      banner.classList.remove('hidden');
+      clearTimeout(banner._hideTimer);
+      banner._hideTimer = setTimeout(() => banner.classList.add('hidden'), 3200);
+    }
+
+    function closeModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.classList.add('hidden');
+    }
+
+    function hideAllMenus() {
+      const ctx = document.getElementById('richContextMenu');
+      const opts = document.getElementById('noteOptionsMenu');
+      const emoji = document.getElementById('emojiPopover');
+      if (ctx) ctx.classList.add('hidden');
+      if (opts) opts.classList.add('hidden');
+      if (emoji) emoji.classList.add('hidden');
+    }
+
+    function createNewNote() {
+      hideAllMenus();
+      highestZ += 1;
+      const offset = (notes.length % 6) * 26;
+      const newNote = {
+        id: 'note_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        title: 'New Note',
+        content: '',
+        theme: 'lime',
+        x: Math.max(20, Math.min(window.innerWidth - 360, 140 + offset)),
+        y: Math.max(72, Math.min(window.innerHeight - 380, 84 + offset)),
+        width: 340,
+        height: 360,
+        minimized: false,
+        zIndex: highestZ,
+        alarm: null
+      };
+      notes.push(newNote);
+      activeNoteId = newNote.id;
+      saveNotesToStorage();
+      renderAllNotes();
+      setTimeout(() => {
+        const editor = document.querySelector(`[data-note-id="${newNote.id}"] .note-editor`);
+        if (editor) editor.focus();
+      }, 30);
+    }
+
+    function bringNoteToFront(noteId) {
+      activeNoteId = noteId;
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+      highestZ += 1;
+      note.zIndex = highestZ;
+      document.querySelectorAll('.sticky-note').forEach(card => {
+        const isTarget = card.dataset.noteId === noteId;
+        card.classList.toggle('active-note', isTarget);
+        if (isTarget) card.style.zIndex = highestZ;
+      });
+    }
+
+    function renderAllNotes() {
+      const canvas = document.getElementById('desktopCanvas');
+      if (!canvas) return;
+      canvas.innerHTML = '';
+
+      notes.forEach(note => {
+        if (note.minimized) return;
+        const theme = getThemeObj(note.theme);
+        if ((note.zIndex || 10) > highestZ) highestZ = note.zIndex;
+
+        const card = document.createElement('div');
+        card.className = `sticky-note rounded-none sm:rounded-xs ${note.id === activeNoteId ? 'active-note' : ''}`;
+        card.dataset.noteId = note.id;
+        card.style.left = `${note.x}px`;
+        card.style.top = `${note.y}px`;
+        card.style.width = `${note.width}px`;
+        card.style.height = `${note.height}px`;
+        card.style.zIndex = note.zIndex || 10;
+        card.style.backgroundColor = theme.body;
+        card.style.color = theme.text;
+        card.style.border = `1px solid ${theme.border}`;
+
+        card.addEventListener('mousedown', () => bringNoteToFront(note.id));
+
+        const alarmBadgeHtml = (note.alarm && note.alarm.enabled)
+          ? `<button type="button" onclick="event.stopPropagation(); activeNoteId='${note.id}'; openAlarmModalForActiveNote();" class="px-1.5 py-0.5 rounded bg-black/10 text-[10px] font-semibold flex items-center gap-1 cursor-pointer" title="Edit Reminder">⏰ ${new Date(note.alarm.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</button>`
+          : '';
+
+        card.innerHTML = `
+          <div class="note-header flex items-center justify-between px-2.5 py-1.5 cursor-move select-none" style="background-color: ${theme.header};">
+            <div class="w-10 flex items-center">${alarmBadgeHtml}</div>
+            <input type="text" value="${escapeHtmlAttr(note.title || 'New Note')}" aria-label="Note title"
+              class="note-title-input bg-transparent text-center font-normal text-[14px] outline-none flex-1 min-w-0 px-1 truncate"
+              style="color: ${theme.text};" />
+            <div class="flex items-center gap-0.5 flex-shrink-0">
+              <button type="button" class="note-format-btn md:hidden w-8 h-8 flex items-center justify-center rounded hover:bg-black/10 text-xs font-bold cursor-pointer" title="Format Text">Aa</button>
+              <button type="button" class="note-dots-btn w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded hover:bg-black/10 cursor-pointer" title="Note Options & Colors">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/>
+                </svg>
+              </button>
+              <button type="button" class="note-close-btn w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded hover:bg-black/10 cursor-pointer" title="Minimize to Notes Drawer">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="note-editor px-3.5 py-2.5 text-[14.5px]" contenteditable="true" data-placeholder="Take a note...">${note.content || ''}</div>
+        `;
+
+        const header = card.querySelector('.note-header');
+        const titleInput = card.querySelector('.note-title-input');
+        const dotsBtn = card.querySelector('.note-dots-btn');
+        const formatBtn = card.querySelector('.note-format-btn');
+        const closeBtn = card.querySelector('.note-close-btn');
+        const editor = card.querySelector('.note-editor');
+
+        titleInput.addEventListener('mousedown', e => e.stopPropagation());
+        titleInput.addEventListener('input', e => {
+          note.title = e.target.value;
+          saveNotesToStorage();
+        });
+
+        dotsBtn.addEventListener('mousedown', e => e.stopPropagation());
+        dotsBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          openNoteOptionsMenu(note.id, dotsBtn);
+        });
+
+        if (formatBtn) {
+          formatBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            activeNoteId = note.id;
+            openFormattingForActiveNote();
+          });
+        }
+
+        closeBtn.addEventListener('mousedown', e => e.stopPropagation());
+        closeBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          note.minimized = true;
+          saveNotesToStorage();
+          renderAllNotes();
+          showToast('Note minimized — reopen anytime from Notes drawer');
+        });
+
+        editor.addEventListener('input', () => {
+          note.content = editor.innerHTML;
+          saveNotesToStorage();
+        });
+
+        editor.addEventListener('change', e => {
+          if (e.target && e.target.classList.contains('todo-checkbox')) {
+            const textSpan = e.target.nextElementSibling;
+            if (textSpan) textSpan.classList.toggle('checked', e.target.checked);
+            if (e.target.checked) e.target.setAttribute('checked', 'checked');
+            else e.target.removeAttribute('checked');
+            note.content = editor.innerHTML;
+            saveNotesToStorage();
+          }
+        });
+
+        editor.addEventListener('contextmenu', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          bringNoteToFront(note.id);
+          saveCurrentSelection();
+          openRichContextMenu(e.clientX, e.clientY);
+        });
+
+        setupNoteDrag(header, card, note);
+        setupNoteResizeObserver(card, note);
+        canvas.appendChild(card);
+      });
+
+      updateTopCounters();
+      renderDrawerList();
+    }
+
+    function escapeHtmlAttr(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function setupNoteDrag(header, card, note) {
+      header.addEventListener('mousedown', e => {
+        if (window.innerWidth <= 768) return;
+        if (e.target.closest('button') || e.target.tagName === 'INPUT') return;
+        bringNoteToFront(note.id);
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const origX = note.x;
+        const origY = note.y;
+
+        function onMove(ev) {
+          note.x = Math.max(0, Math.min(window.innerWidth - 120, origX + (ev.clientX - startX)));
+          note.y = Math.max(58, Math.min(window.innerHeight - 60, origY + (ev.clientY - startY)));
+          card.style.left = `${note.x}px`;
+          card.style.top = `${note.y}px`;
+        }
+        function onUp() {
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+          saveNotesToStorage();
+        }
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+      });
+    }
+
+    function setupNoteResizeObserver(card, note) {
+      if (typeof ResizeObserver === 'undefined') return;
+      const ro = new ResizeObserver(() => {
+        if (window.innerWidth <= 768) return;
+        const w = card.offsetWidth;
+        const h = card.offsetHeight;
+        if (w > 200 && h > 200 && (Math.abs(w - note.width) > 4 || Math.abs(h - note.height) > 4)) {
+          note.width = w;
+          note.height = h;
+          saveNotesToStorage();
+        }
+      });
+      ro.observe(card);
+    }
+
+    /* =========================================================================
+       2. NOTE OPTIONS MENU ('...') & THEME SWATCHES
+       ========================================================================= */
+    function initColorSwatches() {
+      const row = document.getElementById('colorSwatchesRow');
+      if (!row) return;
+      row.innerHTML = NOTE_THEMES.map(t => `
+        <button type="button" onclick="applyThemeToActiveNote('${t.id}')" title="${t.name}"
+          class="w-7 h-7 rounded-full border border-black/20 hover:scale-110 transition cursor-pointer mx-auto"
+          style="background-color: ${t.header};"></button>
+      `).join('');
+    }
+
+    function openNoteOptionsMenu(noteId, anchorBtn) {
+      hideAllMenus();
+      bringNoteToFront(noteId);
+      const menu = document.getElementById('noteOptionsMenu');
+      if (!menu) return;
+      menu.style.zIndex = Math.max(9998, highestZ + 50);
+      menu.classList.remove('hidden');
+
+      const rect = anchorBtn.getBoundingClientRect();
+      const menuW = menu.offsetWidth || 270;
+      const menuH = menu.offsetHeight || 290;
+      let left = Math.min(window.innerWidth - menuW - 12, Math.max(12, rect.right - menuW));
+      let top = rect.bottom + 6;
+      if (top + menuH > window.innerHeight - 12) {
+        top = Math.max(12, rect.top - menuH - 6);
+      }
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+    }
+
+    function applyThemeToActiveNote(themeId) {
+      const note = notes.find(n => n.id === activeNoteId);
+      if (!note) return;
+      note.theme = themeId;
+      hideAllMenus();
+      saveNotesToStorage();
+      renderAllNotes();
+    }
+
+    function openFormattingForActiveNote() {
+      hideAllMenus();
+      const editor = document.querySelector(`[data-note-id="${activeNoteId}"] .note-editor`);
+      if (editor) editor.focus();
+      saveCurrentSelection();
+      openRichContextMenu(window.innerWidth / 2 - 150, 120);
+    }
+
+    function duplicateActiveNote() {
+      hideAllMenus();
+      const src = notes.find(n => n.id === activeNoteId);
+      if (!src) return;
+      highestZ += 1;
+      const copy = {
+        ...JSON.parse(JSON.stringify(src)),
+        id: 'note_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        title: (src.title || 'New Note') + ' (Copy)',
+        x: Math.min(window.innerWidth - 340, (src.x || 100) + 28),
+        y: Math.min(window.innerHeight - 360, (src.y || 84) + 28),
+        zIndex: highestZ
+      };
+      notes.push(copy);
+      activeNoteId = copy.id;
+      saveNotesToStorage();
+      renderAllNotes();
+      showToast('Note duplicated');
+    }
+
     function deleteActiveNote() {
       hideAllMenus();
       const targetNote = notes.find(n => n.id === activeNoteId);
@@ -1198,4 +1589,541 @@
         pendingDeletedIds.push(targetNote.id);
         deletedNoteIds.add(targetNote.id);
       }
-// ... existing code ... -->
+      notes = notes.filter(n => n.id !== activeNoteId);
+      if (notes.length === 0) {
+        notes = [{
+          id: 'note_' + Date.now(),
+          title: 'New Note',
+          content: '',
+          theme: 'lime',
+          x: Math.max(24, Math.min(window.innerWidth - 360, 420)),
+          y: 78,
+          width: 340,
+          height: 360,
+          minimized: false,
+          zIndex: highestZ + 1,
+          alarm: null
+        }];
+      }
+      activeNoteId = notes[0].id;
+      saveNotesToStorage();
+      renderAllNotes();
+      showToast('Note deleted');
+    }
+
+    /* =========================================================================
+       3. RICH-TEXT CONTEXT MENU ACTIONS
+       ========================================================================= */
+    function saveCurrentSelection() {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        savedSelectionRange = sel.getRangeAt(0).cloneRange();
+      }
+    }
+
+    function restoreSelection() {
+      const editor = document.querySelector(`[data-note-id="${activeNoteId}"] .note-editor`);
+      if (editor) editor.focus();
+      if (savedSelectionRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedSelectionRange);
+      }
+    }
+
+    function openRichContextMenu(clientX, clientY) {
+      const menu = document.getElementById('richContextMenu');
+      if (!menu) return;
+      const selText = window.getSelection()?.toString().trim();
+      const googleLabel = document.getElementById('ctxGoogleSearchLabel');
+      if (googleLabel) {
+        googleLabel.textContent = selText ? `Search at Google for '${selText.slice(0, 18)}'` : 'Search at Google';
+      }
+      menu.classList.remove('hidden');
+      if (window.innerWidth > 768) {
+        const w = menu.offsetWidth || 314;
+        const h = menu.offsetHeight || 460;
+        const left = Math.min(window.innerWidth - w - 12, Math.max(12, clientX));
+        const top = Math.min(window.innerHeight - h - 12, Math.max(12, clientY));
+        menu.style.left = `${left}px`;
+        menu.style.top = `${top}px`;
+      }
+    }
+
+    function syncActiveEditorToNote() {
+      const editor = document.querySelector(`[data-note-id="${activeNoteId}"] .note-editor`);
+      const note = notes.find(n => n.id === activeNoteId);
+      if (editor && note) {
+        note.content = editor.innerHTML;
+        saveNotesToStorage();
+      }
+    }
+
+    function execFormat(cmd, value = null) {
+      restoreSelection();
+      document.execCommand(cmd, false, value);
+      saveCurrentSelection();
+      syncActiveEditorToNote();
+    }
+
+    function applyFontFamily(font) {
+      execFormat('fontName', font);
+    }
+
+    let currentFontSizePt = 11;
+    function stepFontSize(delta) {
+      currentFontSizePt = Math.max(8, Math.min(36, currentFontSizePt + delta));
+      const disp = document.getElementById('ctxFontSizeDisplay');
+      if (disp) disp.textContent = currentFontSizePt;
+      const htmlSize = Math.max(1, Math.min(7, Math.round((currentFontSizePt - 6) / 4)));
+      execFormat('fontSize', htmlSize);
+    }
+
+    function applyTextColor(hex) {
+      const bar = document.getElementById('ctxTextColorBar');
+      if (bar) bar.style.backgroundColor = hex;
+      execFormat('foreColor', hex);
+    }
+
+    function applyHighlightColor(hex) {
+      const bar = document.getElementById('ctxHighlightBar');
+      if (bar) bar.style.backgroundColor = hex;
+      execFormat('hiliteColor', hex);
+    }
+
+    function toggleTextCase() {
+      restoreSelection();
+      const sel = window.getSelection();
+      if (!sel || !sel.toString()) return;
+      const txt = sel.toString();
+      const next = txt === txt.toUpperCase() ? txt.toLowerCase() : txt.toUpperCase();
+      document.execCommand('insertText', false, next);
+      syncActiveEditorToNote();
+    }
+
+    let alignIndex = 0;
+    function cycleAlignment() {
+      const cmds = ['justifyLeft', 'justifyCenter', 'justifyRight'];
+      alignIndex = (alignIndex + 1) % cmds.length;
+      execFormat(cmds[alignIndex]);
+    }
+
+    let spacingIndex = 1;
+    function cycleLineSpacing() {
+      const spacings = ['1.2', '1.45', '1.85'];
+      spacingIndex = (spacingIndex + 1) % spacings.length;
+      const editor = document.querySelector(`[data-note-id="${activeNoteId}"] .note-editor`);
+      if (editor) editor.style.lineHeight = spacings[spacingIndex];
+    }
+
+    function toggleEmojiPopover() {
+      const pop = document.getElementById('emojiPopover');
+      if (pop) pop.classList.toggle('hidden');
+    }
+
+    function insertTextAtCursor(text) {
+      restoreSelection();
+      document.execCommand('insertText', false, text);
+      hideAllMenus();
+      syncActiveEditorToNote();
+    }
+
+    function insertTodoCheckbox() {
+      restoreSelection();
+      const html = `<div class="todo-line"><input type="checkbox" class="todo-checkbox" /><span class="todo-text">To-do item</span></div><div><br></div>`;
+      document.execCommand('insertHTML', false, html);
+      hideAllMenus();
+      syncActiveEditorToNote();
+    }
+
+    function openInsertLinkModal() {
+      hideAllMenus();
+      const selText = window.getSelection()?.toString() || '';
+      document.getElementById('linkTextInput').value = selText;
+      document.getElementById('linkUrlInput').value = 'https://';
+      document.getElementById('insertLinkModal').classList.remove('hidden');
+    }
+
+    function confirmInsertLink() {
+      const label = document.getElementById('linkTextInput').value.trim() || 'Link';
+      const url = document.getElementById('linkUrlInput').value.trim();
+      closeModal('insertLinkModal');
+      if (!url) return;
+      restoreSelection();
+      document.execCommand('insertHTML', false, `<a href="${escapeHtmlAttr(url)}" target="_blank" rel="noopener noreferrer" class="underline text-blue-700">${escapeHtmlAttr(label)}</a>`);
+      syncActiveEditorToNote();
+    }
+
+    function insertDateTime() {
+      const nowStr = new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+      insertTextAtCursor(nowStr + ' ');
+    }
+
+    function handleCut() {
+      execFormat('cut');
+      hideAllMenus();
+    }
+
+    function handleCopy() {
+      execFormat('copy');
+      hideAllMenus();
+      showToast('Copied to clipboard');
+    }
+
+    async function handlePaste(plainOnly) {
+      hideAllMenus();
+      restoreSelection();
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          document.execCommand('insertText', false, text);
+          syncActiveEditorToNote();
+          return;
+        }
+      } catch (e) {}
+      document.execCommand('paste');
+      syncActiveEditorToNote();
+    }
+
+    function handleSelectAll() {
+      const editor = document.querySelector(`[data-note-id="${activeNoteId}"] .note-editor`);
+      if (editor) {
+        editor.focus();
+        document.execCommand('selectAll', false, null);
+      }
+      hideAllMenus();
+    }
+
+    function openFindReplaceModal() {
+      hideAllMenus();
+      document.getElementById('findReplaceModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('findInput').focus(), 40);
+    }
+
+    function executeFindNext() {
+      const query = document.getElementById('findInput').value;
+      if (query) window.find(query);
+    }
+
+    function executeReplaceAll() {
+      const findStr = document.getElementById('findInput').value;
+      const replaceStr = document.getElementById('replaceInput').value;
+      if (!findStr) return;
+      const editor = document.querySelector(`[data-note-id="${activeNoteId}"] .note-editor`);
+      if (editor) {
+        const escaped = findStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        editor.innerHTML = editor.innerHTML.replace(new RegExp(escaped, 'g'), replaceStr);
+        syncActiveEditorToNote();
+        showToast('Replaced all occurrences');
+      }
+      closeModal('findReplaceModal');
+    }
+
+    function searchSelectedAtGoogle() {
+      const selText = window.getSelection()?.toString().trim();
+      hideAllMenus();
+      if (!selText) {
+        showToast('Highlight text inside a note first to search Google');
+        return;
+      }
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(selText)}`, '_blank', 'noopener');
+    }
+
+    function clearNoteFormatting() {
+      execFormat('removeFormat');
+      hideAllMenus();
+    }
+
+    /* =========================================================================
+       4. NOTES DRAWER, ALARMS & BACKGROUND WEB WORKER ENGINE
+       ========================================================================= */
+    function toggleNotesDrawer() {
+      hideAllMenus();
+      const drawer = document.getElementById('notesDrawer');
+      if (!drawer) return;
+      drawer.classList.toggle('hidden');
+      if (!drawer.classList.contains('hidden')) renderDrawerList();
+    }
+
+    function openAlarmsOverview() {
+      hideAllMenus();
+      const drawer = document.getElementById('notesDrawer');
+      if (drawer) {
+        drawer.classList.remove('hidden');
+        renderDrawerList();
+      }
+    }
+
+    function renderDrawerList() {
+      const list = document.getElementById('drawerNotesList');
+      if (!list) return;
+      const query = (document.getElementById('drawerSearchInput')?.value || '').toLowerCase();
+      const filtered = notes.filter(n =>
+        (n.title || '').toLowerCase().includes(query) ||
+        (n.content || '').replace(/<[^>]+>/g, ' ').toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="text-center text-xs text-slate-400 py-8">No matching notes found.</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(n => {
+        const theme = getThemeObj(n.theme);
+        const plain = (n.content || '').replace(/<[^>]+>/g, ' ').trim() || 'Empty note';
+        const alarmTag = (n.alarm && n.alarm.enabled)
+          ? `<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">⏰ ${new Date(n.alarm.time).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>`
+          : '';
+        return `
+          <div onclick="focusOrRestoreNote('${n.id}')" class="p-3 rounded-xl border border-slate-200 hover:border-slate-400 cursor-pointer transition shadow-2xs" style="background-color: ${theme.body}; color: ${theme.text};">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="font-semibold text-xs truncate">${escapeHtmlAttr(n.title || 'New Note')}</span>
+              ${alarmTag}
+            </div>
+            <p class="text-[11px] opacity-75 line-clamp-2">${escapeHtmlAttr(plain)}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function focusOrRestoreNote(noteId) {
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+      note.minimized = false;
+      activeNoteId = note.id;
+      saveNotesToStorage();
+      renderAllNotes();
+      bringNoteToFront(note.id);
+      const drawer = document.getElementById('notesDrawer');
+      if (drawer && window.innerWidth <= 768) drawer.classList.add('hidden');
+    }
+
+    function openAlarmModalForActiveNote() {
+      hideAllMenus();
+      const note = notes.find(n => n.id === activeNoteId);
+      if (!note) return;
+      document.getElementById('alarmModalNoteTitle').textContent = note.title || 'New Note';
+      const defaultDate = note.alarm && note.alarm.time
+        ? new Date(note.alarm.time)
+        : new Date(Date.now() + 5 * 60000);
+      const localIso = new Date(defaultDate.getTime() - defaultDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      document.getElementById('alarmDateTimeInput').value = localIso;
+      document.getElementById('alarmRepeatInput').value = (note.alarm && note.alarm.repeat) || 'none';
+      document.getElementById('alarmLabelInput').value = (note.alarm && note.alarm.label) || '';
+      document.getElementById('removeAlarmBtn').classList.toggle('hidden', !(note.alarm && note.alarm.enabled));
+      document.getElementById('alarmModal').classList.remove('hidden');
+    }
+
+    function setQuickAlarmMinutes(mins) {
+      const target = new Date(Date.now() + mins * 60000);
+      const localIso = new Date(target.getTime() - target.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      document.getElementById('alarmDateTimeInput').value = localIso;
+    }
+
+    function saveNoteAlarm() {
+      const note = notes.find(n => n.id === activeNoteId);
+      if (!note) return;
+      const dtVal = document.getElementById('alarmDateTimeInput').value;
+      if (!dtVal) {
+        showToast('Please select a date and time');
+        return;
+      }
+      note.alarm = {
+        enabled: true,
+        time: new Date(dtVal).toISOString(),
+        repeat: document.getElementById('alarmRepeatInput').value || 'none',
+        label: document.getElementById('alarmLabelInput').value.trim()
+      };
+      saveNotesToStorage();
+      renderAllNotes();
+      closeModal('alarmModal');
+      requestNotificationPermission();
+      showToast('Reminder alarm scheduled!');
+    }
+
+    function clearNoteAlarm() {
+      const note = notes.find(n => n.id === activeNoteId);
+      if (!note) return;
+      note.alarm = null;
+      saveNotesToStorage();
+      renderAllNotes();
+      closeModal('alarmModal');
+      showToast('Reminder removed');
+    }
+
+    function playAlarmSound(singleChime = false) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const playTone = (freq, startOffset, duration) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + startOffset);
+          gain.gain.setValueAtTime(0.18, ctx.currentTime + startOffset);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startOffset + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + startOffset);
+          osc.stop(ctx.currentTime + startOffset + duration);
+        };
+        playTone(880, 0, 0.25);
+        playTone(1174.66, 0.22, 0.35);
+        if (!singleChime) {
+          clearInterval(alarmIntervalAudio);
+          alarmIntervalAudio = setInterval(() => playAlarmSound(true), 2400);
+        }
+      } catch (e) {}
+    }
+
+    function stopAlarmSound() {
+      clearInterval(alarmIntervalAudio);
+      alarmIntervalAudio = null;
+    }
+
+    function checkDueAlarms() {
+      const now = Date.now();
+      for (const note of notes) {
+        if (note.alarm && note.alarm.enabled && note.alarm.time) {
+          const dueTime = new Date(note.alarm.time).getTime();
+          if (now >= dueTime && (!ringingNote || ringingNote.id !== note.id)) {
+            triggerAlarmForNote(note);
+            break;
+          }
+        }
+      }
+    }
+
+    function triggerAlarmForNote(note) {
+      ringingNote = note;
+      note.minimized = false;
+      activeNoteId = note.id;
+      renderAllNotes();
+      bringNoteToFront(note.id);
+
+      document.getElementById('ringingNoteTitle').textContent = note.title || 'New Note';
+      document.getElementById('ringingAlarmLabel').textContent = note.alarm?.label || 'Scheduled reminder triggered!';
+      document.getElementById('ringingModal').classList.remove('hidden');
+      playAlarmSound(false);
+
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification(`MeetNote: ${note.title || 'Reminder'}`, {
+            body: note.alarm?.label || 'Your scheduled sticky note alarm is ringing!',
+            icon: window.MEETNOTE_SVG_URI
+          });
+        } catch (e) {}
+      }
+    }
+
+    function snoozeRingingAlarm(mins) {
+      stopAlarmSound();
+      closeModal('ringingModal');
+      if (ringingNote && ringingNote.alarm) {
+        ringingNote.alarm.time = new Date(Date.now() + mins * 60000).toISOString();
+        ringingNote.alarm.enabled = true;
+        saveNotesToStorage();
+        renderAllNotes();
+        showToast(`Snoozed for ${mins} minutes`);
+      }
+      ringingNote = null;
+    }
+
+    function dismissRingingAlarm() {
+      stopAlarmSound();
+      closeModal('ringingModal');
+      if (ringingNote && ringingNote.alarm) {
+        if (ringingNote.alarm.repeat === 'daily') {
+          ringingNote.alarm.time = new Date(Date.now() + 86400000).toISOString();
+        } else if (ringingNote.alarm.repeat === 'weekly') {
+          ringingNote.alarm.time = new Date(Date.now() + 7 * 86400000).toISOString();
+        } else {
+          ringingNote.alarm.enabled = false;
+        }
+        saveNotesToStorage();
+        renderAllNotes();
+      }
+      ringingNote = null;
+    }
+
+    function requestNotificationPermission() {
+      if (!('Notification' in window)) {
+        showToast('System notifications are not supported in this browser.');
+        return;
+      }
+      Notification.requestPermission().then(perm => {
+        updateNotificationButtonState();
+        if (perm === 'granted') showToast('Desktop & background notifications enabled!');
+      });
+    }
+
+    function updateNotificationButtonState() {
+      const btn = document.getElementById('notifPermBtn');
+      const label = document.getElementById('notifPermLabel');
+      if (!btn || !('Notification' in window)) return;
+      if (Notification.permission === 'granted') {
+        btn.className = 'flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 transition cursor-pointer';
+        if (label) label.textContent = 'Notifications On';
+      }
+    }
+
+    function triggerPwaInstall() {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.finally(() => {
+        deferredInstallPrompt = null;
+        document.getElementById('installPwaBtn')?.classList.add('hidden');
+      });
+    }
+
+    function startBackgroundWorkerTimer() {
+      try {
+        const workerCode = `setInterval(() => postMessage('tick'), 1000);`;
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const worker = new Worker(URL.createObjectURL(blob));
+        worker.onmessage = () => checkDueAlarms();
+      } catch (e) {
+        setInterval(checkDueAlarms, 1000);
+      }
+    }
+
+    /* =========================================================================
+       5. INITIALIZATION & GLOBAL LISTENERS
+       ========================================================================= */
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btn = document.getElementById('installPwaBtn');
+      if (btn) {
+        btn.classList.remove('hidden');
+        btn.classList.add('flex');
+      }
+    });
+
+    document.addEventListener('mousedown', e => {
+      if (!e.target.closest('#richContextMenu') && !e.target.closest('#noteOptionsMenu')) {
+        hideAllMenus();
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && supabaseConnected) {
+        refreshAndSyncNotes(false);
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initColorSwatches();
+      loadSupabaseConfig();
+      loadNotesFromStorage();
+      renderAllNotes();
+      updateNotificationButtonState();
+      startBackgroundWorkerTimer();
+      if (supabaseConnected) {
+        refreshAndSyncNotes(false);
+      }
+    });
+  </script>
+</body>
+</html>
