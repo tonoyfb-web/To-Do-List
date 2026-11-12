@@ -2,43 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#F3F5F8" />
-  <title>MeetNote — Sticky Notes &amp; Reminders</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MeetNote — Sticky Notes &amp; Desktop Reminders</title>
+
+  <!-- Inline SVG Data-URI for MeetNote Clipboard Icon (instant load + fallback) -->
   <script>
-    // Define brand icon SVG data-URI early so header <img> and <head> icons load synchronously without ReferenceError
     window.MEETNOTE_SVG_URI = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E";
   </script>
-  <!-- Instant inline SVG data-URI favicon & touch icons matching meetnote.ico / meetnote.png (auto-upgrades to ./meetnote.ico & ./meetnote.png when hosted) -->
-  <link id="appFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
-  <link id="appShortcutIcon" rel="shortcut icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
-  <link id="appAppleIcon" rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+
+  <!-- Browser Tab Favicon & Mobile/Desktop App Icons -->
+  <link id="faviconLink" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter & Segoe-like clean UI typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
   <style>
-    /* Custom scrollbars & clean solid light desktop/mobile workspace */
     * {
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-    html, body {
-      font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      background-color: #F3F5F8;
-      background-image: none;
-      width: 100%;
-      height: 100%;
-      overflow-x: hidden;
     }
 
-    @media (min-width: 769px) {
-      body {
-        overflow: hidden;
-      }
+    body {
+      font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #F3F5F8;
+      background-image: none;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
     }
 
     @media (max-width: 768px) {
@@ -2007,14 +2002,10 @@
       document.getElementById('ringingModal').classList.remove('hidden');
       playAlarmSound(false);
 
-      if ('Notification' in window && Notification.permission === 'granted') {
-        try {
-          new Notification(`MeetNote: ${note.title || 'Reminder'}`, {
-            body: note.alarm?.label || 'Your scheduled sticky note alarm is ringing!',
-            icon: window.MEETNOTE_SVG_URI
-          });
-        } catch (e) {}
-      }
+      showSystemNotification(
+        `MeetNote: ${note.title || 'Reminder'}`,
+        note.alarm?.label || 'Your scheduled sticky note alarm is ringing!'
+      );
     }
 
     function snoozeRingingAlarm(mins) {
@@ -2047,15 +2038,98 @@
       ringingNote = null;
     }
 
+    let swRegistration = null;
+
+    function registerBackgroundServiceWorker() {
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        const swCode = `
+          self.addEventListener('install', () => self.skipWaiting());
+          self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+          self.addEventListener('notificationclick', (e) => {
+            e.notification.close();
+            e.waitUntil(
+              self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+                if (clients.length > 0) return clients[0].focus();
+                return self.clients.openWindow('./');
+              })
+            );
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob))
+          .then(reg => { swRegistration = reg; })
+          .catch(() => {});
+      } catch (e) {}
+    }
+
+    function showSystemNotification(title, body) {
+      const options = {
+        body: body || '',
+        icon: window.MEETNOTE_SVG_URI,
+        badge: window.MEETNOTE_SVG_URI,
+        tag: 'meetnote-reminder-' + Date.now(),
+        requireInteraction: true
+      };
+
+      if (window.DesktopBridge && typeof window.DesktopBridge.notify === 'function') {
+        try { window.DesktopBridge.notify(title, body); } catch (e) {}
+      }
+
+      if ('Notification' in window && Notification.permission === 'granted') {
+        if (swRegistration && typeof swRegistration.showNotification === 'function') {
+          swRegistration.showNotification(title, options).catch(() => {
+            try { new Notification(title, options); } catch (e) {}
+          });
+        } else {
+          try { new Notification(title, options); } catch (e) {}
+        }
+      }
+    }
+
     function requestNotificationPermission() {
       if (!('Notification' in window)) {
         showToast('System notifications are not supported in this browser.');
         return;
       }
-      Notification.requestPermission().then(perm => {
+
+      if (Notification.permission === 'granted') {
         updateNotificationButtonState();
-        if (perm === 'granted') showToast('Desktop & background notifications enabled!');
-      });
+        showSystemNotification('MeetNote Notifications Active', 'Background desktop & mobile reminders are working properly!');
+        showToast('Test notification banner sent!');
+        return;
+      }
+
+      if (Notification.permission === 'denied') {
+        updateNotificationButtonState();
+        showToast('Notifications are blocked in browser site settings — please allow them in your browser address bar.');
+        return;
+      }
+
+      const handlePermResult = (perm) => {
+        updateNotificationButtonState();
+        if (perm === 'granted') {
+          showSystemNotification('MeetNote Notifications Enabled', 'You will now receive background reminder banners & alarms!');
+          showToast('Desktop & background notifications enabled!');
+        } else if (perm === 'denied') {
+          showToast('Notification permission was declined.');
+        } else if (window.self !== window.top) {
+          showToast('Browser blocked the permission prompt inside this preview frame — open index.html directly in a tab.');
+        }
+      };
+
+      try {
+        const res = Notification.requestPermission(handlePermResult);
+        if (res && typeof res.then === 'function') {
+          res.then(handlePermResult).catch(() => {
+            if (window.self !== window.top) {
+              showToast('Open index.html in its own browser tab to allow system notifications.');
+            }
+          });
+        }
+      } catch (e) {
+        showToast('Open index.html in a regular browser tab to enable notifications.');
+      }
     }
 
     function updateNotificationButtonState() {
@@ -2063,8 +2137,14 @@
       const label = document.getElementById('notifPermLabel');
       if (!btn || !('Notification' in window)) return;
       if (Notification.permission === 'granted') {
-        btn.className = 'flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 transition cursor-pointer';
+        btn.className = 'flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition cursor-pointer';
         if (label) label.textContent = 'Notifications On';
+      } else if (Notification.permission === 'denied') {
+        btn.className = 'flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 transition cursor-pointer';
+        if (label) label.textContent = 'Notifications Blocked';
+      } else {
+        btn.className = 'flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition cursor-pointer';
+        if (label) label.textContent = 'Enable Notifications';
       }
     }
 
@@ -2118,6 +2198,7 @@
       loadSupabaseConfig();
       loadNotesFromStorage();
       renderAllNotes();
+      registerBackgroundServiceWorker();
       updateNotificationButtonState();
       startBackgroundWorkerTimer();
       if (supabaseConnected) {
