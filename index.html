@@ -1,510 +1,2171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MeetNote — Meetings & Tasks</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='16' y='14' width='68' height='82' rx='6' fill='%238b5a4f'/%3E%3Crect x='26' y='22' width='50' height='70' rx='2' fill='%23fff'/%3E%3Crect x='38' y='6' width='24' height='14' rx='3' fill='%23aab1bb'/%3E%3C/svg%3E">
-<style>
-:root{
-  --ink:#202b3c;--muted:#748198;--line:#e5eaf2;--blue:#526cf5;
-  --blue-dark:#3e55d8;--bg:#f4f6fb;--danger:#c54242;
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-button,input,select{font:inherit}
-header{background:linear-gradient(120deg,#e9edff,#e5f5ff);border-bottom:1px solid #e4eaf3}
-.header-inner{max-width:1200px;margin:auto;padding:16px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:12px}
-.logo-img{width:52px;height:52px;object-fit:contain;display:block}
-.logo-fallback{display:none;width:52px;height:52px}
-.brand h1{margin:0;font-size:21px;letter-spacing:-.45px}
-.brand p{margin:2px 0 0;color:#687791;font-size:12px}
-.header-user{color:#63718a;font-size:13px}
-.wrap{max-width:1200px;margin:30px auto;padding:0 26px}
-.topline{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:21px}
-.topline h2{margin:0;font-size:27px;letter-spacing:-.8px}
-.muted{font-size:13px;color:var(--muted)}
-.top-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.status{font-size:12px;color:#63718a}
-.icon{width:16px;height:16px;flex:0 0 16px;vertical-align:-3px}
-.btn-icon{display:inline-flex;align-items:center;gap:7px}
-button{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:white;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}
-button:hover{background:var(--blue-dark);transform:translateY(-1px)}
-button:disabled{opacity:.55;cursor:not-allowed;transform:none}
-button.secondary{background:#fff;color:#47566e;border:1px solid var(--line)}
-button.secondary:hover{background:#f7f8fc}
-button.danger{background:#fff2f2;color:var(--danger);border:1px solid #ffdddd}
-button.danger:hover{background:#ffe8e8}
-.add-btn{padding:11px 18px;box-shadow:0 8px 18px #526cf533}
-label{display:block;margin:13px 0 5px;color:#64728a;font-size:12px;font-weight:700}
-input,select{width:100%;padding:10px 12px;border:1px solid #dce2ec;border-radius:10px;background:#fff;color:var(--ink);outline:none}
-input:focus,select:focus,#editor:focus{border-color:#91a5ff;box-shadow:0 0 0 3px #526cf51a}
-.row{display:flex;gap:9px}
-.row>*{flex:1;min-width:0}
-.toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:7px;border:1px solid var(--line);border-radius:10px;background:#fafbfe;margin-top:7px}
-.tool{padding:6px 9px;border:1px solid #e5e9f0;background:#fff;color:#34445d;border-radius:7px;font-size:13px}
-.tool:hover{background:#f3f6ff}
-.color-wrap{display:flex;align-items:center;gap:5px;color:#64728a;font-size:11px}
-.color-wrap input{width:27px;height:26px;padding:2px;border:0}
-#editor{min-height:140px;padding:11px;border:1px solid #dce2ec;border-radius:10px;margin-top:7px;outline:none;overflow-wrap:anywhere}
-.form-actions{display:flex;gap:8px;margin-top:16px}
-.form-actions button{flex:1}
-.list-panel{background:#fff;border:1px solid var(--line);border-radius:19px;padding:20px;box-shadow:0 9px 28px #29385b09}
-.list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-.list-head h3{margin:0;font-size:18px}
-.filters{display:flex;gap:8px;flex-wrap:wrap}
-.filters input{width:220px}
-.filters select{width:auto}
-.view-controls{display:flex;gap:3px;padding:3px;background:#f1f3f8;border-radius:10px}
-.view-controls button{padding:7px 11px;background:transparent;color:#657189}
-.view-controls button.active{background:#fff;color:#344fc2;box-shadow:0 1px 4px #1c294012}
-#notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
-#notes.list-view{grid-template-columns:1fr}
-.note{min-width:0;padding:16px;background:#fff;border:1px solid #e9eaf0;border-radius:15px;box-shadow:0 4px 14px #27345008}
-.note.overdue{border-color:#f0c6c6;background:#fffafa}
-.note h4{margin:0 0 7px;font-size:16px;line-height:1.35;overflow-wrap:anywhere}
-.note-date{margin-bottom:11px;color:#7b879a;font-size:12px}
-.note-body{min-height:24px;white-space:pre-wrap;overflow-wrap:anywhere}
-.note-body:empty{display:none}
-.note-body ul,.note-body ol{padding-left:22px}
-.note-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:13px;padding-top:10px;border-top:1px solid #edf0f3}
-.reminder{margin-top:8px;color:#87621a;font-size:11px}
-.note-actions{display:flex;gap:6px}
-.note-actions button{padding:6px 9px;font-size:11px}
-.note-summary{display:flex;align-items:center;gap:12px;cursor:pointer;list-style:none}
-.note-summary::-webkit-details-marker{display:none}
-.note-number{flex:0 0 30px;color:#718096;font-weight:750}
-.note-summary h4{flex:1;margin:0}
-.list-view .note{padding:13px 15px}
-.list-view .note-date,.list-view .note-body,.list-view .note-foot,.list-view .reminder{display:none}
-.list-view details[open] .note-date,.list-view details[open] .note-body,.list-view details[open] .reminder{display:block}
-.list-view details[open] .note-foot{display:flex}
-.list-view details[open] .note-date{margin-top:10px}
-.list-view details[open] .note-body{margin-top:8px}
-.empty{grid-column:1/-1;padding:48px 15px;border:1px dashed #d5dce8;border-radius:14px;text-align:center;color:#748198}
-.empty b{display:block;margin-bottom:4px;color:#45536a}
-dialog{width:min(620px,calc(100% - 32px));max-height:calc(100vh - 40px);padding:24px;border:0;border-radius:18px;box-shadow:0 20px 70px #18274433}
-dialog::backdrop{background:#17243c77}
-dialog h2{margin:0 0 5px;font-size:20px}
-.dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.icon-close{background:#f1f3f8;color:#47566e;padding:6px 10px;border:0}
-.dialog-actions{display:flex;gap:8px;margin-top:16px}
-.dialog-actions button{flex:1}
-.auth-error{min-height:20px;margin-top:8px;color:#b53c3c;font-size:13px}
-footer{padding:28px;text-align:center;color:#8a96a7;font-size:12px}
-@media(max-width:850px){.wrap{padding:0 18px}}
-@media(max-width:600px){
-  .header-inner{padding:14px 17px}
-  .wrap{margin:20px auto}
-  #notes{grid-template-columns:1fr}
-  .filters{width:100%}
-  .filters input,.filters select{flex:1;width:auto}
-  .top-actions{width:100%}
-  .row{flex-direction:column;gap:0}
-}
-</style>
-</head>
-<body>
-<header>
-  <div class="header-inner">
-    <div class="brand">
-      <img class="logo-img" src="clipboard-logo.png" alt="MeetNote logo"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-      <svg class="logo-fallback" viewBox="0 0 100 100" aria-hidden="true">
-        <rect x="16" y="14" width="68" height="82" rx="6" fill="#8b5a4f"/>
-        <rect x="26" y="22" width="50" height="70" rx="2" fill="#fff"/>
-        <rect x="38" y="6" width="24" height="14" rx="3" fill="#aab1bb"/>
-        <path d="M31 36l3 3 5-6" stroke="#22b573" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-        <path d="M31 50l3 3 5-6" stroke="#22b573" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-        <path d="M31 64l3 3 5-6" stroke="#22b573" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-        <rect x="31" y="74" width="8" height="8" fill="none" stroke="#333" stroke-width="1.5"/>
-        <path d="M44 38h24M44 46h24M44 54h24M44 62h24M44 78h24" stroke="#333" stroke-width="1.6"/>
-      </svg>
-      <div><h1>MeetNote</h1><p>Your meetings, tasks & reminders in one place</p></div>
-    </div>
-    <div class="header-user" id="headerUser"></div>
-  </div>
-</header>
-
-<main class="wrap">
-  <div class="topline">
-    <div>
-      <h2>My schedule</h2>
-      <div class="muted">Plan meetings and keep track of what needs doing.</div>
-    </div>
-    <div class="top-actions">
-      <span class="status" id="appStatus" aria-live="polite">Connecting…</span>
-      <button id="enableNotify" type="button" class="secondary btn-icon">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-        Enable notifications
-      </button>
-      <button id="accountBtn" type="button" class="secondary btn-icon"></button>
-      <button id="addBtn" type="button" class="add-btn btn-icon">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        Add schedule / task
-      </button>
-    </div>
-  </div>
-
-  <section class="list-panel">
-    <div class="list-head">
-      <div><h3>Upcoming & saved</h3><div class="muted" id="count">0 items</div></div>
-      <div class="view-controls" aria-label="Choose layout">
-        <button type="button" class="active" id="gridViewBtn">Grid</button>
-        <button type="button" id="listViewBtn">List</button>
-      </div>
-      <div class="filters">
-        <input id="search" placeholder="Search schedules…" aria-label="Search schedules">
-        <select id="filter" aria-label="Filter schedules">
-          <option value="all">All items</option>
-          <option value="upcoming">Upcoming</option>
-          <option value="past">Past</option>
-          <option value="undated">Undated</option>
-        </select>
-      </div>
-    </div>
-    <div id="notes"></div>
-  </section>
-</main>
-
-<!-- Add / edit task dialog -->
-<dialog id="taskDialog">
-  <form id="noteForm">
-    <div class="dialog-head">
-      <div>
-        <h2 id="formTitle">Add a schedule / task</h2>
-        <div class="muted">Fill in the details and save to your account.</div>
-      </div>
-      <button type="button" class="icon-close" id="closeTaskDialog" aria-label="Close">✕</button>
-    </div>
-
-    <input type="hidden" id="editId">
-    <label for="title">Meeting / task title</label>
-    <input id="title" required maxlength="120" placeholder="e.g. Prepare project update">
-
-    <div class="row">
-      <div><label for="date">Date <span class="muted">(optional)</span></label><input id="date" type="date"></div>
-      <div><label for="time">Time <span class="muted">(optional)</span></label><input id="time" type="time"></div>
-    </div>
-
-    <label>Notes & details</label>
-    <div class="toolbar" aria-label="Text formatting">
-      <button type="button" class="tool" data-cmd="bold" title="Bold"><b>B</b></button>
-      <button type="button" class="tool" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
-      <button type="button" class="tool" data-cmd="hiliteColor" title="Highlight">🖍</button>
-      <span class="color-wrap">Text <input type="color" id="textColor" value="#263247" title="Text color"></span>
-      <span class="color-wrap">Highlight <input type="color" id="highlightColor" value="#fff19a" title="Highlight color"></span>
-      <button type="button" class="tool" data-cmd="removeFormat" title="Clear formatting">Clear</button>
-    </div>
-    <div id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Meeting notes"></div>
-
-    <div class="row">
-      <div>
-        <label for="reminder">Reminder</label>
-        <select id="reminder">
-          <option value="">No reminder</option>
-          <option value="0">At scheduled time</option>
-          <option value="5">5 minutes before</option>
-          <option value="10">10 minutes before</option>
-          <option value="15">15 minutes before</option>
-          <option value="30">30 minutes before</option>
-          <option value="60">1 hour before</option>
-          <option value="1440">1 day before</option>
-        </select>
-      </div>
-      <div>
-        <label for="alarm">Alarm sound</label>
-        <select id="alarm"><option value="yes">On</option><option value="no">Off</option></select>
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button type="button" class="secondary" id="resetBtn">Clear</button>
-      <button type="submit" id="saveBtn">Save schedule</button>
-    </div>
-  </form>
-</dialog>
-
-<!-- Sign-in dialog -->
-<dialog id="accountDialog">
-  <form id="authForm">
-    <h2>Sign in to MeetNote</h2>
-    <p class="muted">Sign in with your existing Supabase account.</p>
-    <label for="authEmail">Email</label>
-    <input id="authEmail" type="email" autocomplete="email" required>
-    <label for="authPassword">Password</label>
-    <input id="authPassword" type="password" autocomplete="current-password" required>
-    <div class="auth-error" id="authError" aria-live="polite"></div>
-    <div class="dialog-actions">
-      <button type="button" class="secondary" id="closeDialog">Cancel</button>
-      <button type="submit" id="authSubmit">Sign in</button>
-    </div>
-  </form>
-</dialog>
-
-<footer>MeetNote · Keep your day organised</footer>
-
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-/* Your Supabase project settings (publishable key is safe to use in the browser). */
-const SUPABASE_URL='https://eabnbkysvhbbhrgpetkz.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx';
-const configured=!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
-const supabase=configured?createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
-
-const $=id=>document.getElementById(id);
-const editor=$('editor');
-let items=[];
-let user=null;
-let currentView=localStorage.getItem('meetnote_view')||'grid';
-
-/* Browser tab icon: use clipboard-logo.png if present, otherwise the built-in clipboard icon. */
-(function setFavicon(){
-  const link=document.querySelector('link[rel="icon"]')||document.createElement('link');
-  link.rel='icon';
-  if(!link.parentNode)document.head.appendChild(link);
-  const img=new Image();
-  img.onload=()=>{link.type='image/png';link.href='clipboard-logo.png'};
-  img.onerror=()=>{/* keep the built-in SVG icon already in <head> */};
-  img.src='clipboard-logo.png';
-})();
-
-function setStatus(message){$('appStatus').textContent=message}
-function setView(view){
-  currentView=view;
-  $('notes').classList.toggle('list-view',view==='list');
-  $('gridViewBtn').classList.toggle('active',view==='grid');
-  $('listViewBtn').classList.toggle('active',view==='list');
-  localStorage.setItem('meetnote_view',view);
-}
-function dateTime(n){return n.date?new Date(`${n.date}T${n.time||'00:00'}:00`):null}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function fmt(d){return d.toLocaleString(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
-function safeNotes(html){
-  const doc=new DOMParser().parseFromString(String(html||''),'text/html');
-  doc.querySelectorAll('script,style,iframe,object,embed,link,meta').forEach(el=>el.remove());
-  doc.body.querySelectorAll('*').forEach(el=>[...el.attributes].forEach(attr=>{
-    if(attr.name.toLowerCase().startsWith('on')||
-      ((attr.name==='href'||attr.name==='src')&&/^\s*javascript:/i.test(attr.value)))el.removeAttribute(attr.name);
-  }));
-  return doc.body.innerHTML;
-}
-function render(){
-  const query=$('search').value.trim().toLowerCase(),filter=$('filter').value,now=new Date();
-  const sorted=[...items].sort((a,b)=>{
-    const da=dateTime(a),db=dateTime(b);
-    if(!da)return db?1:0;if(!db)return -1;return da-db;
-  });
-  const filtered=sorted.filter(n=>{
-    const dt=dateTime(n);
-    const text=(n.title+' '+String(n.notes||'').replace(/<[^>]*>/g,' ')).toLowerCase();
-    const match=filter==='all'||(filter==='undated'&&!dt)||(filter==='upcoming'&&dt&&dt>=now)||(filter==='past'&&dt&&dt<now);
-    return text.includes(query)&&match;
-  });
-  $('count').textContent=`${items.length} item${items.length===1?'':'s'} · ${filtered.length} shown`;
-  if(!filtered.length){
-    $('notes').innerHTML='<div class="empty"><b>No schedules found</b>Click “Add schedule / task” to create one, or change the search/filter.</div>';
-    return;
-  }
-  $('notes').innerHTML=filtered.map((n,index)=>{
-    const dt=dateTime(n),past=Boolean(dt&&dt<now);
-    const reminder=n.reminder!=null?`<div class="reminder">Reminder: ${Number(n.reminder)===0?'at time':esc(n.reminder+' min before')}</div>`:'';
-    const details=`<div class="note-date">${dt?esc(fmt(dt))+(past?' · Past':''):'No date set · Task'}</div>
-      <div class="note-body">${safeNotes(n.notes)||'<span class="muted">No notes added.</span>'}</div>${reminder}
-      <div class="note-foot"><span class="muted">${n.alarm===false?'Alarm off':''}</span>
-      <div class="note-actions"><button class="secondary" type="button" data-edit="${esc(n.id)}">Edit</button>
-      <button class="danger" type="button" data-delete="${esc(n.id)}">Delete</button></div></div>`;
-    if(currentView==='list')return `<article class="note ${past?'overdue':''}"><details><summary class="note-summary"><span class="note-number">${index+1}.</span><h4>${esc(n.title)}</h4><span aria-hidden="true">▾</span></summary>${details}</details></article>`;
-    return `<article class="note ${past?'overdue':''}"><h4>${esc(n.title)}</h4>${details}</article>`;
-  }).join('');
-  $('notes').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>editNote(b.dataset.edit)));
-  $('notes').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>deleteNote(b.dataset.delete)));
-}
-
-async function loadItems(){
-  if(!supabase||!user)return;
-  setStatus('Loading your tasks…');
-  const {data,error}=await supabase.from('tasks').select('*').order('date',{ascending:true,nullsFirst:false}).order('time',{ascending:true});
-  if(error){setStatus('Could not load tasks: '+error.message);return}
-  items=(data||[]).map(row=>({id:row.id,title:row.title,date:row.date||'',time:(row.time||'').slice(0,5),notes:row.notes||'',reminder:row.reminder,alarm:row.alarm,notified:false}));
-  setStatus('Signed in · your tasks are synced');
-  render();
-}
-
-function syncDateFields(){
-  const hasDate=Boolean($('date').value);
-  $('reminder').disabled=!hasDate;
-  $('time').disabled=!hasDate;
-}
-function resetForm(){
-  $('noteForm').reset();
-  $('editId').value='';
-  editor.innerHTML='';
-  $('formTitle').textContent='Add a schedule / task';
-  $('saveBtn').textContent='Save schedule';
-  syncDateFields();
-}
-function openTaskForm(){
-  if(!user){setStatus('Sign in to add schedules and tasks.');openSignIn();return}
-  resetForm();
-  $('taskDialog').showModal();
-  $('title').focus();
-}
-function editNote(id){
-  const n=items.find(x=>x.id===id);if(!n)return;
-  $('editId').value=n.id;
-  $('title').value=n.title;
-  $('date').value=n.date||'';
-  $('time').value=n.time||'';
-  $('reminder').value=n.reminder==null?'':String(n.reminder);
-  $('alarm').value=n.alarm===false?'no':'yes';
-  editor.innerHTML=n.notes||'';
-  $('formTitle').textContent='Edit schedule / task';
-  $('saveBtn').textContent='Update schedule';
-  syncDateFields();
-  $('taskDialog').showModal();
-}
-async function saveTask(event){
-  event.preventDefault();
-  if(!user){setStatus('Sign in to save tasks.');openSignIn();return}
-  const id=$('editId').value,hasDate=Boolean($('date').value);
-  const payload={
-    user_id:user.id,
-    title:$('title').value.trim(),
-    date:hasDate?$('date').value:null,
-    time:hasDate&&$('time').value?$('time').value:null,
-    notes:editor.innerHTML,
-    reminder:hasDate&&$('reminder').value!==''?Number($('reminder').value):null,
-    alarm:$('alarm').value==='yes'
-  };
-  $('saveBtn').disabled=true;
-  const result=id
-    ?await supabase.from('tasks').update(payload).eq('id',id).select().single()
-    :await supabase.from('tasks').insert(payload).select().single();
-  $('saveBtn').disabled=false;
-  if(result.error){setStatus('Save failed: '+result.error.message);return}
-  $('taskDialog').close();
-  await loadItems();
-}
-async function deleteNote(id){
-  if(!confirm('Delete this task?'))return;
-  const {error}=await supabase.from('tasks').delete().eq('id',id);
-  if(error){setStatus('Delete failed: '+error.message);return}
-  await loadItems();
-}
-
-function openSignIn(){
-  if(!configured){setStatus('Add your Supabase project URL and publishable key in the HTML first.');return}
-  $('authError').textContent='';
-  $('accountDialog').showModal();
-  $('authEmail').focus();
-}
-async function signIn(event){
-  event.preventDefault();
-  const email=$('authEmail').value.trim(),password=$('authPassword').value;
-  $('authError').textContent='';
-  $('authSubmit').disabled=true;
-  const {error}=await supabase.auth.signInWithPassword({email,password});
-  $('authSubmit').disabled=false;
-  if(error){$('authError').textContent=error.message;return}
-  $('authPassword').value='';
-  $('accountDialog').close();
-}
-async function signOut(){
-  const {error}=await supabase.auth.signOut();
-  if(error)setStatus('Sign out failed: '+error.message);
-}
-function updateAccountUI(){
-  $('headerUser').textContent=user?(user.email||'Signed in'):'';
-  $('accountBtn').innerHTML=user
-    ?'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Sign out'
-    :'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Sign in';
-  $('accountBtn').onclick=user?signOut:openSignIn;
-  $('addBtn').disabled=!user;
-  $('addBtn').title=user?'':'Sign in to add schedules';
-}
-
-function updateNotificationButton(){
-  const button=$('enableNotify');
-  if(!('Notification'in window)){button.textContent='Notifications unavailable';button.disabled=true;return}
-  if(!window.isSecureContext){button.textContent='Use HTTPS for notifications';button.disabled=true;return}
-  button.disabled=false;
-  button.textContent=Notification.permission==='granted'?'Notifications enabled':
-    Notification.permission==='denied'?'Notifications blocked':'Enable notifications';
-}
-async function enableNotifications(){
-  if(!('Notification'in window)){setStatus('This browser does not support desktop notifications.');return}
-  if(!window.isSecureContext){setStatus('Notifications require HTTPS or localhost. Open this site securely, then try again.');return}
-  try{
-    const permission=await Notification.requestPermission();
-    updateNotificationButton();
-    if(permission==='granted'){setStatus('Notifications enabled. Keep this page open for reminders.');checkReminders()}
-    else if(permission==='denied')setStatus('Notifications were blocked. Allow them in your browser site settings.');
-    else setStatus('Permission prompt dismissed. Click Enable notifications to try again.');
-  }catch(error){setStatus('Could not request notification permission: '+error.message)}
-}
-function beep(){
-  try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
-    const c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);
-    o.frequency.value=880;g.gain.setValueAtTime(.18,c.currentTime);
-    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+1);o.start();o.stop(c.currentTime+1);
-  }catch(e){}
-}
-function checkReminders(){
-  if(!('Notification'in window)||Notification.permission!=='granted'||!user)return;
-  const now=new Date();
-  items.forEach(n=>{
-    const dt=dateTime(n);if(!dt||n.reminder==null||n.notified)return;
-    const trigger=new Date(dt.getTime()-Number(n.reminder)*60000);
-    if(now>=trigger&&now<=new Date(dt.getTime()+5*60000)){
-      try{new Notification('MeetNote reminder: '+n.title,{body:'Scheduled for '+fmt(dt),tag:'meetnote-'+n.id});if(n.alarm!==false)beep();n.notified=true}catch(e){}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#F3F5F8" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Custom scrollbars & clean solid light desktop workspace */
+    * {
+      box-sizing: border-box;
     }
-  });
-}
+    body {
+      font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      user-select: none;
+      background-color: #F3F5F8;
+      background-image: none;
+    }
 
-$('noteForm').addEventListener('submit',saveTask);
-$('resetBtn').addEventListener('click',resetForm);
-$('closeTaskDialog').addEventListener('click',()=>$('taskDialog').close());
-$('taskDialog').addEventListener('close',resetForm);
-$('addBtn').addEventListener('click',openTaskForm);
-$('search').addEventListener('input',render);
-$('filter').addEventListener('change',render);
-$('gridViewBtn').addEventListener('click',()=>{setView('grid');render()});
-$('listViewBtn').addEventListener('click',()=>{setView('list');render()});
-$('authForm').addEventListener('submit',signIn);
-$('closeDialog').addEventListener('click',()=>$('accountDialog').close());
-$('enableNotify').addEventListener('click',enableNotifications);
-document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>{
-  editor.focus();
-  document.execCommand(b.dataset.cmd,false,b.dataset.cmd==='hiliteColor'?$('highlightColor').value:null);
-}));
-$('textColor').addEventListener('input',e=>{editor.focus();document.execCommand('foreColor',false,e.target.value)});
-$('highlightColor').addEventListener('input',e=>{editor.focus();document.execCommand('hiliteColor',false,e.target.value)});
-$('date').addEventListener('change',syncDateFields);
+    /* Custom subtle scrollbar inside notes */
+    .note-editor::-webkit-scrollbar,
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .note-editor::-webkit-scrollbar-track,
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .note-editor::-webkit-scrollbar-thumb,
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: 9999px;
+    }
+    .note-editor::-webkit-scrollbar-thumb:hover,
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.32);
+    }
 
-setView(currentView);
-updateNotificationButton();
-updateAccountUI();
-syncDateFields();
-render();
-setInterval(checkReminders,15000);
-window.addEventListener('focus',updateNotificationButton);
+    /* Sticky Note Card Styling matching the screenshot's crisp desktop look */
+    .sticky-note {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.08);
+      transition: box-shadow 0.18s ease, transform 0.12s ease;
+      min-width: 275px;
+      min-height: 275px;
+      resize: both;
+      overflow: hidden;
+    }
+    .sticky-note.active-note {
+      box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.08);
+    }
 
-if(configured){
-  supabase.auth.onAuthStateChange((_event,session)=>{
-    user=session?.user||null;updateAccountUI();items=[];render();
-    if(user)void loadItems();else setStatus('Sign in to view your Supabase tasks.');
-  });
-  supabase.auth.getSession().then(({data,error})=>{
-    if(error){setStatus('Could not check sign-in status: '+error.message);return}
-    user=data.session?.user||null;updateAccountUI();
-    if(user)void loadItems();else setStatus('Sign in to view your Supabase tasks.');
-  });
-}else{
-  setStatus('Add your Supabase project URL and publishable key in the HTML to connect.');
-}
-</script>
+    /* Editable content area */
+    .note-editor {
+      user-select: text;
+      outline: none;
+      flex: 1;
+      overflow-y: auto;
+      word-wrap: break-word;
+      line-height: 1.45;
+    }
+    .note-editor:empty:before {
+      content: attr(data-placeholder);
+      opacity: 0.42;
+      pointer-events: none;
+    }
+
+    /* Interactive checklist items inside note */
+    .todo-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 3px 0;
+    }
+    .todo-checkbox {
+      width: 15px;
+      height: 15px;
+      margin-top: 3px;
+      cursor: pointer;
+      accent-color: #1f2937;
+      flex-shrink: 0;
+    }
+    .todo-text.checked {
+      text-decoration: line-through;
+      opacity: 0.58;
+    }
+
+    /* Floating Windows 11 / Desktop Context Menu matching the reference image */
+    #richContextMenu {
+      position: fixed;
+      z-index: 9999;
+      width: 314px;
+      background: #ffffff;
+      color: #1f2328;
+      border: 1px solid #d8dee4;
+      border-radius: 10px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+      padding: 6px 0;
+      font-family: 'Segoe UI', 'Inter', sans-serif;
+      font-size: 13.5px;
+      animation: menuPop 0.11s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes menuPop {
+      from { opacity: 0; transform: scale(0.97) translateY(-3px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .ctx-btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      color: #24292f;
+      transition: background 0.12s ease;
+      cursor: pointer;
+    }
+    .ctx-btn-icon:hover {
+      background: #f0f2f5;
+    }
+    .ctx-btn-icon.is-active {
+      background: #e5ebf3;
+      color: #0969da;
+    }
+
+    .ctx-row-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+    .ctx-row-item:hover:not(.disabled) {
+      background: #f3f4f6;
+    }
+    .ctx-row-item.disabled {
+      opacity: 0.42;
+      cursor: default;
+    }
+
+    /* Alarm flashing animation */
+    @keyframes alarmPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7), 0 20px 50px rgba(0,0,0,0.25); }
+      50% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0), 0 20px 50px rgba(0,0,0,0.25); }
+    }
+    .alarm-ringing-card {
+      animation: alarmPulse 1.2s infinite;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden relative text-slate-900 bg-[#F3F5F8]">
+
+  <!-- Top Light Desktop Status & Control Dock -->
+  <header id="topDock" class="fixed top-3 left-3 right-3 z-40 flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-800 shadow-xs">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-lg bg-[#C4F07D] text-slate-900 border border-[#b3e366] flex items-center justify-center font-bold shadow-2xs">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/>
+          <path d="M15 3v6h6"/>
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-semibold text-sm tracking-tight text-slate-900">Sticky Notes</span>
+          <span id="bgWorkerBadge" class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" title="Background Web Worker & Desktop Bridge keeping alarms active even when minimized">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="desktopEnvLabel">Desktop &amp; BG Ready</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Controls -->
+    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+      <!-- Supabase Cloud Sync Button -->
+      <button type="button" id="supabaseSyncBtn" onclick="openSupabaseModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition cursor-pointer" title="Configure Supabase Cloud Backup & Sync">
+        <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+        <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+        </svg>
+        <span id="syncBtnLabel">Cloud Backup</span>
+      </button>
+
+      <!-- Notification Permission Button -->
+      <button type="button" id="notifPermBtn" onclick="requestNotificationPermission()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition cursor-pointer">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span id="notifPermLabel">Enable Notifications</span>
+      </button>
+
+      <!-- Install PWA / Desktop App Button -->
+      <button type="button" id="installPwaBtn" onclick="triggerPwaInstall()" class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Install Desktop App</span>
+      </button>
+
+      <!-- Alarms Overview Button -->
+      <button type="button" onclick="openAlarmsOverview()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition cursor-pointer">
+        <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="13" r="8"/>
+          <path d="M12 9v4l2 2"/>
+          <path d="M5 3 2 6"/>
+          <path d="m22 6-3-3"/>
+        </svg>
+        <span>Reminders</span>
+        <span id="activeAlarmCount" class="px-1.5 py-0.2 rounded-full bg-[#C4F07D] text-slate-900 border border-[#b3e366] font-bold text-[10px]">0</span>
+      </button>
+
+      <!-- All Notes Drawer Toggle -->
+      <button type="button" onclick="toggleNotesDrawer()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition cursor-pointer">
+        <svg class="w-3.5 h-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span>Notes (<span id="totalNotesCount">1</span>)</span>
+      </button>
+
+      <!-- New Sticky Note Button -->
+      <button type="button" onclick="createNewNote()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#C4F07D] hover:bg-[#b8ea68] text-slate-900 border border-[#aad95d] shadow-2xs transition cursor-pointer">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>New Note</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Desktop Canvas where Sticky Notes float -->
+  <main id="desktopCanvas" class="w-full h-full relative pt-16 bg-[#F3F5F8]"></main>
+
+  <!-- Helper Hint Footer (Light Theme) -->
+  <div class="fixed bottom-3 left-4 z-30 pointer-events-none hidden sm:flex items-center gap-2 text-[11px] text-slate-600 bg-white/95 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs">
+    <span>Tip: <strong>Right-click</strong> inside any note for Formatting &amp; Tools • Drag header to move • Click <strong>•••</strong> for colors &amp; alarms</span>
+  </div>
+
+  <!-- =====================================================================
+       EXACT REPLICA FLOATING RICH-TEXT CONTEXT MENU (from reference screenshot)
+       ===================================================================== -->
+  <div id="richContextMenu" class="hidden" onmousedown="event.stopPropagation()">
+    <!-- Row 1: Font Family, Size (- 9 +), Text Color (A), Highlight Color -->
+    <div class="px-3 pt-1.5 pb-2 border-b border-gray-200 flex items-center justify-between gap-1.5">
+      <div class="relative flex-1 min-w-0">
+        <select id="ctxFontFamily" onchange="applyFontFamily(this.value)" class="w-full appearance-none bg-transparent hover:bg-gray-100 text-[13px] font-normal text-gray-800 py-1 pl-1.5 pr-6 rounded cursor-pointer outline-none truncate">
+          <option value="Calibri, 'Segoe UI', sans-serif">Calibri</option>
+          <option value="'Segoe UI', sans-serif">Segoe UI</option>
+          <option value="Arial, sans-serif">Arial</option>
+          <option value="Georgia, serif">Georgia</option>
+          <option value="'Times New Roman', serif">Times New Roman</option>
+          <option value="Consolas, monospace">Consolas</option>
+          <option value="'Comic Sans MS', cursive">Comic Sans</option>
+        </select>
+        <svg class="w-3.5 h-3.5 text-gray-600 pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+
+      <!-- Font Size Stepper (- 9 +) -->
+      <div class="flex items-center gap-0.5">
+        <button type="button" onclick="stepFontSize(-1)" class="ctx-btn-icon !w-6 !h-7" title="Decrease Font Size">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <span id="ctxFontSizeDisplay" class="w-6 text-center text-[13px] text-gray-800 font-normal">11</span>
+        <button type="button" onclick="stepFontSize(1)" class="ctx-btn-icon !w-6 !h-7" title="Increase Font Size">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+
+      <!-- Font Color (A with color bar) -->
+      <label class="ctx-btn-icon relative cursor-pointer" title="Font Color">
+        <div class="flex flex-col items-center leading-none">
+          <span class="text-[13px] font-semibold">A</span>
+          <span id="ctxTextColorBar" class="w-4 h-1 rounded-xs bg-black mt-0.5"></span>
+        </div>
+        <input type="color" id="ctxTextColorInput" value="#000000" onchange="applyTextColor(this.value)" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" />
+      </label>
+
+      <!-- Text Highlight Color (Marker icon) -->
+      <label class="ctx-btn-icon relative cursor-pointer" title="Text Highlight Color">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="m9 11-6 6v3h9l3-3"/>
+          <path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>
+        </svg>
+        <span id="ctxHighlightBar" class="w-4 h-1 rounded-xs bg-yellow-300 absolute bottom-0.5"></span>
+        <input type="color" id="ctxHighlightInput" value="#fef08a" onchange="applyHighlightColor(this.value)" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" />
+      </label>
+    </div>
+
+    <!-- Row 2: Style (B, I, U, S, aA) -->
+    <div class="px-3.5 py-1.5 border-b border-gray-200 flex items-center justify-between">
+      <span class="text-[13px] text-gray-800">Style</span>
+      <div class="flex items-center gap-1 border border-gray-200 rounded-md px-1 py-0.5 bg-white">
+        <button type="button" id="btnBold" onclick="execFormat('bold')" class="ctx-btn-icon font-bold text-[14px]" title="Bold (Ctrl+B)">B</button>
+        <button type="button" id="btnItalic" onclick="execFormat('italic')" class="ctx-btn-icon italic font-serif text-[15px]" title="Italic (Ctrl+I)">I</button>
+        <button type="button" id="btnUnderline" onclick="execFormat('underline')" class="ctx-btn-icon underline text-[14px]" title="Underline (Ctrl+U)">U</button>
+        <button type="button" id="btnStrike" onclick="execFormat('strikeThrough')" class="ctx-btn-icon line-through text-[14px]" title="Strikethrough">S</button>
+        <button type="button" onclick="toggleTextCase()" class="ctx-btn-icon text-[13px] font-medium" title="Change Case (UPPER / lower / Title)">aA</button>
+      </div>
+    </div>
+
+    <!-- Row 3: Paragraph (Align, Outdent, Indent, Bullet List, Line Spacing) -->
+    <div class="px-3.5 py-1.5 border-b border-gray-200 flex items-center justify-between">
+      <span class="text-[13px] text-gray-800">Paragraph</span>
+      <div class="flex items-center gap-0.5 border border-gray-200 rounded-md px-1 py-0.5 bg-white">
+        <button type="button" onclick="cycleAlignment()" class="ctx-btn-icon" title="Cycle Alignment (Left / Center / Right)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/>
+          </svg>
+        </button>
+        <button type="button" onclick="execFormat('outdent')" class="ctx-btn-icon" title="Decrease Indent">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="7 8 3 12 7 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/>
+          </svg>
+        </button>
+        <button type="button" onclick="execFormat('indent')" class="ctx-btn-icon" title="Increase Indent">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="3 8 7 12 3 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/>
+          </svg>
+        </button>
+        <div class="w-[1px] h-4 bg-gray-200 mx-0.5"></div>
+        <button type="button" onclick="execFormat('insertUnorderedList')" class="ctx-btn-icon" title="Bulleted List">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/>
+            <circle cx="4" cy="6" r="1.2" fill="currentColor"/><circle cx="4" cy="12" r="1.2" fill="currentColor"/><circle cx="4" cy="18" r="1.2" fill="currentColor"/>
+          </svg>
+        </button>
+        <button type="button" onclick="cycleLineSpacing()" class="ctx-btn-icon" title="Toggle Line Spacing (1.2 / 1.45 / 1.85)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M6 7v10"/><polyline points="3 9 6 6 9 9"/><polyline points="3 15 6 18 9 15"/>
+            <line x1="13" y1="7" x2="21" y2="7"/><line x1="13" y1="12" x2="21" y2="12"/><line x1="13" y1="17" x2="21" y2="17"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 4: Insert (Emoji/Symbols, Checkbox/To-do, Link, Date/Time) -->
+    <div class="px-3.5 py-1.5 border-b border-gray-200 flex items-center justify-between relative">
+      <span class="text-[13px] text-gray-800">Insert</span>
+      <div class="flex items-center gap-0.5 border border-gray-200 rounded-md px-1 py-0.5 bg-white">
+        <button type="button" onclick="toggleEmojiPopover()" class="ctx-btn-icon" title="Insert Emoji / Symbol">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+            <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/>
+            <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/>
+          </svg>
+        </button>
+        <button type="button" onclick="insertTodoCheckbox()" class="ctx-btn-icon" title="Insert Checklist Item">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="18" height="18" rx="3"/>
+            <polyline points="8 12 11 15 16 9"/>
+          </svg>
+        </button>
+        <button type="button" onclick="openInsertLinkModal()" class="ctx-btn-icon" title="Insert Hyperlink">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+        </button>
+        <button type="button" onclick="insertDateTime()" class="ctx-btn-icon" title="Insert Date & Time">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="4" width="18" height="17" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <circle cx="16.5" cy="16.5" r="3.5" fill="white"/>
+            <polyline points="16.5 15 16.5 16.5 17.5 17.5"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Quick Emoji Picker Popover -->
+      <div id="emojiPopover" class="hidden absolute right-3 top-10 z-50 bg-white border border-gray-200 rounded-lg shadow-xl p-2 grid grid-cols-6 gap-1 w-52">
+        <button type="button" onclick="insertTextAtCursor('✅')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">✅</button>
+        <button type="button" onclick="insertTextAtCursor('📌')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">📌</button>
+        <button type="button" onclick="insertTextAtCursor('⏰')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">⏰</button>
+        <button type="button" onclick="insertTextAtCursor('⭐')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">⭐</button>
+        <button type="button" onclick="insertTextAtCursor('🔥')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">🔥</button>
+        <button type="button" onclick="insertTextAtCursor('💡')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">💡</button>
+        <button type="button" onclick="insertTextAtCursor('❤️')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">❤️</button>
+        <button type="button" onclick="insertTextAtCursor('👍')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">👍</button>
+        <button type="button" onclick="insertTextAtCursor('📅')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">📅</button>
+        <button type="button" onclick="insertTextAtCursor('⚡')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">⚡</button>
+        <button type="button" onclick="insertTextAtCursor('🎯')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">🎯</button>
+        <button type="button" onclick="insertTextAtCursor('📝')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">📝</button>
+      </div>
+    </div>
+
+    <!-- Undo -->
+    <div class="py-1 border-b border-gray-200">
+      <div onclick="execFormat('undo')" class="ctx-row-item">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+          </svg>
+          <span>Undo</span>
+        </div>
+        <span class="text-xs text-gray-500">Ctrl+Z</span>
+      </div>
+    </div>
+
+    <!-- Cut, Copy, Paste, Paste without formatting, Delete -->
+    <div class="py-1 border-b border-gray-200">
+      <div onclick="handleCut()" class="ctx-row-item">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+            <line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/>
+          </svg>
+          <span>Cut</span>
+        </div>
+        <span class="text-xs text-gray-500">Ctrl+X</span>
+      </div>
+
+      <div onclick="handleCopy()" class="ctx-row-item">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          <span>Copy</span>
+        </div>
+        <span class="text-xs text-gray-500">Ctrl+C</span>
+      </div>
+
+      <div onclick="handlePaste(false)" class="ctx-row-item">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+            <rect x="8" y="2" width="8" height="4" rx="1"/>
+          </svg>
+          <span>Paste</span>
+        </div>
+        <span class="text-xs text-gray-500">Ctrl+V</span>
+      </div>
+
+      <div onclick="handlePaste(true)" class="ctx-row-item">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+            <rect x="8" y="2" width="8" height="4" rx="1"/>
+            <text x="9.5" y="16.5" font-size="7" font-weight="bold" fill="currentColor" stroke="none">A</text>
+          </svg>
+          <span>Paste without formatting</span>
+        </div>
+        <span class="text-xs text-gray-500">Shift+Ctrl+V</span>
+      </div>
+
+      <div onclick="execFormat('delete')" class="ctx-row-item">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span>Delete</span>
+        </div>
+        <span class="text-xs text-gray-500">Del</span>
+      </div>
+    </div>
+
+    <!-- Select All, Find & Replace, Search at Google -->
+    <div class="py-1 border-b border-gray-200">
+      <div onclick="handleSelectAll()" class="ctx-row-item">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+            <rect x="8" y="8" width="8" height="8" rx="1" stroke-dasharray="none"/>
+          </svg>
+          <span>Select All</span>
+        </div>
+        <span class="text-xs text-gray-500">Ctrl+A</span>
+      </div>
+
+      <div onclick="openFindReplaceModal()" class="ctx-row-item">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span>Find &amp; Replace</span>
+        </div>
+        <svg class="w-3.5 h-3.5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+
+      <div onclick="searchSelectedAtGoogle()" class="ctx-row-item">
+        <div class="flex items-center gap-3 min-w-0 pr-2">
+          <svg class="w-4 h-4 text-gray-700 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.2" y2="15.2"/>
+          </svg>
+          <span id="ctxGoogleSearchLabel" class="truncate">Search at Google</span>
+        </div>
+        <span class="text-xs text-gray-500 flex-shrink-0">Ctrl+G</span>
+      </div>
+    </div>
+
+    <!-- Clear Formatting -->
+    <div class="pt-1">
+      <div onclick="clearNoteFormatting()" class="ctx-row-item">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/>
+            <path d="M22 21H7"/><path d="m5 11 9 9"/>
+          </svg>
+          <span>Clear Formatting</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       NOTE OPTIONS POPOVER ('...' Menu: Theme Color, Set Reminder/Alarm, Duplicate, Delete)
+       ===================================================================== -->
+  <div id="noteOptionsMenu" class="hidden fixed z-50 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 p-2 text-sm text-gray-800" onmousedown="event.stopPropagation()">
+    <div class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Note Color</div>
+    <div id="colorSwatchesRow" class="grid grid-cols-6 gap-1.5 px-2 py-1.5 mb-1.5 border-b border-gray-100"></div>
+
+    <button type="button" onclick="openAlarmModalForActiveNote()" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-gray-100 transition text-left cursor-pointer">
+      <span class="flex items-center gap-2.5 font-medium text-gray-800">
+        <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/>
+        </svg>
+        Set Reminder / Alarm
+      </span>
+      <span class="text-[11px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 font-semibold">Alarm</span>
+    </button>
+
+    <button type="button" onclick="openFindReplaceModal()" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-gray-100 transition text-left cursor-pointer">
+      <svg class="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <span>Find &amp; Replace</span>
+    </button>
+
+    <button type="button" onclick="duplicateActiveNote()" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-gray-100 transition text-left cursor-pointer">
+      <svg class="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+      <span>Duplicate Note</span>
+    </button>
+
+    <div class="my-1 border-t border-gray-100"></div>
+
+    <button type="button" onclick="deleteActiveNote()" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-red-50 text-red-600 transition text-left cursor-pointer">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      </svg>
+      <span>Delete Note</span>
+    </button>
+  </div>
+
+  <!-- =====================================================================
+       REMINDER / ALARM SCHEDULER MODAL
+       ===================================================================== -->
+  <div id="alarmModal" class="hidden fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden">
+      <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 text-slate-900 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-[#C4F07D] border border-[#b3e366] text-slate-900 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-sm text-slate-900">Set Desktop Reminder &amp; Alarm</h3>
+            <p id="alarmModalNoteTitle" class="text-xs text-slate-500 truncate max-w-[230px]">New Note</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('alarmModal')" class="p-1.5 rounded-lg hover:bg-slate-200/70 text-slate-500 cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4 text-sm">
+        <!-- Quick presets -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Quick Timer Presets</label>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" onclick="setQuickAlarmMinutes(1)" class="py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+1 Min</button>
+            <button type="button" onclick="setQuickAlarmMinutes(5)" class="py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+5 Mins</button>
+            <button type="button" onclick="setQuickAlarmMinutes(15)" class="py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+15 Mins</button>
+            <button type="button" onclick="setQuickAlarmMinutes(60)" class="py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+1 Hour</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Date &amp; Time</label>
+            <input type="datetime-local" id="alarmDateTimeInput" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-xs" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Repeat Schedule</label>
+            <select id="alarmRepeatInput" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs bg-white">
+              <option value="none">Once (No Repeat)</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Alarm Label / Reminder Note</label>
+          <input type="text" id="alarmLabelInput" placeholder="e.g., Follow up on meeting notes..." class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs" />
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <button type="button" onclick="playAlarmSound(true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium cursor-pointer">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+            Test Alarm Sound
+          </button>
+
+          <div class="flex items-center gap-2">
+            <button type="button" id="removeAlarmBtn" onclick="clearNoteAlarm()" class="hidden px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 cursor-pointer">Remove</button>
+            <button type="button" onclick="saveNoteAlarm()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm cursor-pointer">Save Reminder</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       RINGING ALARM POPUP OVERLAY
+       ===================================================================== -->
+  <div id="ringingModal" class="hidden fixed inset-0 z-[100] bg-slate-900/45 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border-2 border-red-500 w-full max-w-sm p-6 text-center space-y-4 alarm-ringing-card">
+      <div class="w-14 h-14 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center animate-bounce">
+        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/>
+        </svg>
+      </div>
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-red-600">Sticky Note Reminder</span>
+        <h3 id="ringingNoteTitle" class="text-lg font-bold text-slate-900 mt-0.5">New Note</h3>
+        <p id="ringingAlarmLabel" class="text-xs text-slate-600 mt-1">Scheduled reminder triggered!</p>
+      </div>
+      <div class="flex items-center justify-center gap-2 pt-2">
+        <button type="button" onclick="snoozeRingingAlarm(5)" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold cursor-pointer">Snooze 5m</button>
+        <button type="button" onclick="dismissRingingAlarm()" class="flex-1 py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-md cursor-pointer">Dismiss Alarm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       FIND & REPLACE MODAL
+       ===================================================================== -->
+  <div id="findReplaceModal" class="hidden fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm p-5 space-y-3.5 text-xs">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold text-sm text-slate-900">Find &amp; Replace in Note</h3>
+        <button type="button" onclick="closeModal('findReplaceModal')" class="text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
+      </div>
+      <div>
+        <label class="block text-slate-600 mb-1">Find text</label>
+        <input type="text" id="findInput" placeholder="Search word or phrase..." class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
+      </div>
+      <div>
+        <label class="block text-slate-600 mb-1">Replace with</label>
+        <input type="text" id="replaceInput" placeholder="Replacement text..." class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
+      </div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="executeFindNext()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Find Next</button>
+        <button type="button" onclick="executeReplaceAll()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer">Replace All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       INSERT LINK MODAL
+       ===================================================================== -->
+  <div id="insertLinkModal" class="hidden fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm p-5 space-y-3.5 text-xs">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold text-sm text-slate-900">Insert Hyperlink</h3>
+        <button type="button" onclick="closeModal('insertLinkModal')" class="text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
+      </div>
+      <div>
+        <label class="block text-slate-600 mb-1">Display Text</label>
+        <input type="text" id="linkTextInput" placeholder="Link label" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
+      </div>
+      <div>
+        <label class="block text-slate-600 mb-1">URL Address</label>
+        <input type="url" id="linkUrlInput" placeholder="https://example.com" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
+      </div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="closeModal('insertLinkModal')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer">Cancel</button>
+        <button type="button" onclick="confirmInsertLink()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer">Insert Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       ALL NOTES & REMINDERS DRAWER (LIGHT THEME)
+       ===================================================================== -->
+  <div id="notesDrawer" class="hidden fixed top-16 right-3 bottom-3 z-40 w-80 bg-white/95 backdrop-blur-md text-slate-800 rounded-2xl border border-slate-200 shadow-xl flex flex-col overflow-hidden">
+    <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+      <h3 class="font-semibold text-sm text-slate-900">All Notes &amp; Scheduled Alarms</h3>
+      <button type="button" onclick="toggleNotesDrawer()" class="text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
+    </div>
+    <div class="p-3 border-b border-slate-100">
+      <input type="text" id="drawerSearchInput" oninput="renderDrawerList()" placeholder="Search notes..." class="w-full px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-emerald-500 focus:bg-white" />
+    </div>
+    <div id="drawerNotesList" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2.5"></div>
+  </div>
+
+  <!-- =====================================================================
+       SUPABASE CLOUD BACKUP & SYNC CONFIGURATION MODAL
+       ===================================================================== -->
+  <div id="supabaseModal" class="hidden fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden">
+      <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-sm text-slate-900">Supabase Cloud Backup &amp; Sync</h3>
+            <p class="text-xs text-slate-500">Auto-backup notes, colors, positions &amp; alarms to PostgreSQL</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('supabaseModal')" class="p-1.5 rounded-lg hover:bg-slate-200/70 text-slate-500 cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-5 space-y-3.5 text-xs text-slate-700 max-h-[82vh] overflow-y-auto custom-scroll">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Supabase Project URL</label>
+          <input type="url" id="sbUrlInput" placeholder="https://your-project-id.supabase.co" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono" />
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Supabase Anon Public Key</label>
+          <input type="password" id="sbKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Workspace / User Sync ID</label>
+            <input type="text" id="sbWorkspaceInput" placeholder="my-desktop-notes" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs" />
+          </div>
+          <div class="flex items-end pb-1">
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="sbAutoSyncCheckbox" checked class="w-4 h-4 accent-emerald-600 rounded" />
+              <span class="font-medium text-slate-700">Auto-backup on every edit</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- One-Click Copy SQL Setup Box -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold text-[11px] uppercase tracking-wider text-slate-500">1-Step Supabase SQL Table Setup</span>
+            <button type="button" onclick="copySupabaseSql()" class="px-2 py-1 rounded bg-white hover:bg-slate-100 border border-slate-300 text-[11px] font-medium text-slate-700 cursor-pointer">Copy SQL</button>
+          </div>
+          <pre id="supabaseSqlSnippet" class="text-[11px] font-mono text-slate-600 overflow-x-auto bg-white p-2 rounded border border-slate-200 select-all">CREATE TABLE IF NOT EXISTS public.sticky_notes (
+  workspace_id TEXT PRIMARY KEY,
+  notes_data JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.sticky_notes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public sync" ON public.sticky_notes;
+CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WITH CHECK (true);</pre>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="pushNotesToSupabase(true)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Backup Now ↑</button>
+            <button type="button" onclick="pullNotesFromSupabase()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Restore ↓</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="disconnectSupabase()" class="px-3 py-1.5 rounded-lg text-red-600 hover:bg-red-50 font-medium cursor-pointer">Disconnect</button>
+            <button type="button" onclick="saveSupabaseConfig()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xs cursor-pointer">Connect &amp; Sync</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Banner -->
+  <div id="toastBanner" class="hidden fixed bottom-4 right-4 z-[110] bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2"></div>
+
+  <script>
+    /* =========================================================================
+       1. STATE, FAILSAFE SUPABASE CONFIG & UNIVERSAL DESKTOP APP BRIDGE
+       ========================================================================= */
+    const NOTE_THEMES = [
+      { id: 'lime',   name: 'Lime Green', header: '#C4F07D', body: '#CCF583', text: '#1b2410', border: '#b3e366' },
+      { id: 'yellow', name: 'Classic Yellow', header: '#FFF2AB', body: '#FFF7D1', text: '#292512', border: '#f0df89' },
+      { id: 'pink',   name: 'Soft Pink', header: '#FFCCE5', body: '#FFE4F1', text: '#2e1422', border: '#f5b3d4' },
+      { id: 'blue',   name: 'Sky Blue', header: '#CDE9FF', body: '#E2F1FF', text: '#112536', border: '#b0d8f7' },
+      { id: 'purple', name: 'Lavender', header: '#E4D4FF', body: '#F0E6FF', text: '#221536', border: '#ceb8f5' },
+      { id: 'dark',   name: 'Charcoal', header: '#2B2B2B', body: '#333333', text: '#F3F4F6', border: '#444444' }
+    ];
+
+    const STORAGE_KEY = 'desktop_sticky_notes_v1';
+    const SUPABASE_CFG_KEY = 'desktop_sticky_supabase_cfg_v1';
+    let notes = [];
+    let activeNoteId = null;
+    let highestZ = 10;
+    let savedSelectionRange = null;
+    let currentAlignmentIdx = 0;
+    const ALIGNMENTS = ['justifyLeft', 'justifyCenter', 'justifyRight'];
+    const LINE_SPACINGS = ['1.2', '1.45', '1.85'];
+    let currentLineSpacingIdx = 1;
+
+    // Alarm & Audio state
+    let ringingAlarmNoteId = null;
+    let alarmAudioInterval = null;
+    let deferredInstallPrompt = null;
+
+    // Failsafe Supabase configuration & debounce timer (uses zero-dependency native fetch)
+    let supabaseConnected = false;
+    let supabaseConfig = { url: '', key: '', workspaceId: 'default-desktop', autoSync: true };
+    let supabaseSyncDebounce = null;
+
+    // Universal Desktop Wrapper Bridge (Electron, Tauri, WebView2, PWA / Browser)
+    window.DesktopBridge = {
+      env: 'Web / PWA',
+      init() {
+        try {
+          if (window.__TAURI__) {
+            this.env = 'Tauri Desktop';
+          } else if (window.electronAPI || (typeof process !== 'undefined' && process.versions && process.versions.electron)) {
+            this.env = 'Electron Desktop';
+          } else if (window.chrome && window.chrome.webview) {
+            this.env = 'WebView2 Desktop';
+          }
+          const envBadge = document.getElementById('desktopEnvLabel');
+          if (envBadge) envBadge.textContent = `${this.env} • BG Active`;
+        } catch (e) {}
+      },
+      async notifyAndFocus(title, body, tag) {
+        // 1. Tauri Native Desktop Notification + Window Focus
+        try {
+          if (window.__TAURI__) {
+            if (window.__TAURI__.notification) {
+              window.__TAURI__.notification.sendNotification({ title, body });
+            }
+            if (window.__TAURI__.window && window.__TAURI__.window.appWindow) {
+              await window.__TAURI__.window.appWindow.unminimize();
+              await window.__TAURI__.window.appWindow.show();
+              await window.__TAURI__.window.appWindow.setFocus();
+            }
+          }
+        } catch (e) {}
+
+        // 2. Electron IPC Native Notification & Focus Bridge
+        try {
+          if (window.electronAPI && typeof window.electronAPI.triggerAlarm === 'function') {
+            window.electronAPI.triggerAlarm({ title, body, tag });
+          }
+        } catch (e) {}
+
+        // 3. Microsoft WebView2 Host Message Bridge (.NET / C++ Desktop Wrapper)
+        try {
+          if (window.chrome && window.chrome.webview) {
+            window.chrome.webview.postMessage(JSON.stringify({ type: 'STICKY_ALARM', title, body, tag }));
+          }
+        } catch (e) {}
+
+        // 4. Standard OS / Browser Notification API + Service Worker
+        try {
+          if ('Notification' in window && Notification.permission === 'granted') {
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+              const reg = await navigator.serviceWorker.ready;
+              await reg.showNotification(title, {
+                body,
+                tag,
+                requireInteraction: true,
+                silent: false
+              });
+            } else {
+              const n = new Notification(title, { body, tag, requireInteraction: true });
+              n.onclick = () => {
+                window.focus();
+                n.close();
+              };
+            }
+          }
+        } catch (e) {}
+
+        try { window.focus(); } catch (e) {}
+      }
+    };
+
+    /* =========================================================================
+       2. INITIALIZATION & PWA / BACKGROUND SERVICE WORKER SETUP
+       ========================================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      try { window.DesktopBridge.init(); } catch (e) {}
+      try { initColorSwatches(); } catch (e) {}
+      try { loadNotesFromStorage(); } catch (e) {}
+      try { renderAllNotes(); } catch (e) {}
+      try { initBackgroundWorker(); } catch (e) {}
+      try { initPwaManifestAndServiceWorker(); } catch (e) {}
+      try { updateNotificationButtonUI(); } catch (e) {}
+      try { initSupabaseFromStorage(); } catch (e) {}
+    });
+
+    function initPwaManifestAndServiceWorker() {
+      try {
+        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#C4F07D"/><path d="M36 28h40l20 20v52a8 8 0 0 1-8 8H36a8 8 0 0 1-8-8V36a8 8 0 0 1 8-8z" fill="#CCF583" stroke="#1f2937" stroke-width="6"/></svg>`;
+        const iconUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(iconSvg);
+
+        const manifest = {
+          name: 'Sticky Notes Desktop',
+          short_name: 'StickyNotes',
+          start_url: '.',
+          display: 'standalone',
+          background_color: '#F3F5F8',
+          theme_color: '#C4F07D',
+          icons: [{ src: iconUrl, sizes: '128x128', type: 'image/svg+xml' }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = URL.createObjectURL(manifestBlob);
+        document.head.appendChild(manifestLink);
+
+        if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+          const swCode = `
+            self.addEventListener('install', e => self.skipWaiting());
+            self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+            self.addEventListener('notificationclick', event => {
+              event.notification.close();
+              event.waitUntil(
+                self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+                  if (clients.length > 0) return clients[0].focus();
+                  return self.clients.openWindow('./');
+                })
+              );
+            });
+          `;
+          const swBlob = new Blob([swCode], { type: 'application/javascript' });
+          navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+        }
+      } catch (err) {}
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btn = document.getElementById('installPwaBtn');
+      if (btn) {
+        btn.classList.remove('hidden');
+        btn.classList.add('flex');
+      }
+    });
+
+    async function triggerPwaInstall() {
+      if (!deferredInstallPrompt) {
+        showToast('Use your browser menu → "Install App" or "Add to Desktop" for standalone window mode.');
+        return;
+      }
+      try {
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+      } catch (e) {}
+      deferredInstallPrompt = null;
+      const btn = document.getElementById('installPwaBtn');
+      if (btn) btn.classList.add('hidden');
+    }
+
+    /* =========================================================================
+       3. BACKGROUND WEB WORKER HEARTBEAT (Prevents background tab throttling)
+       ========================================================================= */
+    function initBackgroundWorker() {
+      const workerScript = `
+        setInterval(() => {
+          postMessage({ type: 'TICK', now: Date.now() });
+        }, 1000);
+      `;
+      try {
+        const blob = new Blob([workerScript], { type: 'application/javascript' });
+        const worker = new Worker(URL.createObjectURL(blob));
+        worker.onmessage = (e) => {
+          if (e.data && e.data.type === 'TICK') {
+            checkScheduledAlarms(e.data.now);
+          }
+        };
+      } catch (err) {
+        setInterval(() => checkScheduledAlarms(Date.now()), 1000);
+      }
+    }
+
+    /* =========================================================================
+       4. STORAGE & MULTI-NOTE MANAGEMENT
+       ========================================================================= */
+    function loadNotesFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          notes = JSON.parse(raw);
+        }
+      } catch (e) {
+        notes = [];
+      }
+
+      if (!Array.isArray(notes) || notes.length === 0) {
+        notes = [
+          {
+            id: 'note_' + Date.now(),
+            title: 'New Note',
+            content: '',
+            theme: 'lime',
+            x: Math.max(40, Math.min(window.innerWidth - 380, 460)),
+            y: 78,
+            width: 340,
+            height: 360,
+            minimized: false,
+            zIndex: 11,
+            alarm: null
+          }
+        ];
+        saveNotesToStorage(true);
+      }
+      activeNoteId = notes[0].id;
+    }
+
+    function saveNotesToStorage(skipCloudSync = false) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+      } catch (e) {}
+      updateTopCounters();
+      const drawer = document.getElementById('notesDrawer');
+      if (drawer && !drawer.classList.contains('hidden')) {
+        renderDrawerList();
+      }
+      if (!skipCloudSync && supabaseConnected && supabaseConfig.autoSync) {
+        scheduleSupabaseAutoBackup();
+      }
+    }
+
+    function updateTopCounters() {
+      const totalEl = document.getElementById('totalNotesCount');
+      const alarmEl = document.getElementById('activeAlarmCount');
+      if (totalEl) totalEl.textContent = notes.length;
+      if (alarmEl) alarmEl.textContent = notes.filter(n => n.alarm && n.alarm.enabled).length;
+    }
+
+    function getThemeObj(themeId) {
+      return NOTE_THEMES.find(t => t.id === themeId) || NOTE_THEMES[0];
+    }
+
+    function createNewNote(overrides = {}) {
+      highestZ++;
+      const offset = (notes.length % 6) * 28;
+      const newNote = {
+        id: 'note_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        title: overrides.title || 'New Note',
+        content: overrides.content || '',
+        theme: overrides.theme || 'lime',
+        x: Math.min(Math.max(24, window.innerWidth - 350), 120 + offset),
+        y: Math.min(Math.max(70, window.innerHeight - 360), 84 + offset),
+        width: 330,
+        height: 350,
+        minimized: false,
+        zIndex: highestZ,
+        alarm: null
+      };
+      notes.push(newNote);
+      activeNoteId = newNote.id;
+      saveNotesToStorage();
+      renderAllNotes();
+      focusNoteEditor(newNote.id);
+    }
+
+    /* =========================================================================
+       4B. FAILSAFE SUPABASE BACKEND BACKUP & SYNC (Direct PostgREST Fetch)
+       ========================================================================= */
+    function normalizeSupabaseUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== 'string') return '';
+      let clean = rawUrl.trim().replace(/\/+$/, '');
+      if (!clean) return '';
+      if (!/^https?:\/\//i.test(clean)) {
+        clean = 'https://' + clean;
+      }
+      try {
+        const parsed = new URL(clean);
+        return parsed.origin;
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function initSupabaseFromStorage() {
+      try {
+        const raw = localStorage.getItem(SUPABASE_CFG_KEY);
+        if (raw) {
+          supabaseConfig = { ...supabaseConfig, ...JSON.parse(raw) };
+        }
+      } catch (e) {}
+
+      const validUrl = normalizeSupabaseUrl(supabaseConfig.url);
+      if (validUrl && supabaseConfig.key) {
+        supabaseConfig.url = validUrl;
+        supabaseConnected = true;
+        setSyncUiState('connected', 'Synced');
+      } else {
+        supabaseConnected = false;
+        setSyncUiState('offline', 'Cloud Backup');
+      }
+    }
+
+    function setSyncUiState(state, labelText) {
+      const dot = document.getElementById('syncStatusDot');
+      const label = document.getElementById('syncBtnLabel');
+      if (!dot || !label) return;
+      label.textContent = labelText;
+      dot.className = 'w-2 h-2 rounded-full ' + (
+        state === 'connected' ? 'bg-emerald-500' :
+        state === 'syncing'   ? 'bg-amber-400 animate-ping' :
+        state === 'error'     ? 'bg-red-500' : 'bg-slate-400'
+      );
+    }
+
+    function openSupabaseModal() {
+      document.getElementById('sbUrlInput').value = supabaseConfig.url || '';
+      document.getElementById('sbKeyInput').value = supabaseConfig.key || '';
+      document.getElementById('sbWorkspaceInput').value = supabaseConfig.workspaceId || 'default-desktop';
+      document.getElementById('sbAutoSyncCheckbox').checked = supabaseConfig.autoSync !== false;
+      document.getElementById('supabaseModal').classList.remove('hidden');
+    }
+
+    async function saveSupabaseConfig() {
+      const rawUrl = document.getElementById('sbUrlInput').value;
+      const validUrl = normalizeSupabaseUrl(rawUrl);
+      const key = (document.getElementById('sbKeyInput').value || '').trim();
+      const workspaceId = (document.getElementById('sbWorkspaceInput').value || '').trim() || 'default-desktop';
+      const autoSync = document.getElementById('sbAutoSyncCheckbox').checked;
+
+      if (!validUrl || !key) {
+        showToast('Please enter a valid Supabase Project URL (https://xxx.supabase.co) and Anon Key.');
+        return;
+      }
+
+      supabaseConfig = { url: validUrl, key, workspaceId, autoSync };
+      supabaseConnected = true;
+      try {
+        localStorage.setItem(SUPABASE_CFG_KEY, JSON.stringify(supabaseConfig));
+      } catch (e) {}
+
+      setSyncUiState('connected', 'Connected');
+      closeModal('supabaseModal');
+      await pushNotesToSupabase(true);
+    }
+
+    function disconnectSupabase() {
+      supabaseConnected = false;
+      supabaseConfig = { url: '', key: '', workspaceId: 'default-desktop', autoSync: true };
+      try {
+        localStorage.removeItem(SUPABASE_CFG_KEY);
+      } catch (e) {}
+      setSyncUiState('offline', 'Cloud Backup');
+      closeModal('supabaseModal');
+      showToast('Disconnected from Supabase.');
+    }
+
+    function scheduleSupabaseAutoBackup() {
+      clearTimeout(supabaseSyncDebounce);
+      setSyncUiState('syncing', 'Saving...');
+      supabaseSyncDebounce = setTimeout(() => {
+        pushNotesToSupabase(false);
+      }, 1500);
+    }
+
+    async function pushNotesToSupabase(manualNotify = false) {
+      const validUrl = normalizeSupabaseUrl(supabaseConfig.url);
+      if (!supabaseConnected || !validUrl || !supabaseConfig.key) {
+        if (manualNotify) showToast('Configure a valid Supabase URL & Key first.');
+        return;
+      }
+      setSyncUiState('syncing', 'Backing up...');
+      try {
+        const endpoint = `${validUrl}/rest/v1/sticky_notes?on_conflict=workspace_id`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseConfig.key,
+            'Authorization': `Bearer ${supabaseConfig.key}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates,return=minimal'
+          },
+          body: JSON.stringify({
+            workspace_id: supabaseConfig.workspaceId || 'default-desktop',
+            notes_data: notes,
+            updated_at: new Date().toISOString()
+          })
+        });
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => '');
+          throw new Error(errText || `HTTP ${response.status}`);
+        }
+
+        setSyncUiState('connected', 'Backed Up');
+        if (manualNotify) showToast('All notes backed up to Supabase!');
+      } catch (err) {
+        console.warn('Supabase backup warning:', err);
+        setSyncUiState('error', 'Sync Offline');
+        if (manualNotify) showToast(`Cloud backup issue: check URL, Key, or SQL table.`);
+      }
+    }
+
+    async function pullNotesFromSupabase() {
+      const validUrl = normalizeSupabaseUrl(supabaseConfig.url);
+      if (!supabaseConnected || !validUrl || !supabaseConfig.key) {
+        showToast('Configure a valid Supabase URL & Key first.');
+        return;
+      }
+      setSyncUiState('syncing', 'Restoring...');
+      try {
+        const ws = encodeURIComponent(supabaseConfig.workspaceId || 'default-desktop');
+        const endpoint = `${validUrl}/rest/v1/sticky_notes?workspace_id=eq.${ws}&select=notes_data`;
+        const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'apikey': supabaseConfig.key,
+            'Authorization': `Bearer ${supabaseConfig.key}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => '');
+          throw new Error(errText || `HTTP ${response.status}`);
+        }
+
+        const rows = await response.json();
+        if (Array.isArray(rows) && rows.length > 0 && Array.isArray(rows[0].notes_data) && rows[0].notes_data.length > 0) {
+          notes = rows[0].notes_data;
+          activeNoteId = notes[0].id;
+          saveNotesToStorage(true);
+          renderAllNotes();
+          setSyncUiState('connected', 'Restored');
+          closeModal('supabaseModal');
+          showToast(`Restored ${notes.length} note(s) from Supabase!`);
+        } else {
+          setSyncUiState('connected', 'No Backup');
+          showToast('No saved notes found for this Workspace ID.');
+        }
+      } catch (err) {
+        console.warn('Supabase restore warning:', err);
+        setSyncUiState('error', 'Restore Failed');
+        showToast('Restore failed: verify Supabase URL, Key, and SQL table.');
+      }
+    }
+
+    function copySupabaseSql() {
+      const sqlText = document.getElementById('supabaseSqlSnippet').textContent;
+      const temp = document.createElement('textarea');
+      temp.value = sqlText;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      showToast('SQL table setup copied to clipboard!');
+    }
+
+    function focusNote(noteId) {
+      activeNoteId = noteId;
+      highestZ++;
+      const note = notes.find(n => n.id === noteId);
+      if (note) {
+        note.zIndex = highestZ;
+        note.minimized = false;
+      }
+      document.querySelectorAll('.sticky-note').forEach(el => {
+        if (el.dataset.id === noteId) {
+          el.style.zIndex = highestZ;
+          el.classList.add('active-note');
+        } else {
+          el.classList.remove('active-note');
+        }
+      });
+    }
+
+    function focusNoteEditor(noteId) {
+      focusNote(noteId);
+      const editor = document.querySelector(`.sticky-note[data-id="${noteId}"] .note-editor`);
+      if (editor) editor.focus();
+    }
+
+    /* =========================================================================
+       5. RENDER STICKY NOTES ON DESKTOP CANVAS
+       ========================================================================= */
+    function renderAllNotes() {
+      const canvas = document.getElementById('desktopCanvas');
+      if (!canvas) return;
+      canvas.innerHTML = '';
+
+      notes.forEach(note => {
+        if (note.minimized) return;
+        const theme = getThemeObj(note.theme);
+        if (note.zIndex > highestZ) highestZ = note.zIndex;
+
+        const card = document.createElement('div');
+        card.className = `sticky-note rounded-none sm:rounded-xs ${note.id === activeNoteId ? 'active-note' : ''}`;
+        card.dataset.id = note.id;
+        card.style.left = `${note.x}px`;
+        card.style.top = `${note.y}px`;
+        card.style.width = `${note.width}px`;
+        card.style.height = `${note.height}px`;
+        card.style.zIndex = note.zIndex;
+        card.style.backgroundColor = theme.body;
+        card.style.color = theme.text;
+        card.style.border = `1px solid ${theme.border}`;
+
+        card.addEventListener('mousedown', () => focusNote(note.id));
+
+        // Header Bar matching screenshot ('New Note' centered, '...' and 'X' on right)
+        const header = document.createElement('div');
+        header.className = 'h-9 px-2.5 flex items-center justify-between cursor-move select-none flex-shrink-0';
+        header.style.backgroundColor = theme.header;
+
+        // Left Spacer / Alarm indicator badge
+        const leftBox = document.createElement('div');
+        leftBox.className = 'w-14 flex items-center';
+        if (note.alarm && note.alarm.enabled) {
+          const alarmDate = new Date(note.alarm.time);
+          const timeStr = alarmDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          leftBox.innerHTML = `
+            <button type="button" onclick="event.stopPropagation(); activeNoteId='${note.id}'; openAlarmModalForActiveNote();" title="Alarm set for ${alarmDate.toLocaleString()}" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/10 hover:bg-black/20 text-[10px] font-semibold cursor-pointer">
+              ⏰ ${timeStr}
+            </button>
+          `;
+        }
+
+        // Editable Note Title ('New Note')
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.value = note.title;
+        titleInput.className = 'bg-transparent text-center font-normal text-[14px] outline-none w-full max-w-[160px] truncate focus:bg-black/5 rounded px-1';
+        titleInput.style.color = theme.text;
+        titleInput.addEventListener('mousedown', (e) => e.stopPropagation());
+        titleInput.addEventListener('input', (e) => {
+          note.title = e.target.value || 'New Note';
+          saveNotesToStorage();
+        });
+
+        // Right Window Controls ('...' and 'X')
+        const controls = document.createElement('div');
+        controls.className = 'w-14 flex items-center justify-end gap-0.5';
+        controls.innerHTML = `
+          <button type="button" title="Note options, Colors & Alarm" class="w-7 h-7 flex items-center justify-center rounded hover:bg-black/10 transition cursor-pointer" onclick="openNoteOptionsMenu(event, '${note.id}')">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>
+            </svg>
+          </button>
+          <button type="button" title="Hide / Minimize Note" class="w-7 h-7 flex items-center justify-center rounded hover:bg-black/10 transition cursor-pointer" onclick="minimizeNote(event, '${note.id}')">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        `;
+
+        header.appendChild(leftBox);
+        header.appendChild(titleInput);
+        header.appendChild(controls);
+
+        // Dragging support (mouse + touch)
+        enableHeaderDrag(header, card, note);
+
+        // Contenteditable Rich Text Area
+        const editor = document.createElement('div');
+        editor.className = 'note-editor px-4 py-3 text-[15px]';
+        editor.contentEditable = 'true';
+        editor.spellcheck = true;
+        editor.dataset.placeholder = 'Take a note... (Right-click for formatting)';
+        editor.innerHTML = note.content;
+
+        editor.addEventListener('input', () => {
+          note.content = editor.innerHTML;
+          saveNotesToStorage();
+        });
+
+        // Toggle interactive checkboxes inside editor
+        editor.addEventListener('click', (e) => {
+          if (e.target && e.target.classList.contains('todo-checkbox')) {
+            const span = e.target.nextElementSibling;
+            if (e.target.checked) {
+              e.target.setAttribute('checked', 'checked');
+              if (span) span.classList.add('checked');
+            } else {
+              e.target.removeAttribute('checked');
+              if (span) span.classList.remove('checked');
+            }
+            note.content = editor.innerHTML;
+            saveNotesToStorage();
+          }
+        });
+
+        // Right-click opens our exact custom Desktop Rich Context Menu
+        editor.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          focusNote(note.id);
+          saveSelection();
+          openRichContextMenu(e.clientX, e.clientY);
+        });
+
+        // Track resize changes
+        if (typeof ResizeObserver !== 'undefined') {
+          const resizeObserver = new ResizeObserver(() => {
+            if (!note.minimized && card.offsetWidth > 0 && card.offsetHeight > 0) {
+              note.width = card.offsetWidth;
+              note.height = card.offsetHeight;
+              saveNotesToStorage();
+            }
+          });
+          resizeObserver.observe(card);
+        }
+
+        card.appendChild(header);
+        card.appendChild(editor);
+        canvas.appendChild(card);
+      });
+
+      updateTopCounters();
+    }
+
+    function enableHeaderDrag(headerEl, cardEl, noteObj) {
+      let isDragging = false;
+      let startX = 0, startY = 0, origX = 0, origY = 0;
+
+      const onStart = (clientX, clientY) => {
+        isDragging = true;
+        startX = clientX;
+        startY = clientY;
+        origX = noteObj.x;
+        origY = noteObj.y;
+        focusNote(noteObj.id);
+      };
+
+      const onMove = (clientX, clientY) => {
+        if (!isDragging) return;
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        noteObj.x = Math.max(0, Math.min(window.innerWidth - 100, origX + dx));
+        noteObj.y = Math.max(56, Math.min(window.innerHeight - 60, origY + dy));
+        cardEl.style.left = `${noteObj.x}px`;
+        cardEl.style.top = `${noteObj.y}px`;
+      };
+
+      const onEnd = () => {
+        if (isDragging) {
+          isDragging = false;
+          saveNotesToStorage();
+        }
+      };
+
+      headerEl.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.closest('button')) return;
+        onStart(e.clientX, e.clientY);
+      });
+      window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+      window.addEventListener('mouseup', onEnd);
+
+      headerEl.addEventListener('touchstart', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.closest('button')) return;
+        const t = e.touches[0];
+        onStart(t.clientX, t.clientY);
+      }, { passive: true });
+      window.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const t = e.touches[0];
+        onMove(t.clientX, t.clientY);
+      }, { passive: true });
+      window.addEventListener('touchend', onEnd);
+    }
+
+    function minimizeNote(e, noteId) {
+      e.stopPropagation();
+      const note = notes.find(n => n.id === noteId);
+      if (note) {
+        note.minimized = true;
+        saveNotesToStorage();
+        renderAllNotes();
+        showToast(`"${note.title}" hidden to Notes drawer.`);
+      }
+    }
+
+    /* =========================================================================
+       6. CONTEXT MENU & RICH FORMATTING COMMANDS
+       ========================================================================= */
+    function saveSelection() {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        savedSelectionRange = sel.getRangeAt(0).cloneRange();
+      }
+    }
+
+    function restoreSelection() {
+      if (savedSelectionRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedSelectionRange);
+      }
+    }
+
+    function openRichContextMenu(x, y) {
+      const menu = document.getElementById('richContextMenu');
+      document.getElementById('emojiPopover').classList.add('hidden');
+      document.getElementById('noteOptionsMenu').classList.add('hidden');
+
+      const selectedText = window.getSelection().toString().trim();
+      const googleLabel = document.getElementById('ctxGoogleSearchLabel');
+      if (selectedText) {
+        const shortText = selectedText.length > 16 ? selectedText.slice(0, 16) + '…' : selectedText;
+        googleLabel.textContent = `Search at Google for '${shortText}'`;
+      } else {
+        googleLabel.textContent = `Search at Google`;
+      }
+
+      try {
+        document.getElementById('btnBold').classList.toggle('is-active', document.queryCommandState('bold'));
+        document.getElementById('btnItalic').classList.toggle('is-active', document.queryCommandState('italic'));
+        document.getElementById('btnUnderline').classList.toggle('is-active', document.queryCommandState('underline'));
+        document.getElementById('btnStrike').classList.toggle('is-active', document.queryCommandState('strikeThrough'));
+      } catch (e) {}
+
+      menu.classList.remove('hidden');
+
+      const menuRect = menu.getBoundingClientRect();
+      const posX = Math.min(x, window.innerWidth - menuRect.width - 10);
+      const posY = Math.min(y, window.innerHeight - menuRect.height - 10);
+      menu.style.left = `${Math.max(8, posX)}px`;
+      menu.style.top = `${Math.max(8, posY)}px`;
+    }
+
+    function hideAllMenus() {
+      document.getElementById('richContextMenu').classList.add('hidden');
+      document.getElementById('noteOptionsMenu').classList.add('hidden');
+      document.getElementById('emojiPopover').classList.add('hidden');
+    }
+
+    window.addEventListener('mousedown', (e) => {
+      if (!e.target.closest('#richContextMenu') && !e.target.closest('#noteOptionsMenu')) {
+        hideAllMenus();
+      }
+    });
+
+    function getActiveEditor() {
+      return document.querySelector(`.sticky-note[data-id="${activeNoteId}"] .note-editor`);
+    }
+
+    function syncActiveNoteContent() {
+      const editor = getActiveEditor();
+      const note = notes.find(n => n.id === activeNoteId);
+      if (editor && note) {
+        note.content = editor.innerHTML;
+        saveNotesToStorage();
+      }
+    }
+
+    function execFormat(cmd, value = null) {
+      restoreSelection();
+      document.execCommand(cmd, false, value);
+      saveSelection();
+      syncActiveNoteContent();
+      try {
+        document.getElementById('btnBold').classList.toggle('is-active', document.queryCommandState('bold'));
+        document.getElementById('btnItalic').classList.toggle('is-active', document.queryCommandState('italic'));
+        document.getElementById('btnUnderline').classList.toggle('is-active', document.queryCommandState('underline'));
+        document.getElementById('btnStrike').classList.toggle('is-active', document.queryCommandState('strikeThrough'));
+      } catch (e) {}
+    }
+
+    function applyFontFamily(fontName) {
+      execFormat('fontName', fontName);
+    }
+
+    function stepFontSize(delta) {
+      const display = document.getElementById('ctxFontSizeDisplay');
+      let current = parseInt(display.textContent, 10) || 11;
+      current = Math.max(8, Math.min(36, current + delta));
+      display.textContent = current;
+
+      restoreSelection();
+      const sel = window.getSelection();
+      if (sel && !sel.isCollapsed) {
+        document.execCommand('fontSize', false, '4');
+        const editor = getActiveEditor();
+        if (editor) {
+          editor.querySelectorAll('font[size="4"]').forEach(el => {
+            el.removeAttribute('size');
+            el.style.fontSize = `${current + 3}px`;
+          });
+        }
+      } else {
+        const editor = getActiveEditor();
+        if (editor) editor.style.fontSize = `${current + 3}px`;
+      }
+      saveSelection();
+      syncActiveNoteContent();
+    }
+
+    function applyTextColor(hex) {
+      document.getElementById('ctxTextColorBar').style.backgroundColor = hex;
+      execFormat('foreColor', hex);
+    }
+
+    function applyHighlightColor(hex) {
+      document.getElementById('ctxHighlightBar').style.backgroundColor = hex;
+      execFormat('hiliteColor', hex);
+    }
+
+    function toggleTextCase() {
+      restoreSelection();
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) {
+        showToast('Select text first to change case.');
+        return;
+      }
+      const txt = sel.toString();
+      let transformed = txt;
+      if (txt === txt.toUpperCase()) {
+        transformed = txt.toLowerCase();
+      } else if (txt === txt.toLowerCase()) {
+        transformed = txt.replace(/\b\w/g, c => c.toUpperCase());
+      } else {
+        transformed = txt.toUpperCase();
+      }
+      document.execCommand('insertText', false, transformed);
+      saveSelection();
+      syncActiveNoteContent();
+    }
+
+    function cycleAlignment() {
+      const cmd = ALIGNMENTS[currentAlignmentIdx % ALIGNMENTS.length];
+      currentAlignmentIdx++;
+      execFormat(cmd);
+    }
+
+    function cycleLineSpacing() {
+      const editor = getActiveEditor();
+      if (!editor) return;
+      const spacing = LINE_SPACINGS[currentLineSpacingIdx % LINE_SPACINGS.length];
+      currentLineSpacingIdx++;
+      editor.style.lineHeight = spacing;
+      syncActiveNoteContent();
+      showToast(`Line spacing set to ${spacing}`);
+    }
+
+    function toggleEmojiPopover() {
+      document.getElementById('emojiPopover').classList.toggle('hidden');
+    }
+
+    function insertTextAtCursor(text) {
+      restoreSelection();
+      document.execCommand('insertText', false, text);
+      saveSelection();
+      syncActiveNoteContent();
+      document.getElementById('emojiPopover').classList.add('hidden');
+    }
+
+    function insertTodoCheckbox() {
+      restoreSelection();
+      const html = `<div class="todo-line"><input type="checkbox" class="todo-checkbox" /><span class="todo-text">To-do item</span></div><div><br></div>`;
+      document.execCommand('insertHTML', false, html);
+      syncActiveNoteContent();
+      hideAllMenus();
+    }
+
+    function insertDateTime() {
+      const now = new Date();
+      const formatted = now.toLocaleString([], {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+      insertTextAtCursor(formatted + ' ');
+      hideAllMenus();
+    }
+
+    function openInsertLinkModal() {
+      hideAllMenus();
+      const selText = savedSelectionRange ? savedSelectionRange.toString() : '';
+      document.getElementById('linkTextInput').value = selText;
+      document.getElementById('linkUrlInput').value = 'https://';
+      document.getElementById('insertLinkModal').classList.remove('hidden');
+    }
+
+    function confirmInsertLink() {
+      const url = document.getElementById('linkUrlInput').value.trim();
+      const label = document.getElementById('linkTextInput').value.trim() || url;
+      if (!url) return;
+      closeModal('insertLinkModal');
+      restoreSelection();
+      const aHtml = `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#0969da;text-decoration:underline;">${label}</a>`;
+      document.execCommand('insertHTML', false, aHtml);
+      syncActiveNoteContent();
+    }
+
+    function handleCut() {
+      restoreSelection();
+      document.execCommand('cut');
+      syncActiveNoteContent();
+      hideAllMenus();
+    }
+
+    function handleCopy() {
+      restoreSelection();
+      document.execCommand('copy');
+      hideAllMenus();
+      showToast('Copied to clipboard');
+    }
+
+    async function handlePaste(plainTextOnly) {
+      hideAllMenus();
+      restoreSelection();
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          document.execCommand('insertText', false, text);
+          syncActiveNoteContent();
+          return;
+        }
+      } catch (e) {}
+      document.execCommand('paste');
+      if (plainTextOnly) clearNoteFormatting();
+      syncActiveNoteContent();
+    }
+
+    function handleSelectAll() {
+      const editor = getActiveEditor();
+      if (editor) {
+        editor.focus();
+        document.execCommand('selectAll', false, null);
+        saveSelection();
+      }
+      hideAllMenus();
+    }
+
+    function searchSelectedAtGoogle() {
+      restoreSelection();
+      const query = window.getSelection().toString().trim();
+      hideAllMenus();
+      if (!query) {
+        showToast('Highlight text inside your note first to search Google.');
+        return;
+      }
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank', 'noopener');
+    }
+
+    function clearNoteFormatting() {
+      restoreSelection();
+      document.execCommand('removeFormat', false, null);
+      syncActiveNoteContent();
+      hideAllMenus();
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') {
+        const sel = window.getSelection().toString().trim();
+        if (sel) {
+          e.preventDefault();
+          window.open(`https://www.google.com/search?q=${encodeURIComponent(sel)}`, '_blank', 'noopener');
+        }
+      }
+    });
+
+    /* =========================================================================
+       7. FIND & REPLACE MODAL LOGIC
+       ========================================================================= */
+    function openFindReplaceModal() {
+      hideAllMenus();
+      document.getElementById('findReplaceModal').classList.remove('hidden');
+      document.getElementById('findInput').focus();
+    }
+
+    function executeFindNext() {
+      const term = document.getElementById('findInput').value;
+      if (!term) return;
+      if (!window.find(term)) {
+        showToast(`No more matches for "${term}"`);
+      }
+    }
+
+    function executeReplaceAll() {
+      const findStr = document.getElementById('findInput').value;
+      const replaceStr = document.getElementById('replaceInput').value;
+      const editor = getActiveEditor();
+      if (!findStr || !editor) return;
+
+      const escaped = findStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'gi');
+      editor.innerHTML = editor.innerHTML.replace(regex, replaceStr);
+      syncActiveNoteContent();
+      showToast(`Replaced "${findStr}" with "${replaceStr}"`);
+    }
+
+    /* =========================================================================
+       8. NOTE OPTIONS ('...' MENU: COLORS, DUPLICATE, DELETE)
+       ========================================================================= */
+    function initColorSwatches() {
+      const container = document.getElementById('colorSwatchesRow');
+      if (!container) return;
+      container.innerHTML = '';
+      NOTE_THEMES.forEach(t => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.title = t.name;
+        btn.className = 'w-7 h-7 rounded-full border border-black/20 hover:scale-110 transition cursor-pointer shadow-2xs';
+        btn.style.backgroundColor = t.header;
+        btn.onclick = () => changeActiveNoteTheme(t.id);
+        container.appendChild(btn);
+      });
+    }
+
+    function openNoteOptionsMenu(e, noteId) {
+      e.stopPropagation();
+      focusNote(noteId);
+      hideAllMenus();
+      const menu = document.getElementById('noteOptionsMenu');
+      menu.classList.remove('hidden');
+      const rect = e.currentTarget.getBoundingClientRect();
+      menu.style.left = `${Math.min(rect.left, window.innerWidth - 270)}px`;
+      menu.style.top = `${Math.min(rect.bottom + 6, window.innerHeight - 260)}px`;
+    }
+
+    function changeActiveNoteTheme(themeId) {
+      const note = notes.find(n => n.id === activeNoteId);
+      if (note) {
+        note.theme = themeId;
+        saveNotesToStorage();
+        renderAllNotes();
+      }
+      hideAllMenus();
+    }
+
+    function duplicateActiveNote() {
+      const note = notes.find(n => n.id === activeNoteId);
+      hideAllMenus();
+      if (!note) return;
+      createNewNote({
+        title: note.title + ' (Copy)',
+        content: note.content,
+        theme: note.theme
+      });
+    }
+
+    function deleteActiveNote() {
+      hideAllMenus();
+      if (notes.length <= 1) {
+        const note = notes[0];
+        note.title = 'New Note';
+        note.content = '';
+        note.alarm = null;
+        saveNotesToStorage();
+        renderAllNotes();
+        showToast('Note cleared.');
+        return;
+      }
+      notes = notes.filter(n => n.id !== activeNoteId);
+      activeNoteId = notes[notes.length - 1].id;
+      saveNotesToStorage();
+      renderAllNotes();
+      showToast('Note deleted.');
+    }
+
+    /* =========================================================================
+       9. NOTIFICATIONS, REMINDERS & WEB AUDIO ALARM SYNTHESIZER
+       ========================================================================= */
+    async function requestNotificationPermission() {
+      if (!('Notification' in window)) {
+        showToast('Desktop notifications are not supported in this browser.');
+        return;
+      }
+      try {
+        const perm = await Notification.requestPermission();
+        updateNotificationButtonUI();
+        if (perm === 'granted') {
+          showToast('Desktop notifications enabled! Reminders will alert you even in the background.');
+          new Notification('Sticky Notes Reminders Ready', {
+            body: 'You will receive background alerts when your sticky note alarms trigger.'
+          });
+        } else {
+          showToast('Notification permission denied. In-app visual & audio alarms remain active.');
+        }
+      } catch (e) {}
+    }
+
+    function updateNotificationButtonUI() {
+      const btn = document.getElementById('notifPermBtn');
+      const label = document.getElementById('notifPermLabel');
+      if (!btn || !label) return;
+      if (!('Notification' in window)) {
+        btn.classList.add('hidden');
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        label.textContent = 'Notifications On';
+        btn.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-pointer';
+      } else {
+        label.textContent = 'Enable Notifications';
+      }
+    }
+
+    function openAlarmModalForActiveNote() {
+      hideAllMenus();
+      const note = notes.find(n => n.id === activeNoteId);
+      if (!note) return;
+
+      document.getElementById('alarmModalNoteTitle').textContent = note.title;
+      const dtInput = document.getElementById('alarmDateTimeInput');
+      const repInput = document.getElementById('alarmRepeatInput');
+      const lblInput = document.getElementById('alarmLabelInput');
+      const removeBtn = document.getElementById('removeAlarmBtn');
+
+      if (note.alarm && note.alarm.time) {
+        dtInput.value = toLocalDateTimeInputValue(new Date(note.alarm.time));
+        repInput.value = note.alarm.repeat || 'none';
+        lblInput.value = note.alarm.label || '';
+        removeBtn.classList.remove('hidden');
+      } else {
+        const defaultTime = new Date(Date.now() + 5 * 60000);
+        dtInput.value = toLocalDateTimeInputValue(defaultTime);
+        repInput.value = 'none';
+        lblInput.value = '';
+        removeBtn.classList.add('hidden');
+      }
+
+      document.getElementById('alarmModal').classList.remove('hidden');
+    }
+
+    function setQuickAlarmMinutes(mins) {
+      const target = new Date(Date.now() + mins * 60000);
+      document.getElementById('alarmDateTimeInput').value = toLocalDateTimeInputValue(target);
+    }
+
+    function toLocalDateTimeInputValue(date) {
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function saveNoteAlarm() {
+      const note = notes.find(n => n.id === activeNoteId);
+      if (!note) return;
+      const dtVal = document.getElementById('alarmDateTimeInput').value;
+      if (!dtVal) {
+        showToast('Please select a valid date and time.');
+        return;
+      }
+      const timestamp = new Date(dtVal).getTime();
+      if (isNaN(timestamp)) return;
+
+      note.alarm = {
+        enabled: true,
+        time: timestamp,
+        repeat: document.getElementById('alarmRepeatInput').value,
+        label: document.getElementById('alarmLabelInput').value.trim() || `Reminder for "${note.title}"`
+      };
+
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(updateNotificationButtonUI).catch(() => {});
+      }
+
+      saveNotesToStorage();
+      renderAllNotes();
+      closeModal('alarmModal');
+      showToast(`Alarm set for ${new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+    }
+
+    function clearNoteAlarm() {
+      const note = notes.find(n => n.id === activeNoteId);
+      if (note) {
+        note.alarm = null;
+        saveNotesToStorage();
+        renderAllNotes();
+      }
+      closeModal('alarmModal');
+      showToast('Reminder removed.');
+    }
+
+    function checkScheduledAlarms(nowMs) {
+      let changed = false;
+      notes.forEach(note => {
+        if (note.alarm && note.alarm.enabled && nowMs >= note.alarm.time) {
+          triggerAlarmForNote(note);
+          if (note.alarm.repeat === 'daily') {
+            note.alarm.time += 24 * 60 * 60 * 1000;
+          } else if (note.alarm.repeat === 'weekly') {
+            note.alarm.time += 7 * 24 * 60 * 60 * 1000;
+          } else {
+            note.alarm.enabled = false;
+          }
+          changed = true;
+        }
+      });
+      if (changed) {
+        saveNotesToStorage();
+        renderAllNotes();
+      }
+    }
+
+    function triggerAlarmForNote(note) {
+      ringingAlarmNoteId = note.id;
+      note.minimized = false;
+      focusNote(note.id);
+
+      document.getElementById('ringingNoteTitle').textContent = note.title;
+      document.getElementById('ringingAlarmLabel').textContent = note.alarm.label || 'Scheduled Sticky Note Alarm!';
+      document.getElementById('ringingModal').classList.remove('hidden');
+
+      const plainBody = note.alarm.label || note.content.replace(/<[^>]+>/g, ' ').trim() || 'Your sticky note reminder is due!';
+      window.DesktopBridge.notifyAndFocus(`⏰ ${note.title}`, plainBody, note.id);
+
+      stopAlarmSound();
+      playAlarmSound(false);
+      alarmAudioInterval = setInterval(() => playAlarmSound(false), 2200);
+    }
+
+    function playAlarmSound(singlePreview = false) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const notesFreq = [587.33, 783.99, 987.77, 1174.66];
+        notesFreq.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.14);
+
+          gain.gain.setValueAtTime(0.001, ctx.currentTime + idx * 0.14);
+          gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + idx * 0.14 + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.14 + 0.55);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.14);
+          osc.stop(ctx.currentTime + idx * 0.14 + 0.6);
+        });
+      } catch (e) {}
+    }
+
+    function stopAlarmSound() {
+      if (alarmAudioInterval) {
+        clearInterval(alarmAudioInterval);
+        alarmAudioInterval = null;
+      }
+    }
+
+    function snoozeRingingAlarm(mins) {
+      stopAlarmSound();
+      document.getElementById('ringingModal').classList.add('hidden');
+      const note = notes.find(n => n.id === ringingAlarmNoteId);
+      if (note) {
+        note.alarm = {
+          enabled: true,
+          time: Date.now() + mins * 60000,
+          repeat: note.alarm ? note.alarm.repeat : 'none',
+          label: note.alarm ? note.alarm.label : `Snoozed reminder: ${note.title}`
+        };
+        saveNotesToStorage();
+        renderAllNotes();
+        showToast(`Alarm snoozed for ${mins} minutes.`);
+      }
+    }
+
+    function dismissRingingAlarm() {
+      stopAlarmSound();
+      document.getElementById('ringingModal').classList.add('hidden');
+      ringingAlarmNoteId = null;
+    }
+
+    /* =========================================================================
+       10. NOTES & REMINDERS SIDE DRAWER
+       ========================================================================= */
+    function toggleNotesDrawer() {
+      const drawer = document.getElementById('notesDrawer');
+      drawer.classList.toggle('hidden');
+      if (!drawer.classList.contains('hidden')) {
+        renderDrawerList();
+      }
+    }
+
+    function openAlarmsOverview() {
+      const drawer = document.getElementById('notesDrawer');
+      drawer.classList.remove('hidden');
+      renderDrawerList();
+    }
+
+    function renderDrawerList() {
+      const container = document.getElementById('drawerNotesList');
+      const query = (document.getElementById('drawerSearchInput').value || '').toLowerCase();
+      container.innerHTML = '';
+
+      const filtered = notes.filter(n => {
+        const plain = n.content.replace(/<[^>]+>/g, ' ').toLowerCase();
+        return n.title.toLowerCase().includes(query) || plain.includes(query);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center text-xs text-slate-400 py-8">No matching notes found.</div>`;
+        return;
+      }
+
+      filtered.forEach(note => {
+        const theme = getThemeObj(note.theme);
+        const plainPreview = note.content.replace(/<[^>]+>/g, ' ').trim() || 'Empty note...';
+        const card = document.createElement('div');
+        card.className = 'p-3 rounded-xl border border-slate-200 hover:border-emerald-400 bg-slate-50/70 hover:bg-white transition cursor-pointer space-y-1.5 shadow-2xs';
+
+        let alarmHtml = '';
+        if (note.alarm && note.alarm.enabled) {
+          alarmHtml = `<div class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+            ⏰ ${new Date(note.alarm.time).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </div>`;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-3 h-3 rounded-full flex-shrink-0 border border-black/15" style="background:${theme.header}"></span>
+              <span class="font-semibold text-xs text-slate-900 truncate">${note.title}</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-medium">${note.minimized ? 'Hidden' : 'Open'}</span>
+          </div>
+          <p class="text-[11px] text-slate-600 line-clamp-2">${plainPreview}</p>
+          <div class="flex items-center justify-between pt-1">
+            <div>${alarmHtml}</div>
+            <button type="button" onclick="event.stopPropagation(); activeNoteId='${note.id}'; openAlarmModalForActiveNote();" class="text-[11px] font-semibold text-emerald-700 hover:underline cursor-pointer">+ Alarm</button>
+          </div>
+        `;
+
+        card.onclick = () => {
+          note.minimized = false;
+          activeNoteId = note.id;
+          saveNotesToStorage();
+          renderAllNotes();
+          focusNoteEditor(note.id);
+        };
+
+        container.appendChild(card);
+      });
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    let toastTimeout = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toastBanner');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.add('hidden'), 3200);
+    }
+  </script>
 </body>
 </html>
