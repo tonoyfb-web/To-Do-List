@@ -877,14 +877,12 @@
       </div>
 
       <div class="p-4 sm:p-5 space-y-3.5 text-xs text-slate-700 overflow-y-auto custom-scroll">
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Supabase Project URL</label>
-          <input type="url" id="sbUrlInput" placeholder="https://eabnbkysvhbbhrgpetkz.supabase.co" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono" />
-        </div>
-
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Supabase Anon Public Key</label>
-          <input type="password" id="sbKeyInput" placeholder="sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono" />
+        <div class="flex items-center justify-between px-3 py-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-800">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="font-medium">Cloud backend configured &amp; ready</span>
+          </div>
+          <span id="sbConnectionBadge" class="text-[11px] font-semibold">Active</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -900,22 +898,6 @@
           </div>
         </div>
 
-        <!-- One-Click Copy SQL Setup Box -->
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="font-semibold text-[11px] uppercase tracking-wider text-slate-500">1-Step Supabase SQL Table Setup</span>
-            <button type="button" onclick="copySupabaseSql()" class="px-2.5 py-1.5 rounded bg-white hover:bg-slate-100 border border-slate-300 text-[11px] font-medium text-slate-700 cursor-pointer">Copy SQL</button>
-          </div>
-          <pre id="supabaseSqlSnippet" class="text-[11px] font-mono text-slate-600 overflow-x-auto bg-white p-2 rounded border border-slate-200 select-all">CREATE TABLE IF NOT EXISTS public.sticky_notes (
-  workspace_id TEXT PRIMARY KEY,
-  notes_data JSONB NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-ALTER TABLE public.sticky_notes ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Allow public sync" ON public.sticky_notes;
-CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);</pre>
-        </div>
-
         <div id="sbDiagnosticBox" class="hidden text-[11px] px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-700 font-mono break-words"></div>
 
         <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
@@ -924,8 +906,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL TO anon, authen
             <button type="button" onclick="pullNotesFromSupabase()" class="px-3 py-2.5 sm:py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Restore ↓</button>
           </div>
           <div class="flex items-center gap-2 ml-auto">
-            <button type="button" onclick="disconnectSupabase()" class="px-3 py-2.5 sm:py-1.5 rounded-lg text-red-600 hover:bg-red-50 font-medium cursor-pointer">Disconnect</button>
-            <button type="button" onclick="saveSupabaseConfig()" class="px-4 py-2.5 sm:py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xs cursor-pointer">Connect &amp; Sync</button>
+            <button type="button" onclick="saveSupabaseConfig()" class="px-4 py-2.5 sm:py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xs cursor-pointer">Save &amp; Sync</button>
           </div>
         </div>
       </div>
@@ -964,9 +945,16 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL TO anon, authen
     let alarmAudioInterval = null;
     let deferredInstallPrompt = null;
 
-    // Failsafe Supabase configuration & debounce timer
+    // Built-in Supabase configuration (set your project URL & Anon Key directly here)
+    const BUILTIN_SUPABASE_URL = 'https://eabnbkysvhbbhrgpetkz.supabase.co';
+    const BUILTIN_SUPABASE_KEY = 'sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx';
     let supabaseConnected = false;
-    let supabaseConfig = { url: '', key: '', workspaceId: 'default-desktop', autoSync: true };
+    let supabaseConfig = {
+      url: BUILTIN_SUPABASE_URL,
+      key: BUILTIN_SUPABASE_KEY,
+      workspaceId: 'default-desktop',
+      autoSync: true
+    };
     let supabaseSyncDebounce = null;
 
     // MeetNote Clipboard Brand Icon (Matches meetnote.ico / meetnote.png)
@@ -1379,7 +1367,13 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL TO anon, authen
       try {
         const raw = localStorage.getItem(SUPABASE_CFG_KEY);
         if (raw) {
-          supabaseConfig = { ...supabaseConfig, ...JSON.parse(raw) };
+          const saved = JSON.parse(raw);
+          supabaseConfig = {
+            ...supabaseConfig,
+            ...saved,
+            url: BUILTIN_SUPABASE_URL || saved.url || '',
+            key: BUILTIN_SUPABASE_KEY || saved.key || ''
+          };
         }
       } catch (e) {}
 
@@ -1413,10 +1407,12 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL TO anon, authen
     }
 
     function openSupabaseModal() {
-      document.getElementById('sbUrlInput').value = supabaseConfig.url || '';
-      document.getElementById('sbKeyInput').value = supabaseConfig.key || '';
       document.getElementById('sbWorkspaceInput').value = supabaseConfig.workspaceId || 'default-desktop';
       document.getElementById('sbAutoSyncCheckbox').checked = supabaseConfig.autoSync !== false;
+      const badge = document.getElementById('sbConnectionBadge');
+      if (badge) {
+        badge.textContent = supabaseConnected ? 'Connected' : 'Configure in HTML';
+      }
       const diagBox = document.getElementById('sbDiagnosticBox');
       if (diagBox) diagBox.classList.add('hidden');
       document.getElementById('supabaseModal').classList.remove('hidden');
@@ -1434,21 +1430,21 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL TO anon, authen
     }
 
     async function saveSupabaseConfig() {
-      const rawUrl = document.getElementById('sbUrlInput').value;
-      const validUrl = normalizeSupabaseUrl(rawUrl);
-      const key = (document.getElementById('sbKeyInput').value || '').trim();
+      const validUrl = normalizeSupabaseUrl(BUILTIN_SUPABASE_URL || supabaseConfig.url);
+      const key = (BUILTIN_SUPABASE_KEY || supabaseConfig.key || '').trim();
       const workspaceId = (document.getElementById('sbWorkspaceInput').value || '').trim() || 'default-desktop';
       const autoSync = document.getElementById('sbAutoSyncCheckbox').checked;
 
       if (!validUrl || !key) {
-        showToast('Please enter a valid Supabase Project URL (https://xxx.supabase.co) and Anon Key.');
+        setSupabaseDiagnostic('Set BUILTIN_SUPABASE_URL and BUILTIN_SUPABASE_KEY in index.html to enable cloud sync.');
+        showToast('Supabase credentials not set in HTML.');
         return;
       }
 
       supabaseConfig = { url: validUrl, key, workspaceId, autoSync };
       supabaseConnected = true;
       try {
-        localStorage.setItem(SUPABASE_CFG_KEY, JSON.stringify(supabaseConfig));
+        localStorage.setItem(SUPABASE_CFG_KEY, JSON.stringify({ workspaceId, autoSync }));
       } catch (e) {}
 
       setSyncUiState('connected', 'Connected');
@@ -1620,61 +1616,6 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL TO anon, authen
         setSupabaseDiagnostic(`Supabase Error: ${msg}`);
         showToast('Restore failed — see details in Cloud Backup window.');
       }
-    }
-
-    async function pullNotesFromSupabase() {
-      const validUrl = normalizeSupabaseUrl(supabaseConfig.url);
-      if (!supabaseConnected || !validUrl || !supabaseConfig.key) {
-        showToast('Configure a valid Supabase URL & Key first.');
-        return;
-      }
-      setSyncUiState('syncing', 'Restoring...');
-      try {
-        const ws = encodeURIComponent(supabaseConfig.workspaceId || 'default-desktop');
-        const endpoint = `${validUrl}/rest/v1/sticky_notes?workspace_id=eq.${ws}&select=notes_data`;
-        const response = await fetch(endpoint, {
-          method: 'GET',
-          headers: {
-            'apikey': supabaseConfig.key,
-            'Authorization': `Bearer ${supabaseConfig.key}`,
-            'Accept': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          const errText = await response.text().catch(() => '');
-          throw new Error(errText || `HTTP ${response.status}`);
-        }
-
-        const rows = await response.json();
-        if (Array.isArray(rows) && rows.length > 0 && Array.isArray(rows[0].notes_data) && rows[0].notes_data.length > 0) {
-          notes = rows[0].notes_data;
-          activeNoteId = notes[0].id;
-          saveNotesToStorage(true);
-          renderAllNotes();
-          setSyncUiState('connected', 'Restored');
-          closeModal('supabaseModal');
-          showToast(`Restored ${notes.length} note(s) from Supabase!`);
-        } else {
-          setSyncUiState('connected', 'No Backup');
-          showToast('No saved notes found for this Workspace ID.');
-        }
-      } catch (err) {
-        console.warn('Supabase restore warning:', err);
-        setSyncUiState('error', 'Restore Failed');
-        showToast('Restore failed: verify Supabase URL, Key, and SQL table.');
-      }
-    }
-
-    function copySupabaseSql() {
-      const sqlText = document.getElementById('supabaseSqlSnippet').textContent;
-      const temp = document.createElement('textarea');
-      temp.value = sqlText;
-      document.body.appendChild(temp);
-      temp.select();
-      document.execCommand('copy');
-      document.body.removeChild(temp);
-      showToast('SQL table setup copied to clipboard!');
     }
 
     function focusNote(noteId) {
