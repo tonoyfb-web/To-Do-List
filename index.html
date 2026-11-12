@@ -913,8 +913,10 @@
 );
 ALTER TABLE public.sticky_notes ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public sync" ON public.sticky_notes;
-CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WITH CHECK (true);</pre>
+CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);</pre>
         </div>
+
+        <div id="sbDiagnosticBox" class="hidden text-[11px] px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-700 font-mono break-words"></div>
 
         <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
           <div class="flex items-center gap-2">
@@ -1415,7 +1417,20 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       document.getElementById('sbKeyInput').value = supabaseConfig.key || '';
       document.getElementById('sbWorkspaceInput').value = supabaseConfig.workspaceId || 'default-desktop';
       document.getElementById('sbAutoSyncCheckbox').checked = supabaseConfig.autoSync !== false;
+      const diagBox = document.getElementById('sbDiagnosticBox');
+      if (diagBox) diagBox.classList.add('hidden');
       document.getElementById('supabaseModal').classList.remove('hidden');
+    }
+
+    function setSupabaseDiagnostic(msg) {
+      const diagBox = document.getElementById('sbDiagnosticBox');
+      if (!diagBox) return;
+      if (msg) {
+        diagBox.textContent = msg;
+        diagBox.classList.remove('hidden');
+      } else {
+        diagBox.classList.add('hidden');
+      }
     }
 
     async function saveSupabaseConfig() {
@@ -1437,8 +1452,10 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       } catch (e) {}
 
       setSyncUiState('connected', 'Connected');
-      closeModal('supabaseModal');
-      await pushNotesToSupabase(true);
+      const ok = await pushNotesToSupabase(true);
+      if (ok) {
+        closeModal('supabaseModal');
+      }
     }
 
     function disconnectSupabase() {
@@ -1447,6 +1464,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       try {
         localStorage.removeItem(SUPABASE_CFG_KEY);
       } catch (e) {}
+      setSupabaseDiagnostic('');
       setSyncUiState('offline', 'Cloud Backup');
       closeModal('supabaseModal');
       showToast('Disconnected from Supabase.');
@@ -1464,25 +1482,62 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       const validUrl = normalizeSupabaseUrl(supabaseConfig.url);
       if (!supabaseConnected || !validUrl || !supabaseConfig.key) {
         if (manualNotify) showToast('Configure a valid Supabase URL & Key first.');
-        return;
+        return false;
       }
       setSyncUiState('syncing', 'Backing up...');
+      setSupabaseDiagnostic('');
+      const wsId = supabaseConfig.workspaceId || 'default-desktop';
+      const headers = {
+        'apikey': supabaseConfig.key,
+        'Authorization': `Bearer ${supabaseConfig.key}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      };
+
       try {
-        const endpoint = `${validUrl}/rest/v1/sticky_notes?on_conflict=workspace_id`;
-        const response = await fetch(endpoint, {
+        // Primary attempt: Workspace JSONB schema (workspace_id, notes_data)
+        let response = await fetch(`${validUrl}/rest/v1/sticky_notes?on_conflict=workspace_id`, {
           method: 'POST',
-          headers: {
-            'apikey': supabaseConfig.key,
-            'Authorization': `Bearer ${supabaseConfig.key}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates,return=minimal'
-          },
+          headers,
           body: JSON.stringify({
-            workspace_id: supabaseConfig.workspaceId || 'default-desktop',
+            workspace_id: wsId,
             notes_data: notes,
             updated_at: new Date().toISOString()
           })
         });
+
+        // Fallback attempt: Per-row schema (id, workspace_id, title, content, alarms) if notes_data column doesn't exist
+        if (!response.ok) {
+          const firstErr = await response.text().catch(() => '');
+          if (firstErr.includes('notes_data') || firstErr.includes('42703') || firstErr.includes('PGRST204')) {
+            const rowPayload = notes.map(n => {
+              const t = getThemeObj(n.theme);
+              return {
+                id: n.id,
+                workspace_id: wsId,
+                title: n.title,
+                content: n.content,
+                color: t.body,
+                header_color: t.header,
+                x: Math.round(n.x || 100),
+                y: Math.round(n.y || 100),
+                width: Math.round(n.width || 330),
+                height: Math.round(n.height || 350),
+                minimized: !!n.minimized,
+                z_index: n.zIndex || 10,
+                alarms: n.alarm ? [n.alarm] : [],
+                updated_at: new Date().toISOString()
+              };
+            });
+            response = await fetch(`${validUrl}/rest/v1/sticky_notes?on_conflict=id`, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(rowPayload)
+            });
+          } else {
+            throw new Error(firstErr || `HTTP ${response.status}`);
+          }
+        }
 
         if (!response.ok) {
           const errText = await response.text().catch(() => '');
@@ -1491,10 +1546,79 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
 
         setSyncUiState('connected', 'Backed Up');
         if (manualNotify) showToast('All notes backed up to Supabase!');
+        return true;
       } catch (err) {
-        console.warn('Supabase backup warning:', err);
+        const msg = (err && err.message) ? err.message : 'Network or CORS error';
+        console.warn('Supabase backup error:', msg);
         setSyncUiState('error', 'Sync Offline');
-        if (manualNotify) showToast('Cloud backup issue: check URL, Key, or SQL table.');
+        setSupabaseDiagnostic(`Supabase Error: ${msg}`);
+        if (manualNotify) showToast('Cloud backup issue — see details in Cloud Backup window.');
+        return false;
+      }
+    }
+
+    async function pullNotesFromSupabase() {
+      const validUrl = normalizeSupabaseUrl(supabaseConfig.url);
+      if (!supabaseConnected || !validUrl || !supabaseConfig.key) {
+        showToast('Configure a valid Supabase URL & Key first.');
+        return;
+      }
+      setSyncUiState('syncing', 'Restoring...');
+      setSupabaseDiagnostic('');
+      try {
+        const ws = encodeURIComponent(supabaseConfig.workspaceId || 'default-desktop');
+        const response = await fetch(`${validUrl}/rest/v1/sticky_notes?workspace_id=eq.${ws}&select=*`, {
+          method: 'GET',
+          headers: {
+            'apikey': supabaseConfig.key,
+            'Authorization': `Bearer ${supabaseConfig.key}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => '');
+          throw new Error(errText || `HTTP ${response.status}`);
+        }
+
+        const rows = await response.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          if (Array.isArray(rows[0].notes_data) && rows[0].notes_data.length > 0) {
+            notes = rows[0].notes_data;
+          } else if (rows[0].id) {
+            notes = rows.map(r => {
+              const matchedTheme = NOTE_THEMES.find(t => t.body.toLowerCase() === (r.color || '').toLowerCase());
+              return {
+                id: r.id,
+                title: r.title || 'New Note',
+                content: r.content || '',
+                theme: matchedTheme ? matchedTheme.id : 'lime',
+                x: r.x || 120,
+                y: r.y || 84,
+                width: r.width || 330,
+                height: r.height || 350,
+                minimized: !!r.minimized,
+                zIndex: r.z_index || 10,
+                alarm: Array.isArray(r.alarms) && r.alarms.length > 0 ? r.alarms[0] : null
+              };
+            });
+          }
+          activeNoteId = notes[0].id;
+          saveNotesToStorage(true);
+          renderAllNotes();
+          setSyncUiState('connected', 'Restored');
+          closeModal('supabaseModal');
+          showToast(`Restored ${notes.length} note(s) from Supabase!`);
+        } else {
+          setSyncUiState('connected', 'No Backup');
+          showToast('No saved notes found for this Workspace ID.');
+        }
+      } catch (err) {
+        const msg = (err && err.message) ? err.message : 'Network error';
+        console.warn('Supabase restore error:', msg);
+        setSyncUiState('error', 'Restore Failed');
+        setSupabaseDiagnostic(`Supabase Error: ${msg}`);
+        showToast('Restore failed — see details in Cloud Backup window.');
       }
     }
 
