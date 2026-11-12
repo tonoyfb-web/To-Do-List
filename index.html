@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#F3F5F8" />
   <title>MeetNote — Sticky Notes &amp; Reminders</title>
   <script>
@@ -654,7 +654,7 @@
   <!-- =====================================================================
        NOTE OPTIONS POPOVER ('...' Menu: Theme Color, Formatting, Alarm, Duplicate, Delete)
        ===================================================================== -->
-  <div id="noteOptionsMenu" class="hidden fixed z-50 w-[90vw] max-w-[280px] bg-white rounded-2xl shadow-2xl border border-gray-200 p-2.5 text-sm text-gray-800" onmousedown="event.stopPropagation()">
+  <div id="noteOptionsMenu" class="hidden fixed z-[9998] w-[90vw] max-w-[280px] bg-white rounded-2xl shadow-2xl border border-gray-200 p-2.5 text-sm text-gray-800" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
     <div class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Note Color</div>
     <div id="colorSwatchesRow" class="grid grid-cols-6 gap-2 px-2 py-2 mb-1.5 border-b border-gray-100"></div>
 
@@ -700,10 +700,10 @@
     </button>
   </div>
 
-  <!-- =====================================================================
+      <!-- =====================================================================
        REMINDER / ALARM SCHEDULER MODAL
        ===================================================================== -->
-  <div id="alarmModal" class="hidden fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+  <div id="alarmModal" class="hidden fixed inset-0 z-[10000] bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[94vw] max-w-md overflow-hidden max-h-[90vh] flex flex-col">
       <div class="px-4 sm:px-5 py-3.5 bg-slate-50 border-b border-slate-200 text-slate-900 flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-2.5 min-w-0">
@@ -774,7 +774,7 @@
   <!-- =====================================================================
        RINGING ALARM POPUP OVERLAY
        ===================================================================== -->
-  <div id="ringingModal" class="hidden fixed inset-0 z-[100] bg-slate-900/45 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="ringingModal" class="hidden fixed inset-0 z-[10050] bg-slate-900/45 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl border-2 border-red-500 w-[92vw] max-w-sm p-6 text-center space-y-4 alarm-ringing-card">
       <div class="w-14 h-14 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center animate-bounce">
         <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -796,7 +796,7 @@
   <!-- =====================================================================
        FIND & REPLACE MODAL
        ===================================================================== -->
-  <div id="findReplaceModal" class="hidden fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center p-4">
+  <div id="findReplaceModal" class="hidden fixed inset-0 z-[10000] bg-slate-900/30 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[92vw] max-w-sm p-5 space-y-3.5 text-xs">
       <div class="flex items-center justify-between">
         <h3 class="font-semibold text-sm text-slate-900">Find &amp; Replace in Note</h3>
@@ -820,7 +820,7 @@
   <!-- =====================================================================
        INSERT LINK MODAL
        ===================================================================== -->
-  <div id="insertLinkModal" class="hidden fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center p-4">
+  <div id="insertLinkModal" class="hidden fixed inset-0 z-[10000] bg-slate-900/30 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[92vw] max-w-sm p-5 space-y-3.5 text-xs">
       <div class="flex items-center justify-between">
         <h3 class="font-semibold text-sm text-slate-900">Insert Hyperlink</h3>
@@ -844,7 +844,7 @@
   <!-- =====================================================================
        ALL NOTES & REMINDERS DRAWER (Responsive Mobile Full-Sheet / Desktop Sidebar)
        ===================================================================== -->
-  <div id="notesDrawer" class="hidden fixed inset-x-3 top-16 bottom-20 md:inset-x-auto md:top-16 md:right-3 md:bottom-3 z-40 md:w-80 bg-white/98 backdrop-blur-md text-slate-800 rounded-2xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
+  <div id="notesDrawer" class="hidden fixed inset-x-3 top-16 bottom-20 md:inset-x-auto md:top-16 md:right-3 md:bottom-3 z-[9990] md:w-80 bg-white/98 backdrop-blur-md text-slate-800 rounded-2xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
     <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/90">
       <h3 class="font-semibold text-sm text-slate-900">All Notes &amp; Scheduled Alarms</h3>
       <button type="button" onclick="toggleNotesDrawer()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200/70 text-slate-500 cursor-pointer">✕</button>
@@ -859,7 +859,7 @@
   <!-- =====================================================================
        SUPABASE CLOUD BACKUP & SYNC CONFIGURATION MODAL
        ===================================================================== -->
-  <div id="supabaseModal" class="hidden fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+  <div id="supabaseModal" class="hidden fixed inset-0 z-[10000] bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[94vw] max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
       <div class="px-4 sm:px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-2.5 min-w-0">
@@ -914,7 +914,7 @@
   </div>
 
   <!-- Toast Banner -->
-  <div id="toastBanner" class="hidden fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 z-[110] bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center justify-center md:justify-start gap-2"></div>
+  <div id="toastBanner" class="hidden fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 z-[10100] bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center justify-center md:justify-start gap-2"></div>
 
   <script>
     /* =========================================================================
@@ -1847,6 +1847,40 @@
       window.addEventListener('mouseup', onEnd);
     }
 
+    // Re-adapt note layout and clamp coordinates smoothly when browser window/tab is resized
+    let windowResizeTimer = null;
+    let lastWasMobile = isMobileViewport();
+    window.addEventListener('resize', () => {
+      clearTimeout(windowResizeTimer);
+      windowResizeTimer = setTimeout(() => {
+        const nowMobile = isMobileViewport();
+        if (nowMobile !== lastWasMobile) {
+          lastWasMobile = nowMobile;
+          renderAllNotes();
+          return;
+        }
+        if (!nowMobile) {
+          let updated = false;
+          notes.forEach(note => {
+            if (note.minimized) return;
+            const maxX = Math.max(0, window.innerWidth - Math.min(note.width || 330, window.innerWidth));
+            const maxY = Math.max(56, window.innerHeight - 60);
+            if (note.x > maxX || note.y > maxY) {
+              note.x = Math.min(note.x, maxX);
+              note.y = Math.min(note.y, maxY);
+              const el = document.querySelector(`.sticky-note[data-id="${note.id}"]`);
+              if (el) {
+                el.style.left = `${note.x}px`;
+                el.style.top = `${note.y}px`;
+              }
+              updated = true;
+            }
+          });
+          if (updated) saveNotesToStorage(true);
+        }
+      }, 120);
+    });
+
     function minimizeNote(e, noteId) {
       e.stopPropagation();
       const note = notes.find(n => n.id === noteId);
@@ -1931,6 +1965,12 @@
         hideAllMenus();
       }
     });
+
+    window.addEventListener('touchstart', (e) => {
+      if (!e.target.closest('#richContextMenu') && !e.target.closest('#noteOptionsMenu')) {
+        hideAllMenus();
+      }
+    }, { passive: true });
 
     function getActiveEditor() {
       return document.querySelector(`.sticky-note[data-id="${activeNoteId}"] .note-editor`);
@@ -2204,11 +2244,18 @@
       focusNote(noteId);
       hideAllMenus();
       const menu = document.getElementById('noteOptionsMenu');
+      menu.style.zIndex = Math.max(9998, highestZ + 50);
       menu.classList.remove('hidden');
       const rect = e.currentTarget.getBoundingClientRect();
-      const menuW = Math.min(280, window.innerWidth * 0.9);
-      menu.style.left = `${Math.max(12, Math.min(rect.right - menuW, window.innerWidth - menuW - 12))}px`;
-      menu.style.top = `${Math.min(rect.bottom + 6, window.innerHeight - 310)}px`;
+      const menuRect = menu.getBoundingClientRect();
+      const menuW = menuRect.width || Math.min(280, window.innerWidth * 0.9);
+      const menuH = menuRect.height || 290;
+      const posX = Math.max(12, Math.min(rect.right - menuW, window.innerWidth - menuW - 12));
+      const posY = (rect.bottom + 6 + menuH > window.innerHeight - 12)
+        ? Math.max(12, rect.top - menuH - 6)
+        : Math.max(12, rect.bottom + 6);
+      menu.style.left = `${posX}px`;
+      menu.style.top = `${posY}px`;
     }
 
     function changeActiveNoteTheme(themeId) {
