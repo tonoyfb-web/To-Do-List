@@ -2,25 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#F3F5F8" />
+  <title>MeetNote — Sticky Notes &amp; Reminders</title>
+  <script>
+    // Define brand icon SVG data-URI early so header <img> and <head> icons load synchronously without ReferenceError
+    window.MEETNOTE_SVG_URI = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E";
+  </script>
+  <!-- Instant inline SVG data-URI favicon & touch icons matching meetnote.ico / meetnote.png (auto-upgrades to ./meetnote.ico & ./meetnote.png when hosted) -->
+  <link id="appFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link id="appShortcutIcon" rel="shortcut icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link id="appAppleIcon" rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* Custom scrollbars & clean solid light desktop workspace */
+    /* Custom scrollbars & clean solid light desktop/mobile workspace */
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
-    body {
+    html, body {
       font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
       padding: 0;
-      overflow: hidden;
       user-select: none;
       background-color: #F3F5F8;
       background-image: none;
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    @media (min-width: 769px) {
+      body {
+        overflow: hidden;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+      }
+      /* Prevent iOS Safari auto-zoom on input focus */
+      input, select, textarea {
+        font-size: 16px !important;
+      }
     }
 
     /* Custom subtle scrollbar inside notes */
@@ -59,9 +89,41 @@
       box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.08);
     }
 
+    /* Mobile Responsive Stacked Card Layout */
+    @media (max-width: 768px) {
+      #desktopCanvas {
+        position: static !important;
+        height: auto !important;
+        min-height: calc(100vh - 140px);
+        padding-top: calc(68px + env(safe-area-inset-top, 0px)) !important;
+        padding-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+      .sticky-note {
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        width: calc(100vw - 24px) !important;
+        max-width: 540px !important;
+        height: auto !important;
+        min-height: 260px !important;
+        resize: none !important;
+        border-radius: 10px !important;
+        margin: 0 auto !important;
+      }
+      .note-editor {
+        min-height: 200px;
+        max-height: 55vh;
+      }
+    }
+
     /* Editable content area */
     .note-editor {
       user-select: text;
+      -webkit-user-select: text;
       outline: none;
       flex: 1;
       overflow-y: auto;
@@ -79,11 +141,11 @@
       display: flex;
       align-items: flex-start;
       gap: 8px;
-      margin: 3px 0;
+      margin: 4px 0;
     }
     .todo-checkbox {
-      width: 15px;
-      height: 15px;
+      width: 17px;
+      height: 17px;
       margin-top: 3px;
       cursor: pointer;
       accent-color: #1f2937;
@@ -94,23 +156,50 @@
       opacity: 0.58;
     }
 
-    /* Floating Windows 11 / Desktop Context Menu matching the reference image */
+    /* Floating Windows 11 / Desktop Context Menu + Mobile Bottom Sheet Adaptation */
     #richContextMenu {
       position: fixed;
       z-index: 9999;
       width: 314px;
+      max-height: 86vh;
+      overflow-y: auto;
       background: #ffffff;
       color: #1f2328;
       border: 1px solid #d8dee4;
-      border-radius: 10px;
+      border-radius: 12px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
       padding: 6px 0;
       font-family: 'Segoe UI', 'Inter', sans-serif;
       font-size: 13.5px;
-      animation: menuPop 0.11s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: menuPop 0.14s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
+    @media (max-width: 768px) {
+      #richContextMenu {
+        left: 3vw !important;
+        right: 3vw !important;
+        top: auto !important;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+        width: 94vw !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
+        max-height: 76vh !important;
+        border-radius: 16px !important;
+        box-shadow: 0 -8px 40px rgba(15, 23, 42, 0.28), 0 0 0 9999px rgba(15, 23, 42, 0.32);
+        padding-bottom: 12px;
+      }
+      .ctx-btn-icon {
+        width: 36px !important;
+        height: 36px !important;
+      }
+      .ctx-row-item {
+        padding: 10px 16px !important;
+        min-height: 44px;
+      }
+    }
+
     @keyframes menuPop {
-      from { opacity: 0; transform: scale(0.97) translateY(-3px); }
+      from { opacity: 0; transform: scale(0.97) translateY(4px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
@@ -120,7 +209,7 @@
       justify-content: center;
       width: 28px;
       height: 28px;
-      border-radius: 5px;
+      border-radius: 6px;
       color: #24292f;
       transition: background 0.12s ease;
       cursor: pointer;
@@ -159,21 +248,18 @@
     }
   </style>
 </head>
-<body class="h-screen w-screen overflow-hidden relative text-slate-900 bg-[#F3F5F8]">
+<body class="min-h-screen w-screen relative text-slate-900 bg-[#F3F5F8]">
 
-  <!-- Top Light Desktop Status & Control Dock -->
-  <header id="topDock" class="fixed top-3 left-3 right-3 z-40 flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-800 shadow-xs">
-    <div class="flex items-center gap-2.5">
-      <div class="w-7 h-7 rounded-lg bg-[#C4F07D] text-slate-900 border border-[#b3e366] flex items-center justify-center font-bold shadow-2xs">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/>
-          <path d="M15 3v6h6"/>
-        </svg>
+  <!-- Top Desktop & Mobile Header Dock (Always keeps "+ New Note" visible and accessible) -->
+  <header id="topDock" style="top: calc(10px + env(safe-area-inset-top, 0px));" class="fixed left-2.5 right-2.5 sm:left-3 sm:right-3 z-40 flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-800 shadow-xs">
+    <div class="flex items-center gap-2 min-w-0">
+      <div class="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shadow-2xs flex-shrink-0 p-1">
+        <img id="brandLogoImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" alt="MeetNote" onerror="this.onerror=null; if (window.MEETNOTE_SVG_URI) this.src=window.MEETNOTE_SVG_URI;" class="w-full h-full object-contain" />
       </div>
-      <div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-semibold text-sm tracking-tight text-slate-900">Sticky Notes</span>
-          <span id="bgWorkerBadge" class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" title="Background Web Worker & Desktop Bridge keeping alarms active even when minimized">
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5">
+          <span class="font-semibold text-sm tracking-tight text-slate-900 truncate">MeetNote</span>
+          <span id="bgWorkerBadge" class="hidden sm:inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" title="Background Web Worker & Desktop Bridge keeping alarms active even when minimized">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span id="desktopEnvLabel">Desktop &amp; BG Ready</span>
           </span>
@@ -181,10 +267,10 @@
       </div>
     </div>
 
-    <!-- Action Controls -->
-    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-      <!-- Supabase Cloud Sync Button -->
-      <button type="button" id="supabaseSyncBtn" onclick="openSupabaseModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition cursor-pointer" title="Configure Supabase Cloud Backup & Sync">
+    <!-- Action Controls: Desktop shows full bar; Mobile shows prominent "+ New Note" & quick status -->
+    <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+      <!-- Supabase Cloud Sync Button (Desktop / Tablet; Mobile uses bottom bar) -->
+      <button type="button" id="supabaseSyncBtn" onclick="openSupabaseModal()" class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition cursor-pointer" title="Configure Supabase Cloud Backup & Sync">
         <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
         <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
@@ -193,12 +279,12 @@
       </button>
 
       <!-- Notification Permission Button -->
-      <button type="button" id="notifPermBtn" onclick="requestNotificationPermission()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition cursor-pointer">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button type="button" id="notifPermBtn" onclick="requestNotificationPermission()" class="flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition cursor-pointer" title="Enable Background Notifications">
+        <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
         </svg>
-        <span id="notifPermLabel">Enable Notifications</span>
+        <span id="notifPermLabel" class="hidden sm:inline">Enable Notifications</span>
       </button>
 
       <!-- Install PWA / Desktop App Button -->
@@ -208,11 +294,11 @@
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
-        <span>Install Desktop App</span>
+        <span class="hidden lg:inline">Install App</span>
       </button>
 
-      <!-- Alarms Overview Button -->
-      <button type="button" onclick="openAlarmsOverview()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition cursor-pointer">
+      <!-- Alarms Overview Button (Desktop / Tablet; Mobile uses bottom bar) -->
+      <button type="button" onclick="openAlarmsOverview()" class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition cursor-pointer">
         <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="13" r="8"/>
           <path d="M12 9v4l2 2"/>
@@ -223,8 +309,8 @@
         <span id="activeAlarmCount" class="px-1.5 py-0.2 rounded-full bg-[#C4F07D] text-slate-900 border border-[#b3e366] font-bold text-[10px]">0</span>
       </button>
 
-      <!-- All Notes Drawer Toggle -->
-      <button type="button" onclick="toggleNotesDrawer()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition cursor-pointer">
+      <!-- All Notes Drawer Toggle (Desktop / Tablet; Mobile uses bottom bar) -->
+      <button type="button" onclick="toggleNotesDrawer()" class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition cursor-pointer">
         <svg class="w-3.5 h-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="7" height="7" rx="1"/>
           <rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -234,9 +320,9 @@
         <span>Notes (<span id="totalNotesCount">1</span>)</span>
       </button>
 
-      <!-- New Sticky Note Button -->
-      <button type="button" onclick="createNewNote()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#C4F07D] hover:bg-[#b8ea68] text-slate-900 border border-[#aad95d] shadow-2xs transition cursor-pointer">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <!-- New Sticky Note Button (Always visible on both Mobile and Desktop) -->
+      <button type="button" onclick="createNewNote()" class="flex items-center gap-1.5 min-h-[38px] sm:min-h-0 px-3.5 py-1.5 rounded-lg text-xs sm:text-xs font-semibold bg-[#C4F07D] hover:bg-[#b8ea68] active:scale-95 text-slate-900 border border-[#aad95d] shadow-2xs transition cursor-pointer">
+        <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
@@ -245,22 +331,63 @@
     </div>
   </header>
 
-  <!-- Main Desktop Canvas where Sticky Notes float -->
+  <!-- Main Desktop & Mobile Canvas where Sticky Notes live -->
   <main id="desktopCanvas" class="w-full h-full relative pt-16 bg-[#F3F5F8]"></main>
 
-  <!-- Helper Hint Footer (Light Theme) -->
-  <div class="fixed bottom-3 left-4 z-30 pointer-events-none hidden sm:flex items-center gap-2 text-[11px] text-slate-600 bg-white/95 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs">
+  <!-- Mobile Bottom Navigation Dock (Thumb-friendly access to New Note, Notes, Alarms & Cloud Sync) -->
+  <nav id="mobileBottomNav" style="padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 pt-2 grid grid-cols-4 gap-1 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
+    <button type="button" onclick="createNewNote()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl bg-[#C4F07D]/60 active:bg-[#C4F07D] text-slate-900 font-semibold text-[11px] min-h-[48px] cursor-pointer">
+      <svg class="w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      <span>New Note</span>
+    </button>
+
+    <button type="button" onclick="toggleNotesDrawer()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-medium text-[11px] min-h-[48px] cursor-pointer relative">
+      <svg class="w-5 h-5 mb-0.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <span>Notes (<span id="mobileNotesCount">1</span>)</span>
+    </button>
+
+    <button type="button" onclick="openAlarmsOverview()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-medium text-[11px] min-h-[48px] cursor-pointer relative">
+      <svg class="w-5 h-5 mb-0.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/>
+      </svg>
+      <span>Alarms (<span id="mobileAlarmCount">0</span>)</span>
+    </button>
+
+    <button type="button" onclick="openSupabaseModal()" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-medium text-[11px] min-h-[48px] cursor-pointer relative">
+      <div class="relative">
+        <svg class="w-5 h-5 mb-0.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+        </svg>
+        <span id="mobileSyncDot" class="w-2 h-2 rounded-full bg-slate-400 absolute -top-0.5 -right-1"></span>
+      </div>
+      <span id="mobileSyncLabel">Backup</span>
+    </button>
+  </nav>
+
+  <!-- Helper Hint Footer (Desktop Only) -->
+  <div class="fixed bottom-3 left-4 z-30 pointer-events-none hidden md:flex items-center gap-2 text-[11px] text-slate-600 bg-white/95 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs">
     <span>Tip: <strong>Right-click</strong> inside any note for Formatting &amp; Tools • Drag header to move • Click <strong>•••</strong> for colors &amp; alarms</span>
   </div>
 
   <!-- =====================================================================
-       EXACT REPLICA FLOATING RICH-TEXT CONTEXT MENU (from reference screenshot)
+       EXACT REPLICA FLOATING RICH-TEXT CONTEXT MENU (Desktop Popup & Mobile Sheet)
        ===================================================================== -->
   <div id="richContextMenu" class="hidden" onmousedown="event.stopPropagation()">
+    <!-- Mobile Sheet Header with Done button -->
+    <div class="md:hidden px-4 py-2 border-b border-gray-200 flex items-center justify-between bg-gray-50/90 rounded-t-2xl">
+      <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Format &amp; Note Tools</span>
+      <button type="button" onclick="hideAllMenus()" class="px-3 py-1 rounded-lg bg-slate-900 text-white text-xs font-semibold cursor-pointer">Done</button>
+    </div>
+
     <!-- Row 1: Font Family, Size (- 9 +), Text Color (A), Highlight Color -->
     <div class="px-3 pt-1.5 pb-2 border-b border-gray-200 flex items-center justify-between gap-1.5">
       <div class="relative flex-1 min-w-0">
-        <select id="ctxFontFamily" onchange="applyFontFamily(this.value)" class="w-full appearance-none bg-transparent hover:bg-gray-100 text-[13px] font-normal text-gray-800 py-1 pl-1.5 pr-6 rounded cursor-pointer outline-none truncate">
+        <select id="ctxFontFamily" onchange="applyFontFamily(this.value)" class="w-full appearance-none bg-transparent hover:bg-gray-100 text-[13px] font-normal text-gray-800 py-1.5 pl-1.5 pr-6 rounded cursor-pointer outline-none truncate">
           <option value="Calibri, 'Segoe UI', sans-serif">Calibri</option>
           <option value="'Segoe UI', sans-serif">Segoe UI</option>
           <option value="Arial, sans-serif">Arial</option>
@@ -276,11 +403,11 @@
 
       <!-- Font Size Stepper (- 9 +) -->
       <div class="flex items-center gap-0.5">
-        <button type="button" onclick="stepFontSize(-1)" class="ctx-btn-icon !w-6 !h-7" title="Decrease Font Size">
+        <button type="button" onclick="stepFontSize(-1)" class="ctx-btn-icon !w-7 !h-8" title="Decrease Font Size">
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <span id="ctxFontSizeDisplay" class="w-6 text-center text-[13px] text-gray-800 font-normal">11</span>
-        <button type="button" onclick="stepFontSize(1)" class="ctx-btn-icon !w-6 !h-7" title="Increase Font Size">
+        <button type="button" onclick="stepFontSize(1)" class="ctx-btn-icon !w-7 !h-8" title="Increase Font Size">
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
       </div>
@@ -388,19 +515,19 @@
       </div>
 
       <!-- Quick Emoji Picker Popover -->
-      <div id="emojiPopover" class="hidden absolute right-3 top-10 z-50 bg-white border border-gray-200 rounded-lg shadow-xl p-2 grid grid-cols-6 gap-1 w-52">
-        <button type="button" onclick="insertTextAtCursor('✅')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">✅</button>
-        <button type="button" onclick="insertTextAtCursor('📌')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">📌</button>
-        <button type="button" onclick="insertTextAtCursor('⏰')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">⏰</button>
-        <button type="button" onclick="insertTextAtCursor('⭐')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">⭐</button>
-        <button type="button" onclick="insertTextAtCursor('🔥')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">🔥</button>
-        <button type="button" onclick="insertTextAtCursor('💡')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">💡</button>
-        <button type="button" onclick="insertTextAtCursor('❤️')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">❤️</button>
-        <button type="button" onclick="insertTextAtCursor('👍')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">👍</button>
-        <button type="button" onclick="insertTextAtCursor('📅')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">📅</button>
-        <button type="button" onclick="insertTextAtCursor('⚡')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">⚡</button>
-        <button type="button" onclick="insertTextAtCursor('🎯')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">🎯</button>
-        <button type="button" onclick="insertTextAtCursor('📝')" class="hover:bg-gray-100 rounded p-1 text-base cursor-pointer">📝</button>
+      <div id="emojiPopover" class="hidden absolute right-3 top-11 z-50 bg-white border border-gray-200 rounded-xl shadow-xl p-2 grid grid-cols-6 gap-1 w-60">
+        <button type="button" onclick="insertTextAtCursor('✅')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">✅</button>
+        <button type="button" onclick="insertTextAtCursor('📌')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">📌</button>
+        <button type="button" onclick="insertTextAtCursor('⏰')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">⏰</button>
+        <button type="button" onclick="insertTextAtCursor('⭐')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">⭐</button>
+        <button type="button" onclick="insertTextAtCursor('🔥')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">🔥</button>
+        <button type="button" onclick="insertTextAtCursor('💡')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">💡</button>
+        <button type="button" onclick="insertTextAtCursor('❤️')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">❤️</button>
+        <button type="button" onclick="insertTextAtCursor('👍')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">👍</button>
+        <button type="button" onclick="insertTextAtCursor('📅')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">📅</button>
+        <button type="button" onclick="insertTextAtCursor('⚡')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">⚡</button>
+        <button type="button" onclick="insertTextAtCursor('🎯')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">🎯</button>
+        <button type="button" onclick="insertTextAtCursor('📝')" class="hover:bg-gray-100 rounded p-1.5 text-lg cursor-pointer">📝</button>
       </div>
     </div>
 
@@ -525,13 +652,21 @@
   </div>
 
   <!-- =====================================================================
-       NOTE OPTIONS POPOVER ('...' Menu: Theme Color, Set Reminder/Alarm, Duplicate, Delete)
+       NOTE OPTIONS POPOVER ('...' Menu: Theme Color, Formatting, Alarm, Duplicate, Delete)
        ===================================================================== -->
-  <div id="noteOptionsMenu" class="hidden fixed z-50 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 p-2 text-sm text-gray-800" onmousedown="event.stopPropagation()">
+  <div id="noteOptionsMenu" class="hidden fixed z-50 w-[90vw] max-w-[280px] bg-white rounded-2xl shadow-2xl border border-gray-200 p-2.5 text-sm text-gray-800" onmousedown="event.stopPropagation()">
     <div class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Note Color</div>
-    <div id="colorSwatchesRow" class="grid grid-cols-6 gap-1.5 px-2 py-1.5 mb-1.5 border-b border-gray-100"></div>
+    <div id="colorSwatchesRow" class="grid grid-cols-6 gap-2 px-2 py-2 mb-1.5 border-b border-gray-100"></div>
 
-    <button type="button" onclick="openAlarmModalForActiveNote()" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-gray-100 transition text-left cursor-pointer">
+    <button type="button" onclick="openFormattingForActiveNote()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition text-left cursor-pointer">
+      <span class="flex items-center gap-2.5 font-medium text-gray-800">
+        <span class="w-5 h-5 rounded bg-slate-100 border border-slate-300 flex items-center justify-center text-xs font-bold">Aa</span>
+        Format Text &amp; Insert
+      </span>
+      <span class="text-[11px] text-gray-400">Tools</span>
+    </button>
+
+    <button type="button" onclick="openAlarmModalForActiveNote()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition text-left cursor-pointer">
       <span class="flex items-center gap-2.5 font-medium text-gray-800">
         <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/>
@@ -541,14 +676,14 @@
       <span class="text-[11px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 font-semibold">Alarm</span>
     </button>
 
-    <button type="button" onclick="openFindReplaceModal()" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-gray-100 transition text-left cursor-pointer">
+    <button type="button" onclick="openFindReplaceModal()" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition text-left cursor-pointer">
       <svg class="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
       <span>Find &amp; Replace</span>
     </button>
 
-    <button type="button" onclick="duplicateActiveNote()" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-gray-100 transition text-left cursor-pointer">
+    <button type="button" onclick="duplicateActiveNote()" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition text-left cursor-pointer">
       <svg class="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
       </svg>
@@ -557,7 +692,7 @@
 
     <div class="my-1 border-t border-gray-100"></div>
 
-    <button type="button" onclick="deleteActiveNote()" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-red-50 text-red-600 transition text-left cursor-pointer">
+    <button type="button" onclick="deleteActiveNote()" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-red-50 active:bg-red-100 text-red-600 transition text-left cursor-pointer">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
       </svg>
@@ -568,45 +703,45 @@
   <!-- =====================================================================
        REMINDER / ALARM SCHEDULER MODAL
        ===================================================================== -->
-  <div id="alarmModal" class="hidden fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden">
-      <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 text-slate-900 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-[#C4F07D] border border-[#b3e366] text-slate-900 flex items-center justify-center">
+  <div id="alarmModal" class="hidden fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[94vw] max-w-md overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="px-4 sm:px-5 py-3.5 bg-slate-50 border-b border-slate-200 text-slate-900 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-[#C4F07D] border border-[#b3e366] text-slate-900 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/>
             </svg>
           </div>
-          <div>
-            <h3 class="font-semibold text-sm text-slate-900">Set Desktop Reminder &amp; Alarm</h3>
-            <p id="alarmModalNoteTitle" class="text-xs text-slate-500 truncate max-w-[230px]">New Note</p>
+          <div class="min-w-0">
+            <h3 class="font-semibold text-sm text-slate-900">Set Reminder &amp; Alarm</h3>
+            <p id="alarmModalNoteTitle" class="text-xs text-slate-500 truncate">New Note</p>
           </div>
         </div>
-        <button type="button" onclick="closeModal('alarmModal')" class="p-1.5 rounded-lg hover:bg-slate-200/70 text-slate-500 cursor-pointer">
+        <button type="button" onclick="closeModal('alarmModal')" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-200/70 text-slate-500 cursor-pointer flex-shrink-0">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
-      <div class="p-5 space-y-4 text-sm">
+      <div class="p-4 sm:p-5 space-y-4 text-sm overflow-y-auto custom-scroll">
         <!-- Quick presets -->
         <div>
           <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Quick Timer Presets</label>
-          <div class="grid grid-cols-4 gap-2">
-            <button type="button" onclick="setQuickAlarmMinutes(1)" class="py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+1 Min</button>
-            <button type="button" onclick="setQuickAlarmMinutes(5)" class="py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+5 Mins</button>
-            <button type="button" onclick="setQuickAlarmMinutes(15)" class="py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+15 Mins</button>
-            <button type="button" onclick="setQuickAlarmMinutes(60)" class="py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+1 Hour</button>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button type="button" onclick="setQuickAlarmMinutes(1)" class="py-2.5 sm:py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+1 Min</button>
+            <button type="button" onclick="setQuickAlarmMinutes(5)" class="py-2.5 sm:py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+5 Mins</button>
+            <button type="button" onclick="setQuickAlarmMinutes(15)" class="py-2.5 sm:py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+15 Mins</button>
+            <button type="button" onclick="setQuickAlarmMinutes(60)" class="py-2.5 sm:py-1.5 px-2 rounded-lg border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-xs font-medium cursor-pointer">+1 Hour</button>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Date &amp; Time</label>
-            <input type="datetime-local" id="alarmDateTimeInput" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-xs" />
+            <input type="datetime-local" id="alarmDateTimeInput" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-xs" />
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Repeat Schedule</label>
-            <select id="alarmRepeatInput" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs bg-white">
+            <select id="alarmRepeatInput" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs bg-white">
               <option value="none">Once (No Repeat)</option>
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -616,20 +751,20 @@
 
         <div>
           <label class="block text-xs font-medium text-gray-700 mb-1">Alarm Label / Reminder Note</label>
-          <input type="text" id="alarmLabelInput" placeholder="e.g., Follow up on meeting notes..." class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs" />
+          <input type="text" id="alarmLabelInput" placeholder="e.g., Follow up on meeting notes..." class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs" />
         </div>
 
-        <div class="flex items-center justify-between pt-1">
-          <button type="button" onclick="playAlarmSound(true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium cursor-pointer">
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <button type="button" onclick="playAlarmSound(true)" class="inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium cursor-pointer">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
             </svg>
-            Test Alarm Sound
+            Test Sound
           </button>
 
-          <div class="flex items-center gap-2">
-            <button type="button" id="removeAlarmBtn" onclick="clearNoteAlarm()" class="hidden px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 cursor-pointer">Remove</button>
-            <button type="button" onclick="saveNoteAlarm()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm cursor-pointer">Save Reminder</button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" id="removeAlarmBtn" onclick="clearNoteAlarm()" class="hidden px-3 py-2.5 sm:py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 cursor-pointer">Remove</button>
+            <button type="button" onclick="saveNoteAlarm()" class="px-4 py-2.5 sm:py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm cursor-pointer">Save Reminder</button>
           </div>
         </div>
       </div>
@@ -640,7 +775,7 @@
        RINGING ALARM POPUP OVERLAY
        ===================================================================== -->
   <div id="ringingModal" class="hidden fixed inset-0 z-[100] bg-slate-900/45 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border-2 border-red-500 w-full max-w-sm p-6 text-center space-y-4 alarm-ringing-card">
+    <div class="bg-white rounded-2xl border-2 border-red-500 w-[92vw] max-w-sm p-6 text-center space-y-4 alarm-ringing-card">
       <div class="w-14 h-14 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center animate-bounce">
         <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/>
@@ -652,8 +787,8 @@
         <p id="ringingAlarmLabel" class="text-xs text-slate-600 mt-1">Scheduled reminder triggered!</p>
       </div>
       <div class="flex items-center justify-center gap-2 pt-2">
-        <button type="button" onclick="snoozeRingingAlarm(5)" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold cursor-pointer">Snooze 5m</button>
-        <button type="button" onclick="dismissRingingAlarm()" class="flex-1 py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-md cursor-pointer">Dismiss Alarm</button>
+        <button type="button" onclick="snoozeRingingAlarm(5)" class="flex-1 py-3 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold cursor-pointer">Snooze 5m</button>
+        <button type="button" onclick="dismissRingingAlarm()" class="flex-1 py-3 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-md cursor-pointer">Dismiss Alarm</button>
       </div>
     </div>
   </div>
@@ -662,22 +797,22 @@
        FIND & REPLACE MODAL
        ===================================================================== -->
   <div id="findReplaceModal" class="hidden fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm p-5 space-y-3.5 text-xs">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[92vw] max-w-sm p-5 space-y-3.5 text-xs">
       <div class="flex items-center justify-between">
         <h3 class="font-semibold text-sm text-slate-900">Find &amp; Replace in Note</h3>
-        <button type="button" onclick="closeModal('findReplaceModal')" class="text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
+        <button type="button" onclick="closeModal('findReplaceModal')" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
       </div>
       <div>
         <label class="block text-slate-600 mb-1">Find text</label>
-        <input type="text" id="findInput" placeholder="Search word or phrase..." class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
+        <input type="text" id="findInput" placeholder="Search word or phrase..." class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
       </div>
       <div>
         <label class="block text-slate-600 mb-1">Replace with</label>
-        <input type="text" id="replaceInput" placeholder="Replacement text..." class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
+        <input type="text" id="replaceInput" placeholder="Replacement text..." class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
       </div>
       <div class="flex justify-end gap-2 pt-1">
-        <button type="button" onclick="executeFindNext()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Find Next</button>
-        <button type="button" onclick="executeReplaceAll()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer">Replace All</button>
+        <button type="button" onclick="executeFindNext()" class="px-3.5 py-2.5 sm:py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Find Next</button>
+        <button type="button" onclick="executeReplaceAll()" class="px-4 py-2.5 sm:py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer">Replace All</button>
       </div>
     </div>
   </div>
@@ -686,36 +821,37 @@
        INSERT LINK MODAL
        ===================================================================== -->
   <div id="insertLinkModal" class="hidden fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm p-5 space-y-3.5 text-xs">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[92vw] max-w-sm p-5 space-y-3.5 text-xs">
       <div class="flex items-center justify-between">
         <h3 class="font-semibold text-sm text-slate-900">Insert Hyperlink</h3>
-        <button type="button" onclick="closeModal('insertLinkModal')" class="text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
+        <button type="button" onclick="closeModal('insertLinkModal')" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
       </div>
       <div>
         <label class="block text-slate-600 mb-1">Display Text</label>
-        <input type="text" id="linkTextInput" placeholder="Link label" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
+        <input type="text" id="linkTextInput" placeholder="Link label" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
       </div>
       <div>
         <label class="block text-slate-600 mb-1">URL Address</label>
-        <input type="url" id="linkUrlInput" placeholder="https://example.com" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
+        <input type="url" id="linkUrlInput" placeholder="https://example.com" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 outline-none focus:border-emerald-500" />
       </div>
       <div class="flex justify-end gap-2 pt-1">
-        <button type="button" onclick="closeModal('insertLinkModal')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer">Cancel</button>
-        <button type="button" onclick="confirmInsertLink()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer">Insert Link</button>
+        <button type="button" onclick="closeModal('insertLinkModal')" class="px-3.5 py-2.5 sm:py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer">Cancel</button>
+        <button type="button" onclick="confirmInsertLink()" class="px-4 py-2.5 sm:py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer">Insert Link</button>
       </div>
     </div>
   </div>
 
   <!-- =====================================================================
-       ALL NOTES & REMINDERS DRAWER (LIGHT THEME)
+       ALL NOTES & REMINDERS DRAWER (Responsive Mobile Full-Sheet / Desktop Sidebar)
        ===================================================================== -->
-  <div id="notesDrawer" class="hidden fixed top-16 right-3 bottom-3 z-40 w-80 bg-white/95 backdrop-blur-md text-slate-800 rounded-2xl border border-slate-200 shadow-xl flex flex-col overflow-hidden">
-    <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+  <div id="notesDrawer" class="hidden fixed inset-x-3 top-16 bottom-20 md:inset-x-auto md:top-16 md:right-3 md:bottom-3 z-40 md:w-80 bg-white/98 backdrop-blur-md text-slate-800 rounded-2xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
+    <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/90">
       <h3 class="font-semibold text-sm text-slate-900">All Notes &amp; Scheduled Alarms</h3>
-      <button type="button" onclick="toggleNotesDrawer()" class="text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
+      <button type="button" onclick="toggleNotesDrawer()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200/70 text-slate-500 cursor-pointer">✕</button>
     </div>
-    <div class="p-3 border-b border-slate-100">
-      <input type="text" id="drawerSearchInput" oninput="renderDrawerList()" placeholder="Search notes..." class="w-full px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-emerald-500 focus:bg-white" />
+    <div class="p-3 border-b border-slate-100 flex items-center gap-2">
+      <input type="text" id="drawerSearchInput" oninput="renderDrawerList()" placeholder="Search notes..." class="flex-1 px-3 py-2 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-emerald-500 focus:bg-white" />
+      <button type="button" onclick="createNewNote(); toggleNotesDrawer();" class="px-3 py-2 rounded-lg bg-[#C4F07D] text-slate-900 font-semibold text-xs border border-[#b3e366] flex-shrink-0 cursor-pointer">+ New</button>
     </div>
     <div id="drawerNotesList" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2.5"></div>
   </div>
@@ -723,41 +859,41 @@
   <!-- =====================================================================
        SUPABASE CLOUD BACKUP & SYNC CONFIGURATION MODAL
        ===================================================================== -->
-  <div id="supabaseModal" class="hidden fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden">
-      <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center">
+  <div id="supabaseModal" class="hidden fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[94vw] max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="px-4 sm:px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
             </svg>
           </div>
-          <div>
-            <h3 class="font-semibold text-sm text-slate-900">Supabase Cloud Backup &amp; Sync</h3>
-            <p class="text-xs text-slate-500">Auto-backup notes, colors, positions &amp; alarms to PostgreSQL</p>
+          <div class="min-w-0">
+            <h3 class="font-semibold text-sm text-slate-900 truncate">Supabase Cloud Backup &amp; Sync</h3>
+            <p class="text-xs text-slate-500 truncate">Sync notes &amp; alarms across desktop &amp; mobile</p>
           </div>
         </div>
-        <button type="button" onclick="closeModal('supabaseModal')" class="p-1.5 rounded-lg hover:bg-slate-200/70 text-slate-500 cursor-pointer">✕</button>
+        <button type="button" onclick="closeModal('supabaseModal')" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-200/70 text-slate-500 cursor-pointer flex-shrink-0">✕</button>
       </div>
 
-      <div class="p-5 space-y-3.5 text-xs text-slate-700 max-h-[82vh] overflow-y-auto custom-scroll">
+      <div class="p-4 sm:p-5 space-y-3.5 text-xs text-slate-700 overflow-y-auto custom-scroll">
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Supabase Project URL</label>
-          <input type="url" id="sbUrlInput" placeholder="https://eabnbkysvhbbhrgpetkz.supabase.co" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono" />
+          <input type="url" id="sbUrlInput" placeholder="https://eabnbkysvhbbhrgpetkz.supabase.co" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono" />
         </div>
 
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Supabase Anon Public Key</label>
-          <input type="password" id="sbKeyInput" placeholder="sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono" />
+          <input type="password" id="sbKeyInput" placeholder="sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono" />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Workspace / User Sync ID</label>
-            <input type="text" id="sbWorkspaceInput" placeholder="my-desktop-notes" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs" />
+            <input type="text" id="sbWorkspaceInput" placeholder="my-desktop-notes" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs" />
           </div>
           <div class="flex items-end pb-1">
-            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none min-h-[38px]">
               <input type="checkbox" id="sbAutoSyncCheckbox" checked class="w-4 h-4 accent-emerald-600 rounded" />
               <span class="font-medium text-slate-700">Auto-backup on every edit</span>
             </label>
@@ -768,7 +904,7 @@
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5">
           <div class="flex items-center justify-between">
             <span class="font-semibold text-[11px] uppercase tracking-wider text-slate-500">1-Step Supabase SQL Table Setup</span>
-            <button type="button" onclick="copySupabaseSql()" class="px-2 py-1 rounded bg-white hover:bg-slate-100 border border-slate-300 text-[11px] font-medium text-slate-700 cursor-pointer">Copy SQL</button>
+            <button type="button" onclick="copySupabaseSql()" class="px-2.5 py-1.5 rounded bg-white hover:bg-slate-100 border border-slate-300 text-[11px] font-medium text-slate-700 cursor-pointer">Copy SQL</button>
           </div>
           <pre id="supabaseSqlSnippet" class="text-[11px] font-mono text-slate-600 overflow-x-auto bg-white p-2 rounded border border-slate-200 select-all">CREATE TABLE IF NOT EXISTS public.sticky_notes (
   workspace_id TEXT PRIMARY KEY,
@@ -782,12 +918,12 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
 
         <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
           <div class="flex items-center gap-2">
-            <button type="button" onclick="pushNotesToSupabase(true)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Backup Now ↑</button>
-            <button type="button" onclick="pullNotesFromSupabase()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Restore ↓</button>
+            <button type="button" onclick="pushNotesToSupabase(true)" class="px-3 py-2.5 sm:py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Backup Now ↑</button>
+            <button type="button" onclick="pullNotesFromSupabase()" class="px-3 py-2.5 sm:py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium cursor-pointer">Restore ↓</button>
           </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="disconnectSupabase()" class="px-3 py-1.5 rounded-lg text-red-600 hover:bg-red-50 font-medium cursor-pointer">Disconnect</button>
-            <button type="button" onclick="saveSupabaseConfig()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xs cursor-pointer">Connect &amp; Sync</button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" onclick="disconnectSupabase()" class="px-3 py-2.5 sm:py-1.5 rounded-lg text-red-600 hover:bg-red-50 font-medium cursor-pointer">Disconnect</button>
+            <button type="button" onclick="saveSupabaseConfig()" class="px-4 py-2.5 sm:py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xs cursor-pointer">Connect &amp; Sync</button>
           </div>
         </div>
       </div>
@@ -795,7 +931,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
   </div>
 
   <!-- Toast Banner -->
-  <div id="toastBanner" class="hidden fixed bottom-4 right-4 z-[110] bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2"></div>
+  <div id="toastBanner" class="hidden fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 z-[110] bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center justify-center md:justify-start gap-2"></div>
 
   <script>
     /* =========================================================================
@@ -826,33 +962,142 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
     let alarmAudioInterval = null;
     let deferredInstallPrompt = null;
 
-    // Failsafe Supabase configuration & debounce timer (uses zero-dependency native fetch)
+    // Failsafe Supabase configuration & debounce timer
     let supabaseConnected = false;
     let supabaseConfig = { url: '', key: '', workspaceId: 'default-desktop', autoSync: true };
     let supabaseSyncDebounce = null;
 
+    // MeetNote Clipboard Brand Icon (Matches meetnote.ico / meetnote.png)
+    const MEETNOTE_SVG_URI = window.MEETNOTE_SVG_URI || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E";
+    let meetnotePng512Uri = MEETNOTE_SVG_URI;
+    let meetnotePng192Uri = MEETNOTE_SVG_URI;
+
+    function renderMeetNoteCanvasIcon(size) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const s = size / 128;
+
+        const roundRect = (x, y, w, h, r) => {
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.lineTo(x + w - r, y);
+          ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+          ctx.lineTo(x + w, y + h - r);
+          ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+          ctx.lineTo(x + r, y + h);
+          ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+          ctx.lineTo(x, y + r);
+          ctx.quadraticCurveTo(x, y, x + r, y);
+          ctx.closePath();
+        };
+
+        // Brown rounded clipboard body (#7C5343)
+        ctx.fillStyle = '#7C5343';
+        roundRect(20 * s, 18 * s, 88 * s, 104 * s, 14 * s);
+        ctx.fill();
+
+        // Top silver-grey clip (#A5ABB3)
+        ctx.fillStyle = '#A5ABB3';
+        roundRect(46 * s, 8 * s, 36 * s, 20 * s, 6 * s);
+        ctx.fill();
+
+        // White inner sheet (#FFFFFF)
+        ctx.fillStyle = '#FFFFFF';
+        roundRect(30 * s, 30 * s, 68 * s, 82 * s, 6 * s);
+        ctx.fill();
+
+        // Three green checkmarks (#1FA966) & three dark-slate lines (#364152)
+        const rows = [48, 71, 94];
+        rows.forEach((y) => {
+          ctx.strokeStyle = '#1FA966';
+          ctx.lineWidth = 6.5 * s;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          ctx.moveTo(39 * s, y * s);
+          ctx.lineTo(45 * s, (y + 6) * s);
+          ctx.lineTo(57 * s, (y - 7) * s);
+          ctx.stroke();
+
+          ctx.strokeStyle = '#364152';
+          ctx.beginPath();
+          ctx.moveTo(65 * s, (y + 1) * s);
+          ctx.lineTo(89 * s, (y + 1) * s);
+          ctx.stroke();
+        });
+
+        return canvas.toDataURL('image/png');
+      } catch (e) {
+        return MEETNOTE_SVG_URI;
+      }
+    }
+
+    function initAppIconsAndBrand() {
+      meetnotePng512Uri = renderMeetNoteCanvasIcon(512);
+      meetnotePng192Uri = renderMeetNoteCanvasIcon(192);
+
+      // Set PNG data-URI for Apple touch icon immediately
+      const appleLink = document.getElementById('appAppleIcon');
+      if (appleLink) appleLink.href = meetnotePng192Uri;
+
+      // Check if local meetnote.ico / meetnote.png exist alongside index.html when hosted
+      if (location.protocol === 'http:' || location.protocol === 'https:') {
+        const probeIco = new Image();
+        probeIco.onload = () => {
+          const fav = document.getElementById('appFavicon');
+          const sh = document.getElementById('appShortcutIcon');
+          if (fav) { fav.type = 'image/x-icon'; fav.href = './meetnote.ico'; }
+          if (sh) { sh.href = './meetnote.ico'; }
+        };
+        probeIco.src = './meetnote.ico';
+
+        const probePng = new Image();
+        probePng.onload = () => {
+          const appIcon = document.getElementById('appAppleIcon');
+          const logoImg = document.getElementById('brandLogoImg');
+          if (appIcon) appIcon.href = './meetnote.png';
+          if (logoImg) logoImg.src = './meetnote.png';
+          window.DesktopBridge.appIcon = new URL('./meetnote.png', location.href).href;
+        };
+        probePng.src = './meetnote.png';
+      }
+    }
+
+    function isMobileViewport() {
+      return window.innerWidth <= 768;
+    }
+
     // Universal Desktop Wrapper Bridge (Electron, Tauri, WebView2, PWA / Browser)
     window.DesktopBridge = {
       env: 'Web / PWA',
+      appIcon: MEETNOTE_SVG_URI,
       init() {
+        this.appIcon = meetnotePng512Uri || MEETNOTE_SVG_URI;
         try {
           if (window.__TAURI__) {
             this.env = 'Tauri Desktop';
           } else if (window.electronAPI || (typeof process !== 'undefined' && process.versions && process.versions.electron)) {
             this.env = 'Electron Desktop';
+            if (typeof window.electronAPI.setWindowIcon === 'function') {
+              window.electronAPI.setWindowIcon(this.appIcon);
+            }
           } else if (window.chrome && window.chrome.webview) {
             this.env = 'WebView2 Desktop';
+            window.chrome.webview.postMessage(JSON.stringify({ type: 'SET_APP_ICON', icon: this.appIcon }));
           }
           const envBadge = document.getElementById('desktopEnvLabel');
           if (envBadge) envBadge.textContent = `${this.env} • BG Active`;
         } catch (e) {}
       },
       async notifyAndFocus(title, body, tag) {
-        // 1. Tauri Native Desktop Notification + Window Focus
+        const iconUrl = this.appIcon || meetnotePng192Uri || MEETNOTE_SVG_URI;
         try {
           if (window.__TAURI__) {
             if (window.__TAURI__.notification) {
-              window.__TAURI__.notification.sendNotification({ title, body });
+              window.__TAURI__.notification.sendNotification({ title, body, icon: iconUrl });
             }
             if (window.__TAURI__.window && window.__TAURI__.window.appWindow) {
               await window.__TAURI__.window.appWindow.unminimize();
@@ -862,21 +1107,18 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
           }
         } catch (e) {}
 
-        // 2. Electron IPC Native Notification & Focus Bridge
         try {
           if (window.electronAPI && typeof window.electronAPI.triggerAlarm === 'function') {
-            window.electronAPI.triggerAlarm({ title, body, tag });
+            window.electronAPI.triggerAlarm({ title, body, tag, icon: iconUrl });
           }
         } catch (e) {}
 
-        // 3. Microsoft WebView2 Host Message Bridge (.NET / C++ Desktop Wrapper)
         try {
           if (window.chrome && window.chrome.webview) {
-            window.chrome.webview.postMessage(JSON.stringify({ type: 'STICKY_ALARM', title, body, tag }));
+            window.chrome.webview.postMessage(JSON.stringify({ type: 'STICKY_ALARM', title, body, tag, icon: iconUrl }));
           }
         } catch (e) {}
 
-        // 4. Standard OS / Browser Notification API + Service Worker
         try {
           if ('Notification' in window && Notification.permission === 'granted') {
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
@@ -884,11 +1126,19 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
               await reg.showNotification(title, {
                 body,
                 tag,
+                icon: iconUrl,
+                badge: meetnotePng192Uri,
                 requireInteraction: true,
                 silent: false
               });
             } else {
-              const n = new Notification(title, { body, tag, requireInteraction: true });
+              const n = new Notification(title, {
+                body,
+                tag,
+                icon: iconUrl,
+                badge: meetnotePng192Uri,
+                requireInteraction: true
+              });
               n.onclick = () => {
                 window.focus();
                 n.close();
@@ -905,6 +1155,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
        2. INITIALIZATION & PWA / BACKGROUND SERVICE WORKER SETUP
        ========================================================================= */
     window.addEventListener('DOMContentLoaded', () => {
+      try { initAppIconsAndBrand(); } catch (e) {}
       try { window.DesktopBridge.init(); } catch (e) {}
       try { initColorSwatches(); } catch (e) {}
       try { loadNotesFromStorage(); } catch (e) {}
@@ -917,17 +1168,21 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
 
     function initPwaManifestAndServiceWorker() {
       try {
-        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#C4F07D"/><path d="M36 28h40l20 20v52a8 8 0 0 1-8 8H36a8 8 0 0 1-8-8V36a8 8 0 0 1 8-8z" fill="#CCF583" stroke="#1f2937" stroke-width="6"/></svg>`;
-        const iconUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(iconSvg);
+        const icon192 = meetnotePng192Uri || renderMeetNoteCanvasIcon(192);
+        const icon512 = meetnotePng512Uri || renderMeetNoteCanvasIcon(512);
 
         const manifest = {
-          name: 'Sticky Notes Desktop',
-          short_name: 'StickyNotes',
+          name: 'MeetNote',
+          short_name: 'MeetNote',
+          description: 'MeetNote Desktop & Mobile Sticky Notes with Cloud Backup & Alarms',
           start_url: '.',
           display: 'standalone',
           background_color: '#F3F5F8',
-          theme_color: '#C4F07D',
-          icons: [{ src: iconUrl, sizes: '128x128', type: 'image/svg+xml' }]
+          theme_color: '#7C5343',
+          icons: [
+            { src: icon192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: icon512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+          ]
         };
         const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
         const manifestLink = document.createElement('link');
@@ -967,7 +1222,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
 
     async function triggerPwaInstall() {
       if (!deferredInstallPrompt) {
-        showToast('Use your browser menu → "Install App" or "Add to Desktop" for standalone window mode.');
+        showToast('Use your browser menu → "Install App" or "Add to Home Screen".');
         return;
       }
       try {
@@ -980,7 +1235,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
     }
 
     /* =========================================================================
-       3. BACKGROUND WEB WORKER HEARTBEAT (Prevents background tab throttling)
+       3. BACKGROUND WEB WORKER HEARTBEAT
        ========================================================================= */
     function initBackgroundWorker() {
       const workerScript = `
@@ -1021,7 +1276,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
             title: 'New Note',
             content: '',
             theme: 'lime',
-            x: Math.max(40, Math.min(window.innerWidth - 380, 460)),
+            x: Math.max(24, Math.min(window.innerWidth - 360, 420)),
             y: 78,
             width: 340,
             height: 360,
@@ -1050,10 +1305,18 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
     }
 
     function updateTopCounters() {
+      const total = notes.length;
+      const alarms = notes.filter(n => n.alarm && n.alarm.enabled).length;
+
       const totalEl = document.getElementById('totalNotesCount');
       const alarmEl = document.getElementById('activeAlarmCount');
-      if (totalEl) totalEl.textContent = notes.length;
-      if (alarmEl) alarmEl.textContent = notes.filter(n => n.alarm && n.alarm.enabled).length;
+      const mobTotalEl = document.getElementById('mobileNotesCount');
+      const mobAlarmEl = document.getElementById('mobileAlarmCount');
+
+      if (totalEl) totalEl.textContent = total;
+      if (alarmEl) alarmEl.textContent = alarms;
+      if (mobTotalEl) mobTotalEl.textContent = total;
+      if (mobAlarmEl) mobAlarmEl.textContent = alarms;
     }
 
     function getThemeObj(themeId) {
@@ -1076,11 +1339,20 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
         zIndex: highestZ,
         alarm: null
       };
-      notes.push(newNote);
+      // Put newest note at the top of the mobile stack while appending cleanly
+      if (isMobileViewport()) {
+        notes.unshift(newNote);
+      } else {
+        notes.push(newNote);
+      }
       activeNoteId = newNote.id;
       saveNotesToStorage();
       renderAllNotes();
+      if (isMobileViewport()) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       focusNoteEditor(newNote.id);
+      showToast('Created new note');
     }
 
     /* =========================================================================
@@ -1123,13 +1395,19 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
     function setSyncUiState(state, labelText) {
       const dot = document.getElementById('syncStatusDot');
       const label = document.getElementById('syncBtnLabel');
-      if (!dot || !label) return;
-      label.textContent = labelText;
-      dot.className = 'w-2 h-2 rounded-full ' + (
+      const mobDot = document.getElementById('mobileSyncDot');
+      const mobLabel = document.getElementById('mobileSyncLabel');
+
+      const dotClass = 'w-2 h-2 rounded-full ' + (
         state === 'connected' ? 'bg-emerald-500' :
         state === 'syncing'   ? 'bg-amber-400 animate-ping' :
         state === 'error'     ? 'bg-red-500' : 'bg-slate-400'
       );
+
+      if (label) label.textContent = labelText;
+      if (dot) dot.className = dotClass;
+      if (mobLabel) mobLabel.textContent = state === 'offline' ? 'Backup' : labelText;
+      if (mobDot) mobDot.className = dotClass + ' absolute -top-0.5 -right-1';
     }
 
     function openSupabaseModal() {
@@ -1216,7 +1494,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       } catch (err) {
         console.warn('Supabase backup warning:', err);
         setSyncUiState('error', 'Sync Offline');
-        if (manualNotify) showToast(`Cloud backup issue: check URL, Key, or SQL table.`);
+        if (manualNotify) showToast('Cloud backup issue: check URL, Key, or SQL table.');
       }
     }
 
@@ -1300,15 +1578,30 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
     }
 
     /* =========================================================================
-       5. RENDER STICKY NOTES ON DESKTOP CANVAS
+       5. RENDER STICKY NOTES ON DESKTOP & MOBILE CANVAS
        ========================================================================= */
     function renderAllNotes() {
       const canvas = document.getElementById('desktopCanvas');
       if (!canvas) return;
       canvas.innerHTML = '';
 
-      notes.forEach(note => {
-        if (note.minimized) return;
+      const visibleNotes = notes.filter(n => !n.minimized);
+      if (visibleNotes.length === 0) {
+        canvas.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-[60vh] text-center px-6">
+            <div class="w-12 h-12 rounded-2xl bg-[#C4F07D] border border-[#b3e366] flex items-center justify-center mb-3 shadow-xs">
+              <span class="text-xl">📝</span>
+            </div>
+            <p class="text-sm font-semibold text-slate-800">All sticky notes are hidden</p>
+            <p class="text-xs text-slate-500 mt-1 mb-4">Tap "+ New Note" or open the Notes drawer to restore hidden notes.</p>
+            <button type="button" onclick="createNewNote()" class="px-4 py-2.5 rounded-xl bg-[#C4F07D] text-slate-900 font-semibold text-xs border border-[#aad95d] shadow-xs cursor-pointer">+ Create New Note</button>
+          </div>
+        `;
+        updateTopCounters();
+        return;
+      }
+
+      visibleNotes.forEach(note => {
         const theme = getThemeObj(note.theme);
         if (note.zIndex > highestZ) highestZ = note.zIndex;
 
@@ -1325,48 +1618,56 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
         card.style.border = `1px solid ${theme.border}`;
 
         card.addEventListener('mousedown', () => focusNote(note.id));
+        card.addEventListener('touchstart', () => focusNote(note.id), { passive: true });
 
         // Header Bar matching screenshot ('New Note' centered, '...' and 'X' on right)
         const header = document.createElement('div');
-        header.className = 'h-9 px-2.5 flex items-center justify-between cursor-move select-none flex-shrink-0';
+        header.className = 'h-11 md:h-9 px-2.5 flex items-center justify-between md:cursor-move select-none flex-shrink-0';
         header.style.backgroundColor = theme.header;
 
-        // Left Spacer / Alarm indicator badge
+        // Left Spacer / Alarm indicator badge + Mobile Format Trigger ('Aa')
         const leftBox = document.createElement('div');
-        leftBox.className = 'w-14 flex items-center';
+        leftBox.className = 'min-w-[64px] flex items-center gap-1';
+        let leftHtml = `
+          <button type="button" onclick="event.stopPropagation(); activeNoteId='${note.id}'; openFormattingForActiveNote();" title="Format Text & Insert Tools" class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg bg-black/5 hover:bg-black/15 active:bg-black/20 text-xs font-bold cursor-pointer">
+            Aa
+          </button>
+        `;
         if (note.alarm && note.alarm.enabled) {
           const alarmDate = new Date(note.alarm.time);
           const timeStr = alarmDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          leftBox.innerHTML = `
-            <button type="button" onclick="event.stopPropagation(); activeNoteId='${note.id}'; openAlarmModalForActiveNote();" title="Alarm set for ${alarmDate.toLocaleString()}" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/10 hover:bg-black/20 text-[10px] font-semibold cursor-pointer">
+          leftHtml += `
+            <button type="button" onclick="event.stopPropagation(); activeNoteId='${note.id}'; openAlarmModalForActiveNote();" title="Alarm set for ${alarmDate.toLocaleString()}" class="inline-flex items-center gap-1 px-1.5 py-1 md:py-0.5 rounded bg-black/10 hover:bg-black/20 text-[10px] font-semibold cursor-pointer">
               ⏰ ${timeStr}
             </button>
           `;
         }
+        leftBox.innerHTML = leftHtml;
 
         // Editable Note Title ('New Note')
         const titleInput = document.createElement('input');
         titleInput.type = 'text';
         titleInput.value = note.title;
-        titleInput.className = 'bg-transparent text-center font-normal text-[14px] outline-none w-full max-w-[160px] truncate focus:bg-black/5 rounded px-1';
+        titleInput.className = 'bg-transparent text-center font-medium md:font-normal text-[14px] outline-none w-full max-w-[170px] truncate focus:bg-black/5 rounded px-1';
         titleInput.style.color = theme.text;
         titleInput.addEventListener('mousedown', (e) => e.stopPropagation());
+        titleInput.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
         titleInput.addEventListener('input', (e) => {
           note.title = e.target.value || 'New Note';
           saveNotesToStorage();
         });
 
-        // Right Window Controls ('...' and 'X')
+        // Right Window Controls ('...' and 'X') with 40px touch targets on mobile
         const controls = document.createElement('div');
-        controls.className = 'w-14 flex items-center justify-end gap-0.5';
+        controls.className = 'min-w-[68px] flex items-center justify-end gap-1 md:gap-0.5';
         controls.innerHTML = `
-          <button type="button" title="Note options, Colors & Alarm" class="w-7 h-7 flex items-center justify-center rounded hover:bg-black/10 transition cursor-pointer" onclick="openNoteOptionsMenu(event, '${note.id}')">
+          <button type="button" title="Note options, Colors & Alarm" class="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center rounded-lg md:rounded hover:bg-black/10 active:bg-black/20 transition cursor-pointer" onclick="openNoteOptionsMenu(event, '${note.id}')">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>
+              <circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/>
             </svg>
           </button>
-          <button type="button" title="Hide / Minimize Note" class="w-7 h-7 flex items-center justify-center rounded hover:bg-black/10 transition cursor-pointer" onclick="minimizeNote(event, '${note.id}')">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button type="button" title="Hide / Minimize Note" class="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center rounded-lg md:rounded hover:bg-black/10 active:bg-black/20 transition cursor-pointer" onclick="minimizeNote(event, '${note.id}')">
+            <svg class="w-4 h-4 md:w-3.5 md:h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
@@ -1376,7 +1677,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
         header.appendChild(titleInput);
         header.appendChild(controls);
 
-        // Dragging support (mouse + touch)
+        // Dragging support on Desktop (> 768px)
         enableHeaderDrag(header, card, note);
 
         // Contenteditable Rich Text Area
@@ -1384,13 +1685,19 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
         editor.className = 'note-editor px-4 py-3 text-[15px]';
         editor.contentEditable = 'true';
         editor.spellcheck = true;
-        editor.dataset.placeholder = 'Take a note... (Right-click for formatting)';
+        editor.dataset.placeholder = isMobileViewport()
+          ? 'Tap here to write... (Use Aa or ••• for formatting & alarms)'
+          : 'Take a note... (Right-click for formatting)';
         editor.innerHTML = note.content;
 
         editor.addEventListener('input', () => {
           note.content = editor.innerHTML;
           saveNotesToStorage();
         });
+
+        editor.addEventListener('keyup', saveSelection);
+        editor.addEventListener('mouseup', saveSelection);
+        editor.addEventListener('touchend', saveSelection);
 
         // Toggle interactive checkboxes inside editor
         editor.addEventListener('click', (e) => {
@@ -1408,7 +1715,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
           }
         });
 
-        // Right-click opens our exact custom Desktop Rich Context Menu
+        // Right-click / long-press opens our exact custom Desktop Rich Context Menu
         editor.addEventListener('contextmenu', (e) => {
           e.preventDefault();
           focusNote(note.id);
@@ -1416,10 +1723,10 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
           openRichContextMenu(e.clientX, e.clientY);
         });
 
-        // Track resize changes
+        // Track resize changes on desktop
         if (typeof ResizeObserver !== 'undefined') {
           const resizeObserver = new ResizeObserver(() => {
-            if (!note.minimized && card.offsetWidth > 0 && card.offsetHeight > 0) {
+            if (!isMobileViewport() && !note.minimized && card.offsetWidth > 0 && card.offsetHeight > 0) {
               note.width = card.offsetWidth;
               note.height = card.offsetHeight;
               saveNotesToStorage();
@@ -1441,6 +1748,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       let startX = 0, startY = 0, origX = 0, origY = 0;
 
       const onStart = (clientX, clientY) => {
+        if (isMobileViewport()) return;
         isDragging = true;
         startX = clientX;
         startY = clientY;
@@ -1450,7 +1758,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       };
 
       const onMove = (clientX, clientY) => {
-        if (!isDragging) return;
+        if (!isDragging || isMobileViewport()) return;
         const dx = clientX - startX;
         const dy = clientY - startY;
         noteObj.x = Math.max(0, Math.min(window.innerWidth - 100, origX + dx));
@@ -1472,18 +1780,6 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       });
       window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
       window.addEventListener('mouseup', onEnd);
-
-      headerEl.addEventListener('touchstart', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.closest('button')) return;
-        const t = e.touches[0];
-        onStart(t.clientX, t.clientY);
-      }, { passive: true });
-      window.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        const t = e.touches[0];
-        onMove(t.clientX, t.clientY);
-      }, { passive: true });
-      window.addEventListener('touchend', onEnd);
     }
 
     function minimizeNote(e, noteId) {
@@ -1503,16 +1799,28 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
     function saveSelection() {
       const sel = window.getSelection();
       if (sel && sel.rangeCount > 0) {
-        savedSelectionRange = sel.getRangeAt(0).cloneRange();
+        const range = sel.getRangeAt(0);
+        const editor = getActiveEditor();
+        if (editor && editor.contains(range.commonAncestorContainer)) {
+          savedSelectionRange = range.cloneRange();
+        }
       }
     }
 
     function restoreSelection() {
+      const editor = getActiveEditor();
+      if (editor) editor.focus();
       if (savedSelectionRange) {
         const sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(savedSelectionRange);
       }
+    }
+
+    function openFormattingForActiveNote() {
+      hideAllMenus();
+      focusNote(activeNoteId);
+      openRichContextMenu(window.innerWidth / 2 - 150, window.innerHeight / 2 - 150);
     }
 
     function openRichContextMenu(x, y) {
@@ -1538,11 +1846,13 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
 
       menu.classList.remove('hidden');
 
-      const menuRect = menu.getBoundingClientRect();
-      const posX = Math.min(x, window.innerWidth - menuRect.width - 10);
-      const posY = Math.min(y, window.innerHeight - menuRect.height - 10);
-      menu.style.left = `${Math.max(8, posX)}px`;
-      menu.style.top = `${Math.max(8, posY)}px`;
+      if (!isMobileViewport()) {
+        const menuRect = menu.getBoundingClientRect();
+        const posX = Math.min(x, window.innerWidth - menuRect.width - 10);
+        const posY = Math.min(y, window.innerHeight - menuRect.height - 10);
+        menu.style.left = `${Math.max(8, posX)}px`;
+        menu.style.top = `${Math.max(8, posY)}px`;
+      }
     }
 
     function hideAllMenus() {
@@ -1817,7 +2127,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.title = t.name;
-        btn.className = 'w-7 h-7 rounded-full border border-black/20 hover:scale-110 transition cursor-pointer shadow-2xs';
+        btn.className = 'w-8 h-8 md:w-7 md:h-7 rounded-full border border-black/20 hover:scale-110 active:scale-95 transition cursor-pointer shadow-2xs';
         btn.style.backgroundColor = t.header;
         btn.onclick = () => changeActiveNoteTheme(t.id);
         container.appendChild(btn);
@@ -1831,8 +2141,9 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       const menu = document.getElementById('noteOptionsMenu');
       menu.classList.remove('hidden');
       const rect = e.currentTarget.getBoundingClientRect();
-      menu.style.left = `${Math.min(rect.left, window.innerWidth - 270)}px`;
-      menu.style.top = `${Math.min(rect.bottom + 6, window.innerHeight - 260)}px`;
+      const menuW = Math.min(280, window.innerWidth * 0.9);
+      menu.style.left = `${Math.max(12, Math.min(rect.right - menuW, window.innerWidth - menuW - 12))}px`;
+      menu.style.top = `${Math.min(rect.bottom + 6, window.innerHeight - 310)}px`;
     }
 
     function changeActiveNoteTheme(themeId) {
@@ -1869,7 +2180,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
         return;
       }
       notes = notes.filter(n => n.id !== activeNoteId);
-      activeNoteId = notes[notes.length - 1].id;
+      activeNoteId = notes[0].id;
       saveNotesToStorage();
       renderAllNotes();
       showToast('Note deleted.');
@@ -1887,9 +2198,11 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
         const perm = await Notification.requestPermission();
         updateNotificationButtonUI();
         if (perm === 'granted') {
-          showToast('Desktop notifications enabled! Reminders will alert you even in the background.');
-          new Notification('Sticky Notes Reminders Ready', {
-            body: 'You will receive background alerts when your sticky note alarms trigger.'
+          showToast('Notifications enabled! Reminders will alert you in the background.');
+          new Notification('MeetNote Reminders Ready', {
+            body: 'You will receive alerts when your sticky note alarms trigger.',
+            icon: window.DesktopBridge.appIcon || meetnotePng192Uri,
+            badge: meetnotePng192Uri
           });
         } else {
           showToast('Notification permission denied. In-app visual & audio alarms remain active.');
@@ -1907,7 +2220,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
       }
       if (Notification.permission === 'granted') {
         label.textContent = 'Notifications On';
-        btn.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-pointer';
+        btn.className = 'flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-pointer';
       } else {
         label.textContent = 'Enable Notifications';
       }
@@ -2116,7 +2429,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
         const theme = getThemeObj(note.theme);
         const plainPreview = note.content.replace(/<[^>]+>/g, ' ').trim() || 'Empty note...';
         const card = document.createElement('div');
-        card.className = 'p-3 rounded-xl border border-slate-200 hover:border-emerald-400 bg-slate-50/70 hover:bg-white transition cursor-pointer space-y-1.5 shadow-2xs';
+        card.className = 'p-3.5 rounded-xl border border-slate-200 hover:border-emerald-400 bg-slate-50/70 hover:bg-white transition cursor-pointer space-y-1.5 shadow-2xs';
 
         let alarmHtml = '';
         if (note.alarm && note.alarm.enabled) {
@@ -2128,7 +2441,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="w-3 h-3 rounded-full flex-shrink-0 border border-black/15" style="background:${theme.header}"></span>
+              <span class="w-3.5 h-3.5 rounded-full flex-shrink-0 border border-black/15" style="background:${theme.header}"></span>
               <span class="font-semibold text-xs text-slate-900 truncate">${note.title}</span>
             </div>
             <span class="text-[10px] text-slate-400 font-medium">${note.minimized ? 'Hidden' : 'Open'}</span>
@@ -2136,7 +2449,7 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
           <p class="text-[11px] text-slate-600 line-clamp-2">${plainPreview}</p>
           <div class="flex items-center justify-between pt-1">
             <div>${alarmHtml}</div>
-            <button type="button" onclick="event.stopPropagation(); activeNoteId='${note.id}'; openAlarmModalForActiveNote();" class="text-[11px] font-semibold text-emerald-700 hover:underline cursor-pointer">+ Alarm</button>
+            <button type="button" onclick="event.stopPropagation(); activeNoteId='${note.id}'; openAlarmModalForActiveNote();" class="px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:underline cursor-pointer">+ Alarm</button>
           </div>
         `;
 
@@ -2145,6 +2458,9 @@ CREATE POLICY "Allow public sync" ON public.sticky_notes FOR ALL USING (true) WI
           activeNoteId = note.id;
           saveNotesToStorage();
           renderAllNotes();
+          if (isMobileViewport()) {
+            document.getElementById('notesDrawer').classList.add('hidden');
+          }
           focusNoteEditor(note.id);
         };
 
