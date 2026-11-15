@@ -103,6 +103,7 @@
           short_name: 'MeetNote',
           start_url: './',
           display: 'standalone',
+          display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
           background_color: '#F3F5F8',
           theme_color: '#F3F5F8',
           icons: [
@@ -138,7 +139,20 @@
       background-image: none;
       margin: 0;
       padding: 0;
+      min-width: 240px;
+      min-height: 100dvh;
       overflow-x: hidden;
+    }
+
+    /* Compact Header Dock when Desktop PWA window is resized very narrow (< 540px) */
+    @media (max-width: 540px) {
+      #topDock {
+        padding: 6px 8px !important;
+        gap: 4px !important;
+      }
+      #topDock .brand-title-text {
+        font-size: 13px !important;
+      }
     }
 
     @media (max-width: 768px) {
@@ -217,12 +231,12 @@
         position: static !important;
         height: auto !important;
         min-height: 100dvh;
-        padding-top: calc(64px + env(safe-area-inset-top, 0px)) !important;
+        padding-top: calc(82px + env(safe-area-inset-top, 0px)) !important;
         padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
       }
       .sticky-note {
         position: relative !important;
@@ -426,6 +440,13 @@
         </svg>
         <span id="notifPermLabel" class="hidden sm:inline">Enable Notifications</span>
       </button>
+
+      <!-- Desktop PWA View Zoom / Body Scale Control -->
+      <div class="hidden sm:flex items-center bg-slate-100 border border-slate-200 rounded-lg px-1 py-0.5 text-xs text-slate-700" title="Adjust App View Scale">
+        <button type="button" onclick="adjustAppViewScale(-0.05)" class="w-6 h-6 flex items-center justify-center rounded hover:bg-white font-bold cursor-pointer" title="Zoom Out View">−</button>
+        <button type="button" id="viewScaleLabel" onclick="resetAppViewScale()" class="px-1.5 text-[11px] font-semibold hover:text-slate-900 cursor-pointer" title="Reset View Scale to 100%">100%</button>
+        <button type="button" onclick="adjustAppViewScale(0.05)" class="w-6 h-6 flex items-center justify-center rounded hover:bg-white font-bold cursor-pointer" title="Zoom In View">+</button>
+      </div>
 
       <!-- Install PWA / Desktop App Button -->
       <button type="button" id="installPwaBtn" onclick="triggerPwaInstall()" class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer">
@@ -1061,8 +1082,8 @@
        0. PASTE YOUR SUPABASE PROJECT URL & ANON PUBLIC KEY HERE
        (Find both in Supabase Dashboard -> Project Settings -> API)
        ========================================================================= */
-    const BUILTIN_SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-    const BUILTIN_SUPABASE_KEY = 'YOUR_SUPABASE_ANON_PUBLIC_KEY';
+    const BUILTIN_SUPABASE_URL = 'https://eabnbkysvhbbhrgpetkz.supabase.co';
+    const BUILTIN_SUPABASE_KEY = 'sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx';
 
     /* =========================================================================
        1. STATE, FAILSAFE SUPABASE CONFIG & UNIVERSAL DESKTOP APP BRIDGE
@@ -1096,6 +1117,48 @@
     let ringingNote = null;
     let alarmIntervalAudio = null;
     let deferredInstallPrompt = null;
+    const VIEW_SCALE_KEY = 'meetnote_view_scale_v1';
+    let appViewScale = 1.0;
+
+    function applyAppViewScale(scale, persist = true) {
+      appViewScale = Math.max(0.75, Math.min(1.35, Math.round(scale * 100) / 100));
+      const canvas = document.getElementById('desktopCanvas');
+      const label = document.getElementById('viewScaleLabel');
+      if (canvas) {
+        canvas.style.zoom = String(appViewScale);
+      }
+      if (label) {
+        label.textContent = `${Math.round(appViewScale * 100)}%`;
+      }
+      if (persist) {
+        try { localStorage.setItem(VIEW_SCALE_KEY, String(appViewScale)); } catch (e) {}
+      }
+    }
+
+    function adjustAppViewScale(delta) {
+      applyAppViewScale(appViewScale + delta, true);
+    }
+
+    function resetAppViewScale() {
+      applyAppViewScale(1.0, true);
+      showToast('App view scale reset to 100%');
+    }
+
+    function handleWindowResizeReflow() {
+      const isSmall = window.innerWidth <= 768;
+      if (!isSmall) {
+        let changed = false;
+        notes.forEach(n => {
+          if (n.minimized) return;
+          const maxX = Math.max(12, window.innerWidth - Math.min(n.width || 340, window.innerWidth - 24));
+          const maxY = Math.max(66, window.innerHeight - 120);
+          if (n.x > maxX) { n.x = maxX; changed = true; }
+          if (n.y > maxY) { n.y = maxY; changed = true; }
+        });
+        if (changed) saveNotesToStorage(true);
+      }
+      renderAllNotes();
+    }
 
     function normalizeSupabaseUrl(rawUrl) {
       if (!rawUrl || typeof rawUrl !== 'string') return '';
@@ -2414,7 +2477,17 @@
       }
     });
 
+    let windowResizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(windowResizeTimer);
+      windowResizeTimer = setTimeout(handleWindowResizeReflow, 120);
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const savedScale = parseFloat(localStorage.getItem(VIEW_SCALE_KEY));
+        if (Number.isFinite(savedScale)) applyAppViewScale(savedScale, false);
+      } catch (e) {}
       initColorSwatches();
       loadSupabaseConfig();
       loadNotesFromStorage();
