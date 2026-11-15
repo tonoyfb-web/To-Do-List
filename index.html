@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="MeetNote" />
-  <title>MeetNote</title>
+  <title>MeetNote — Sticky Notes &amp; Desktop Reminders</title>
 
   <!-- Inline SVG + Raster PNG Data-URI Generator for Browser Tab, Mobile Home Screen & PWA Manifest -->
   <script>
@@ -180,8 +180,8 @@
       flex-direction: column;
       box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.08);
       transition: box-shadow 0.18s ease, transform 0.12s ease;
-      min-width: 275px;
-      min-height: 275px;
+      min-width: 210px;
+      min-height: 150px;
       resize: both;
       overflow: hidden;
     }
@@ -189,18 +189,40 @@
       box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.08);
     }
 
-    /* Mobile Responsive Stacked Card Layout */
+    /* Custom subtle bottom-right resize grip for touch & small tab viewports */
+    .note-resize-grip {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 22px;
+      height: 22px;
+      cursor: nwse-resize;
+      touch-action: none;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 3px;
+      opacity: 0.45;
+      transition: opacity 0.15s ease;
+      z-index: 5;
+    }
+    .note-resize-grip:hover,
+    .note-resize-grip:active {
+      opacity: 0.9;
+    }
+
+    /* Compact & Resizable Small Tab / Mobile Layout */
     @media (max-width: 768px) {
       #desktopCanvas {
         position: static !important;
         height: auto !important;
         min-height: 100dvh;
-        padding-top: calc(70px + env(safe-area-inset-top, 0px)) !important;
+        padding-top: calc(64px + env(safe-area-inset-top, 0px)) !important;
         padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 14px;
+        gap: 10px;
       }
       .sticky-note {
         position: relative !important;
@@ -208,15 +230,22 @@
         top: auto !important;
         width: calc(100vw - 24px) !important;
         max-width: 540px !important;
-        height: auto !important;
-        min-height: 260px !important;
-        resize: none !important;
+        min-height: 145px !important;
+        resize: vertical !important;
         border-radius: 10px !important;
         margin: 0 auto !important;
       }
+      .note-header {
+        padding: 4px 8px !important;
+      }
+      .note-title-input {
+        font-size: 13px !important;
+      }
       .note-editor {
-        min-height: 200px;
-        max-height: 55vh;
+        padding: 8px 11px !important;
+        font-size: 13px !important;
+        line-height: 1.35 !important;
+        min-height: 95px;
       }
     }
 
@@ -1459,13 +1488,18 @@
         card.style.left = `${note.x}px`;
         card.style.top = `${note.y}px`;
         card.style.width = `${note.width}px`;
-        card.style.height = `${note.height}px`;
+        if (window.innerWidth <= 768) {
+          card.style.height = note.mobileHeight ? `${note.mobileHeight}px` : '215px';
+        } else {
+          card.style.height = `${note.height}px`;
+        }
         card.style.zIndex = note.zIndex || 10;
         card.style.backgroundColor = theme.body;
         card.style.color = theme.text;
         card.style.border = `1px solid ${theme.border}`;
 
         card.addEventListener('mousedown', () => bringNoteToFront(note.id));
+        card.addEventListener('touchstart', () => bringNoteToFront(note.id), { passive: true });
 
         const alarmBadgeHtml = (note.alarm && note.alarm.enabled)
           ? `<button type="button" onclick="event.stopPropagation(); activeNoteId='${note.id}'; openAlarmModalForActiveNote();" class="px-1.5 py-0.5 rounded bg-black/10 text-[10px] font-semibold flex items-center gap-1 cursor-pointer" title="Edit Reminder">⏰ ${new Date(note.alarm.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</button>`
@@ -1478,13 +1512,13 @@
               class="note-title-input bg-transparent text-center font-normal text-[14px] outline-none flex-1 min-w-0 px-1 truncate"
               style="color: ${theme.text};" />
             <div class="flex items-center gap-0.5 flex-shrink-0">
-              <button type="button" class="note-format-btn md:hidden w-8 h-8 flex items-center justify-center rounded hover:bg-black/10 text-xs font-bold cursor-pointer" title="Format Text">Aa</button>
-              <button type="button" class="note-dots-btn w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded hover:bg-black/10 cursor-pointer" title="Note Options & Colors">
+              <button type="button" class="note-format-btn md:hidden w-7 h-7 flex items-center justify-center rounded hover:bg-black/10 text-xs font-bold cursor-pointer" title="Format Text">Aa</button>
+              <button type="button" class="note-dots-btn w-7 h-7 flex items-center justify-center rounded hover:bg-black/10 cursor-pointer" title="Note Options & Colors">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/>
                 </svg>
               </button>
-              <button type="button" class="note-close-btn w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded hover:bg-black/10 cursor-pointer" title="Minimize to Notes Drawer">
+              <button type="button" class="note-close-btn w-7 h-7 flex items-center justify-center rounded hover:bg-black/10 cursor-pointer" title="Minimize to Notes Drawer">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
@@ -1492,6 +1526,11 @@
             </div>
           </div>
           <div class="note-editor px-3.5 py-2.5 text-[14.5px]" contenteditable="true" data-placeholder="Take a note...">${note.content || ''}</div>
+          <div class="note-resize-grip" title="Drag to resize note">
+            <svg class="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <line x1="10" y1="4" x2="4" y2="10"/><line x1="10" y1="8" x2="8" y2="10"/>
+            </svg>
+          </div>
         `;
 
         const header = card.querySelector('.note-header');
@@ -1500,6 +1539,7 @@
         const formatBtn = card.querySelector('.note-format-btn');
         const closeBtn = card.querySelector('.note-close-btn');
         const editor = card.querySelector('.note-editor');
+        const resizeGrip = card.querySelector('.note-resize-grip');
 
         titleInput.addEventListener('mousedown', e => e.stopPropagation());
         titleInput.addEventListener('input', e => {
@@ -1556,6 +1596,7 @@
 
         setupNoteDrag(header, card, note);
         setupNoteResizeObserver(card, note);
+        setupTouchAndPointerResize(resizeGrip, card, note);
         canvas.appendChild(card);
       });
 
@@ -1600,16 +1641,79 @@
     function setupNoteResizeObserver(card, note) {
       if (typeof ResizeObserver === 'undefined') return;
       const ro = new ResizeObserver(() => {
-        if (window.innerWidth <= 768) return;
         const w = card.offsetWidth;
         const h = card.offsetHeight;
-        if (w > 200 && h > 200 && (Math.abs(w - note.width) > 4 || Math.abs(h - note.height) > 4)) {
+        if (window.innerWidth <= 768) {
+          if (h >= 140 && Math.abs(h - (note.mobileHeight || 215)) > 4) {
+            note.mobileHeight = h;
+            saveNotesToStorage();
+          }
+          return;
+        }
+        if (w >= 200 && h >= 140 && (Math.abs(w - note.width) > 4 || Math.abs(h - note.height) > 4)) {
           note.width = w;
           note.height = h;
           saveNotesToStorage();
         }
       });
       ro.observe(card);
+    }
+
+    function setupTouchAndPointerResize(grip, card, note) {
+      if (!grip) return;
+      const startResize = (startX, startY) => {
+        bringNoteToFront(note.id);
+        const startW = card.offsetWidth;
+        const startH = card.offsetHeight;
+        const isSmallView = window.innerWidth <= 768;
+
+        const onMove = (clientX, clientY) => {
+          const newH = Math.max(145, Math.min(window.innerHeight - 90, startH + (clientY - startY)));
+          card.style.height = `${newH}px`;
+          if (isSmallView) {
+            note.mobileHeight = newH;
+          } else {
+            const newW = Math.max(210, Math.min(window.innerWidth - 24, startW + (clientX - startX)));
+            card.style.width = `${newW}px`;
+            note.width = newW;
+            note.height = newH;
+          }
+        };
+
+        const onMouseMove = (ev) => onMove(ev.clientX, ev.clientY);
+        const onTouchMove = (ev) => {
+          if (ev.touches && ev.touches[0]) {
+            ev.preventDefault();
+            onMove(ev.touches[0].clientX, ev.touches[0].clientY);
+          }
+        };
+        const onEnd = () => {
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onEnd);
+          window.removeEventListener('touchmove', onTouchMove);
+          window.removeEventListener('touchend', onEnd);
+          saveNotesToStorage();
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onEnd);
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+      };
+
+      grip.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        startResize(e.clientX, e.clientY);
+      });
+
+      grip.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches[0]) {
+          e.preventDefault();
+          e.stopPropagation();
+          startResize(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: false });
     }
 
     /* =========================================================================
