@@ -228,10 +228,10 @@
         position: relative !important;
         left: auto !important;
         top: auto !important;
-        width: calc(100vw - 24px) !important;
-        max-width: 540px !important;
+        min-width: 210px !important;
+        max-width: calc(100vw - 24px) !important;
         min-height: 145px !important;
-        resize: vertical !important;
+        resize: both !important;
         border-radius: 10px !important;
         margin: 0 auto !important;
       }
@@ -1061,8 +1061,8 @@
        0. PASTE YOUR SUPABASE PROJECT URL & ANON PUBLIC KEY HERE
        (Find both in Supabase Dashboard -> Project Settings -> API)
        ========================================================================= */
-    const BUILTIN_SUPABASE_URL = 'https://eabnbkysvhbbhrgpetkz.supabase.co';
-    const BUILTIN_SUPABASE_KEY = 'sb_publishable_iEANbmfcbUnWww3un-i1mw_3v0uoyNx';
+    const BUILTIN_SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const BUILTIN_SUPABASE_KEY = 'YOUR_SUPABASE_ANON_PUBLIC_KEY';
 
     /* =========================================================================
        1. STATE, FAILSAFE SUPABASE CONFIG & UNIVERSAL DESKTOP APP BRIDGE
@@ -1350,6 +1350,7 @@
           const filteredRows = remoteRows.filter(r => r && r.id && !deletedNoteIds.has(r.id));
           if (filteredRows.length > 0) {
             notes = filteredRows.map(r => {
+              const existingLocal = notes.find(ln => ln.id === r.id);
               const matchedTheme = NOTE_THEMES.find(t => t.body.toLowerCase() === String(r.color || '').toLowerCase()) || NOTE_THEMES[0];
               const alarmObj = Array.isArray(r.alarms) && r.alarms.length > 0 ? r.alarms[0] : null;
               return {
@@ -1361,6 +1362,8 @@
                 y: Number.isFinite(r.y) ? r.y : 84,
                 width: Number.isFinite(r.width) ? r.width : 340,
                 height: Number.isFinite(r.height) ? r.height : 360,
+                mobileWidth: existingLocal?.mobileWidth || null,
+                mobileHeight: existingLocal?.mobileHeight || null,
                 minimized: Boolean(r.minimized),
                 zIndex: Number.isFinite(r.z_index) ? r.z_index : 10,
                 alarm: alarmObj
@@ -1487,10 +1490,11 @@
         card.dataset.noteId = note.id;
         card.style.left = `${note.x}px`;
         card.style.top = `${note.y}px`;
-        card.style.width = `${note.width}px`;
         if (window.innerWidth <= 768) {
+          card.style.width = note.mobileWidth ? `${Math.min(note.mobileWidth, window.innerWidth - 24)}px` : 'calc(100vw - 24px)';
           card.style.height = note.mobileHeight ? `${note.mobileHeight}px` : '215px';
         } else {
+          card.style.width = `${note.width}px`;
           card.style.height = `${note.height}px`;
         }
         card.style.zIndex = note.zIndex || 10;
@@ -1641,16 +1645,21 @@
     function setupNoteResizeObserver(card, note) {
       if (typeof ResizeObserver === 'undefined') return;
       const ro = new ResizeObserver(() => {
+        if (!card.isConnected) return;
         const w = card.offsetWidth;
         const h = card.offsetHeight;
+        if (w < 180 || h < 140) return;
         if (window.innerWidth <= 768) {
-          if (h >= 140 && Math.abs(h - (note.mobileHeight || 215)) > 4) {
+          const prevH = note.mobileHeight || 215;
+          const prevW = note.mobileWidth || w;
+          if (Math.abs(h - prevH) > 4 || Math.abs(w - prevW) > 4) {
             note.mobileHeight = h;
+            note.mobileWidth = w;
             saveNotesToStorage();
           }
           return;
         }
-        if (w >= 200 && h >= 140 && (Math.abs(w - note.width) > 4 || Math.abs(h - note.height) > 4)) {
+        if (Math.abs(w - note.width) > 4 || Math.abs(h - note.height) > 4) {
           note.width = w;
           note.height = h;
           saveNotesToStorage();
@@ -1668,9 +1677,12 @@
         const isSmallView = window.innerWidth <= 768;
 
         const onMove = (clientX, clientY) => {
-          const newH = Math.max(145, Math.min(window.innerHeight - 90, startH + (clientY - startY)));
+          const newH = Math.max(145, Math.min(window.innerHeight * 1.5, startH + (clientY - startY)));
           card.style.height = `${newH}px`;
           if (isSmallView) {
+            const newW = Math.max(210, Math.min(window.innerWidth - 24, startW + (clientX - startX)));
+            card.style.width = `${newW}px`;
+            note.mobileWidth = newW;
             note.mobileHeight = newH;
           } else {
             const newW = Math.max(210, Math.min(window.innerWidth - 24, startW + (clientX - startX)));
