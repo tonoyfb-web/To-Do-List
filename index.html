@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="MeetNote" />
-  <title>MeetNote</title>
+  <title>MeetNote — Sticky Notes &amp; Desktop Reminders</title>
 
   <!-- Inline SVG + Raster PNG Data-URI Generator for Browser Tab, Mobile Home Screen & PWA Manifest -->
   <script>
@@ -447,6 +447,15 @@
         <button type="button" id="viewScaleLabel" onclick="resetAppViewScale()" class="px-1.5 text-[11px] font-semibold hover:text-slate-900 cursor-pointer" title="Reset View Scale to 100%">100%</button>
         <button type="button" onclick="adjustAppViewScale(0.05)" class="w-6 h-6 flex items-center justify-center rounded hover:bg-white font-bold cursor-pointer" title="Zoom In View">+</button>
       </div>
+
+      <!-- Floating Always-on-Top Mini / Picture-in-Picture Mode Button -->
+      <button type="button" id="pipModeBtn" onclick="openFloatingPipNote()" class="flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 transition cursor-pointer" title="Pop out Always-on-Top Mini Sticky Note (Picture-in-Picture)">
+        <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <rect x="12" y="11" width="8" height="6" rx="1" fill="currentColor" fill-opacity="0.25"/>
+        </svg>
+        <span class="hidden sm:inline">Mini PiP</span>
+      </button>
 
       <!-- Install PWA / Desktop App Button -->
       <button type="button" id="installPwaBtn" onclick="triggerPwaInstall()" class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer">
@@ -1117,8 +1126,167 @@
     let ringingNote = null;
     let alarmIntervalAudio = null;
     let deferredInstallPrompt = null;
+    let activePipWindow = null;
     const VIEW_SCALE_KEY = 'meetnote_view_scale_v1';
     let appViewScale = 1.0;
+
+    async function openFloatingPipNote() {
+      const note = notes.find(n => n.id === activeNoteId) || notes[0];
+      if (!note) return;
+
+      if (activePipWindow && !activePipWindow.closed) {
+        activePipWindow.focus();
+        return;
+      }
+
+      const renderPipContent = (pipWin) => {
+        const theme = getThemeObj(note.theme);
+        const doc = pipWin.document;
+        doc.open();
+        doc.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>${escapeHtmlAttr(note.title || 'MeetNote')} — Mini</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'Inter', sans-serif;
+      background: ${theme.body};
+      color: ${theme.text};
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      background: ${theme.header};
+      border-bottom: 1px solid ${theme.border};
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-weight: 600;
+      font-size: 13px;
+      color: ${theme.text};
+      flex: 1;
+      min-width: 0;
+    }
+    .pip-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    button {
+      background: rgba(0,0,0,0.08);
+      border: none;
+      border-radius: 6px;
+      padding: 4px 7px;
+      font-size: 11px;
+      font-weight: 600;
+      color: ${theme.text};
+      cursor: pointer;
+    }
+    button:hover { background: rgba(0,0,0,0.16); }
+    #pipEditor {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      outline: none;
+      overflow-y: auto;
+      word-wrap: break-word;
+    }
+    #pipEditor:empty:before {
+      content: 'Type quick note...';
+      opacity: 0.45;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <input id="pipTitle" type="text" value="${escapeHtmlAttr(note.title || 'New Note')}" />
+    <div class="pip-actions">
+      <button id="pipNewBtn" title="New Note">+ Note</button>
+      <button id="pipSyncBtn" title="Sync Now">Sync</button>
+    </div>
+  </header>
+  <div id="pipEditor" contenteditable="true">${note.content || ''}</div>
+</body>
+</html>`);
+        doc.close();
+
+        const pipTitle = doc.getElementById('pipTitle');
+        const pipEditor = doc.getElementById('pipEditor');
+        const pipNewBtn = doc.getElementById('pipNewBtn');
+        const pipSyncBtn = doc.getElementById('pipSyncBtn');
+
+        pipTitle.addEventListener('input', () => {
+          note.title = pipTitle.value;
+          saveNotesToStorage();
+          const mainInput = document.querySelector(`[data-note-id="${note.id}"] .note-title-input`);
+          if (mainInput) mainInput.value = note.title;
+        });
+
+        pipEditor.addEventListener('input', () => {
+          note.content = pipEditor.innerHTML;
+          saveNotesToStorage();
+          const mainEditor = document.querySelector(`[data-note-id="${note.id}"] .note-editor`);
+          if (mainEditor) mainEditor.innerHTML = note.content;
+        });
+
+        pipNewBtn.addEventListener('click', () => {
+          createNewNote();
+          const newest = notes[notes.length - 1];
+          if (newest) {
+            activeNoteId = newest.id;
+            openFloatingPipNote();
+          }
+        });
+
+        pipSyncBtn.addEventListener('click', () => {
+          refreshAndSyncNotes(true);
+        });
+
+        pipWin.addEventListener('pagehide', () => {
+          activePipWindow = null;
+          renderAllNotes();
+        });
+      };
+
+      // 1. Native Always-on-Top Document Picture-in-Picture API (Chrome / Edge Desktop)
+      if ('documentPictureInPicture' in window) {
+        try {
+          const pipWindow = await window.documentPictureInPicture.requestWindow({
+            width: 310,
+            height: 260
+          });
+          activePipWindow = pipWindow;
+          renderPipContent(pipWindow);
+          showToast('Always-on-top Mini PiP window opened!');
+          return;
+        } catch (err) {
+          // Fall through to compact popup window if blocked or unsupported
+        }
+      }
+
+      // 2. Compact Floating Popup Window Fallback (Firefox / Safari / Embedded Views)
+      const popup = window.open(
+        '',
+        'MeetNoteMiniPip',
+        'width=310,height=260,left=80,top=80,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes'
+      );
+      if (popup) {
+        activePipWindow = popup;
+        renderPipContent(popup);
+        showToast('Compact floating note window opened!');
+      } else {
+        showToast('Allow popups or open MeetNote in its own tab to launch Mini PiP mode.');
+      }
+    }
 
     function applyAppViewScale(scale, persist = true) {
       appViewScale = Math.max(0.75, Math.min(1.35, Math.round(scale * 100) / 100));
