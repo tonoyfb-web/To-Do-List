@@ -449,7 +449,7 @@
       </div>
 
       <!-- Floating Always-on-Top Mini / Picture-in-Picture Mode Button -->
-      <button type="button" id="pipModeBtn" onclick="openFloatingPipNote()" class="flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 transition cursor-pointer" title="Pop out Always-on-Top Mini Sticky Note (Picture-in-Picture)">
+      <button type="button" id="pipModeBtn" onclick="openFloatingPipNote()" class="flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 transition cursor-pointer" title="Open Compact Mini Window & Minimize Main App">
         <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="2" y="4" width="20" height="16" rx="2"/>
           <rect x="12" y="11" width="8" height="6" rx="1" fill="currentColor" fill-opacity="0.25"/>
@@ -1130,12 +1130,74 @@
     const VIEW_SCALE_KEY = 'meetnote_view_scale_v1';
     let appViewScale = 1.0;
 
+    function minimizeMainAppToTray() {
+      // 1. Native Desktop / Electron / Tauri Tray Bridge if available
+      if (window.DesktopBridge) {
+        try {
+          if (typeof window.DesktopBridge.minimizeToTray === 'function') {
+            window.DesktopBridge.minimizeToTray();
+            return;
+          }
+          if (typeof window.DesktopBridge.minimize === 'function') {
+            window.DesktopBridge.minimize();
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // 2. Installed Desktop PWA / Popup Window minimize attempt
+      try {
+        if (typeof window.minimize === 'function') {
+          window.minimize();
+        }
+        window.blur();
+      } catch (e) {}
+
+      // 3. Visual Tray / Standby Banner inside main tab when browser restricts OS window minimizing
+      const canvas = document.getElementById('desktopCanvas');
+      let trayOverlay = document.getElementById('trayMinimizedOverlay');
+      if (!trayOverlay) {
+        trayOverlay = document.createElement('div');
+        trayOverlay.id = 'trayMinimizedOverlay';
+        trayOverlay.className = 'fixed inset-0 z-30 bg-[#F3F5F8]/95 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center';
+        trayOverlay.innerHTML = `
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-lg p-6 max-w-sm w-full space-y-3">
+            <div class="w-11 h-11 mx-auto rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <rect x="12" y="11" width="8" height="6" rx="1" fill="currentColor" fill-opacity="0.25"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-sm text-slate-900">MeetNote Minimized to Mini Mode</h3>
+            <p class="text-xs text-slate-500">Your compact Mini Note window is open. Alarms and cloud sync remain active in the background.</p>
+            <div class="flex items-center justify-center gap-2 pt-1">
+              <button type="button" onclick="openFloatingPipNote()" class="px-3.5 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold cursor-pointer">Focus Mini Note</button>
+              <button type="button" onclick="restoreMainAppFromTray()" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-medium cursor-pointer">Restore Main App</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(trayOverlay);
+      }
+      if (canvas) canvas.classList.add('opacity-10', 'pointer-events-none');
+      trayOverlay.classList.remove('hidden');
+    }
+
+    function restoreMainAppFromTray() {
+      const canvas = document.getElementById('desktopCanvas');
+      const trayOverlay = document.getElementById('trayMinimizedOverlay');
+      if (canvas) canvas.classList.remove('opacity-10', 'pointer-events-none');
+      if (trayOverlay) trayOverlay.classList.add('hidden');
+      try { window.focus(); } catch (e) {}
+      renderAllNotes();
+    }
+
     async function openFloatingPipNote() {
       const note = notes.find(n => n.id === activeNoteId) || notes[0];
       if (!note) return;
 
       if (activePipWindow && !activePipWindow.closed) {
         activePipWindow.focus();
+        minimizeMainAppToTray();
         return;
       }
 
@@ -1212,6 +1274,7 @@
     <div class="pip-actions">
       <button id="pipNewBtn" title="New Note">+ Note</button>
       <button id="pipSyncBtn" title="Sync Now">Sync</button>
+      <button id="pipExpandBtn" title="Restore Main App">Expand</button>
     </div>
   </header>
   <div id="pipEditor" contenteditable="true">${note.content || ''}</div>
@@ -1223,6 +1286,7 @@
         const pipEditor = doc.getElementById('pipEditor');
         const pipNewBtn = doc.getElementById('pipNewBtn');
         const pipSyncBtn = doc.getElementById('pipSyncBtn');
+        const pipExpandBtn = doc.getElementById('pipExpandBtn');
 
         pipTitle.addEventListener('input', () => {
           note.title = pipTitle.value;
@@ -1243,7 +1307,7 @@
           const newest = notes[notes.length - 1];
           if (newest) {
             activeNoteId = newest.id;
-            openFloatingPipNote();
+            renderPipContent(pipWin);
           }
         });
 
@@ -1251,29 +1315,18 @@
           refreshAndSyncNotes(true);
         });
 
-        pipWin.addEventListener('pagehide', () => {
+        pipExpandBtn.addEventListener('click', () => {
+          restoreMainAppFromTray();
+          try { pipWin.close(); } catch (e) {}
+        });
+
+        pipWin.addEventListener('beforeunload', () => {
           activePipWindow = null;
-          renderAllNotes();
+          restoreMainAppFromTray();
         });
       };
 
-      // 1. Native Always-on-Top Document Picture-in-Picture API (Chrome / Edge Desktop)
-      if ('documentPictureInPicture' in window) {
-        try {
-          const pipWindow = await window.documentPictureInPicture.requestWindow({
-            width: 310,
-            height: 260
-          });
-          activePipWindow = pipWindow;
-          renderPipContent(pipWindow);
-          showToast('Always-on-top Mini PiP window opened!');
-          return;
-        } catch (err) {
-          // Fall through to compact popup window if blocked or unsupported
-        }
-      }
-
-      // 2. Compact Floating Popup Window Fallback (Firefox / Safari / Embedded Views)
+      // Open standard compact floating window (behaves like a normal window, not forced always-on-top)
       const popup = window.open(
         '',
         'MeetNoteMiniPip',
@@ -1282,9 +1335,10 @@
       if (popup) {
         activePipWindow = popup;
         renderPipContent(popup);
-        showToast('Compact floating note window opened!');
+        minimizeMainAppToTray();
+        popup.focus();
       } else {
-        showToast('Allow popups or open MeetNote in its own tab to launch Mini PiP mode.');
+        showToast('Allow popups in your browser address bar to open the Mini Note window.');
       }
     }
 
