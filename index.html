@@ -101,7 +101,7 @@
         const currentUrl = window.location.href.split('#')[0];
         const manifest = {
           id: currentUrl,
-          name: 'MeetNote — Sticky Notes & Reminders',
+          name: 'MeetNote',
           short_name: 'MeetNote',
           description: 'Sticky notes & background desktop/mobile reminders with cloud sync',
           start_url: currentUrl,
@@ -159,6 +159,29 @@
       #topDock .brand-title-text {
         font-size: 13px !important;
       }
+    }
+
+    /* Desktop PWA Titlebar / Window Controls Overlay Spacer */
+    :root {
+      --pwa-top-spacer: max(env(titlebar-area-height, 0px), env(safe-area-inset-top, 0px));
+    }
+    @media all and (display-mode: standalone), all and (display-mode: window-controls-overlay) {
+      :root {
+        --pwa-top-spacer: max(28px, env(titlebar-area-height, 28px), env(safe-area-inset-top, 0px));
+      }
+    }
+    #pwaTitlebarSpacer {
+      height: var(--pwa-top-spacer);
+      -webkit-app-region: drag;
+      app-region: drag;
+    }
+    #topDock {
+      top: calc(10px + var(--pwa-top-spacer)) !important;
+      -webkit-app-region: no-drag;
+      app-region: no-drag;
+    }
+    #desktopCanvas {
+      padding-top: calc(72px + var(--pwa-top-spacer)) !important;
     }
 
     @media (max-width: 768px) {
@@ -237,7 +260,7 @@
         position: static !important;
         height: auto !important;
         min-height: 100dvh;
-        padding-top: calc(82px + env(safe-area-inset-top, 0px)) !important;
+        padding-top: calc(82px + var(--pwa-top-spacer)) !important;
         padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
         display: flex;
         flex-direction: column;
@@ -399,8 +422,11 @@
 </head>
 <body class="min-h-screen w-screen relative text-slate-900 bg-[#F3F5F8]">
 
+  <!-- Dedicated Top Spacer for Desktop PWA Titlebar / Window Controls Overlay -->
+  <div id="pwaTitlebarSpacer" class="fixed top-0 left-0 right-0 z-50 bg-[#F3F5F8]/95 backdrop-blur-xs pointer-events-none"></div>
+
   <!-- Top Desktop & Mobile Header Dock (Always keeps "+ New Note" visible and accessible) -->
-  <header id="topDock" style="top: calc(10px + env(safe-area-inset-top, 0px));" class="fixed left-2.5 right-2.5 sm:left-3 sm:right-3 z-40 flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-800 shadow-xs">
+  <header id="topDock" class="fixed left-2.5 right-2.5 sm:left-3 sm:right-3 z-40 flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-800 shadow-xs">
     <div class="flex items-center gap-2 min-w-0">
       <div class="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shadow-2xs flex-shrink-0 p-1">
         <img id="brandLogoImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='20' y='18' width='88' height='104' rx='14' fill='%237C5343'/%3E%3Crect x='46' y='8' width='36' height='20' rx='6' fill='%23A5ABB3'/%3E%3Crect x='30' y='30' width='68' height='82' rx='6' fill='%23FFFFFF'/%3E%3Cpath d='M39 48l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='49' x2='89' y2='49' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 71l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='72' x2='89' y2='72' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3Cpath d='M39 94l6 6 12-13' fill='none' stroke='%231FA966' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='65' y1='95' x2='89' y2='95' stroke='%23364152' stroke-width='6.5' stroke-linecap='round'/%3E%3C/svg%3E" alt="MeetNote" onerror="this.onerror=null; if (window.MEETNOTE_SVG_URI) this.src=window.MEETNOTE_SVG_URI;" class="w-full h-full object-contain" />
@@ -1415,13 +1441,17 @@
 
     function handleWindowResizeReflow() {
       const isSmall = window.innerWidth <= 768;
+      const topSpacerEl = document.getElementById('pwaTitlebarSpacer');
+      const spacerHeight = topSpacerEl ? topSpacerEl.offsetHeight : 0;
+      const minTopY = 66 + spacerHeight;
       if (!isSmall) {
         let changed = false;
         notes.forEach(n => {
           if (n.minimized) return;
           const maxX = Math.max(12, window.innerWidth - Math.min(n.width || 340, window.innerWidth - 24));
-          const maxY = Math.max(66, window.innerHeight - 120);
+          const maxY = Math.max(minTopY, window.innerHeight - 120);
           if (n.x > maxX) { n.x = maxX; changed = true; }
+          if (n.y < minTopY) { n.y = minTopY; changed = true; }
           if (n.y > maxY) { n.y = maxY; changed = true; }
         });
         if (changed) saveNotesToStorage(true);
@@ -1973,10 +2003,12 @@
         const startY = e.clientY;
         const origX = note.x;
         const origY = note.y;
+        const topSpacerEl = document.getElementById('pwaTitlebarSpacer');
+        const minTopY = 58 + (topSpacerEl ? topSpacerEl.offsetHeight : 0);
 
         function onMove(ev) {
           note.x = Math.max(0, Math.min(window.innerWidth - 120, origX + (ev.clientX - startX)));
-          note.y = Math.max(58, Math.min(window.innerHeight - 60, origY + (ev.clientY - startY)));
+          note.y = Math.max(minTopY, Math.min(window.innerHeight - 60, origY + (ev.clientY - startY)));
           card.style.left = `${note.x}px`;
           card.style.top = `${note.y}px`;
         }
