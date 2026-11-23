@@ -98,17 +98,23 @@
       setLink('appleTouchIconLink', 'apple-touch-icon', 'image/png', png180, '180x180');
 
       try {
+        const currentUrl = window.location.href.split('#')[0];
         const manifest = {
+          id: currentUrl,
           name: 'MeetNote — Sticky Notes & Reminders',
           short_name: 'MeetNote',
-          start_url: './',
+          description: 'Sticky notes & background desktop/mobile reminders with cloud sync',
+          start_url: currentUrl,
+          scope: './',
           display: 'standalone',
           display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
           background_color: '#F3F5F8',
           theme_color: '#F3F5F8',
           icons: [
-            { src: png192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-            { src: png512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+            { src: png192, sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: png192, sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+            { src: png512, sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: png512, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
           ]
         };
         const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
@@ -457,14 +463,14 @@
         <span class="hidden sm:inline">Mini PiP</span>
       </button>
 
-      <!-- Install PWA / Desktop App Button -->
-      <button type="button" id="installPwaBtn" onclick="triggerPwaInstall()" class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <!-- Install PWA / Desktop & Mobile App Button (Always visible unless already installed) -->
+      <button type="button" id="installPwaBtn" onclick="triggerPwaInstall()" class="flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-0 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer" title="Install MeetNote App on Desktop or Mobile">
+        <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
-        <span class="hidden lg:inline">Install App</span>
+        <span id="installPwaLabel" class="hidden sm:inline">Install App</span>
       </button>
 
       <!-- Global Add Reminder / Alarm Button in Header -->
@@ -1094,6 +1100,34 @@
             <button type="button" onclick="saveSupabaseConfig()" class="px-4 py-2.5 sm:py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xs cursor-pointer">Save &amp; Sync</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       PWA INSTALL INSTRUCTIONS MODAL (For iOS Safari, Firefox, or Manual Install)
+       ===================================================================== -->
+  <div id="pwaInstallModal" class="hidden fixed inset-0 z-[10000] bg-slate-900/35 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[94vw] max-w-md overflow-hidden">
+      <div class="px-4 sm:px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 border border-sky-200 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-sm text-slate-900">Install MeetNote App</h3>
+            <p class="text-xs text-slate-500">Add to your Home Screen or Desktop Dock</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('pwaInstallModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200/70 text-slate-500 cursor-pointer">✕</button>
+      </div>
+      <div id="pwaInstallSteps" class="p-4 sm:p-5 space-y-3 text-xs text-slate-700"></div>
+      <div class="px-4 sm:px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <button type="button" onclick="closeModal('pwaInstallModal')" class="px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold cursor-pointer">Got it</button>
       </div>
     </div>
   </div>
@@ -2643,8 +2677,27 @@
       if (!('serviceWorker' in navigator)) return;
       try {
         const swCode = `
-          self.addEventListener('install', () => self.skipWaiting());
-          self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+          const CACHE_NAME = 'meetnote-pwa-v1';
+          self.addEventListener('install', (e) => {
+            self.skipWaiting();
+          });
+          self.addEventListener('activate', (e) => {
+            e.waitUntil(self.clients.claim());
+          });
+          self.addEventListener('fetch', (e) => {
+            if (e.request.method !== 'GET') return;
+            e.respondWith(
+              fetch(e.request)
+                .then((res) => {
+                  if (res && res.status === 200 && res.type === 'basic') {
+                    const copy = res.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(e.request, copy)).catch(() => {});
+                  }
+                  return res;
+                })
+                .catch(() => caches.match(e.request))
+            );
+          });
           self.addEventListener('notificationclick', (e) => {
             e.notification.close();
             e.waitUntil(
@@ -2748,12 +2801,67 @@
     }
 
     function triggerPwaInstall() {
-      if (!deferredInstallPrompt) return;
-      deferredInstallPrompt.prompt();
-      deferredInstallPrompt.userChoice.finally(() => {
-        deferredInstallPrompt = null;
-        document.getElementById('installPwaBtn')?.classList.add('hidden');
-      });
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then((choice) => {
+          if (choice && choice.outcome === 'accepted') {
+            showToast('MeetNote installed as an app!');
+            document.getElementById('installPwaBtn')?.classList.add('hidden');
+          }
+          deferredInstallPrompt = null;
+        }).catch(() => {
+          deferredInstallPrompt = null;
+        });
+        return;
+      }
+
+      // Fallback guidance when browser hasn't fired beforeinstallprompt (e.g., iOS Safari, Firefox, or preview iframe)
+      const ua = navigator.userAgent || '';
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isAndroid = /Android/i.test(ua);
+      const stepsBox = document.getElementById('pwaInstallSteps');
+      if (stepsBox) {
+        if (isIOS) {
+          stepsBox.innerHTML = `
+            <p class="font-semibold text-slate-900">Install on iPhone / iPad (Safari):</p>
+            <ol class="list-decimal pl-4 space-y-1.5 text-slate-600">
+              <li>Tap the <strong>Share</strong> button (<span class="inline-block px-1.5 py-0.5 bg-slate-100 rounded font-mono">↑</span>) in Safari's toolbar.</li>
+              <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+              <li>Tap <strong>Add</strong> in the top-right corner to launch MeetNote full-screen.</li>
+            </ol>
+          `;
+        } else if (isAndroid) {
+          stepsBox.innerHTML = `
+            <p class="font-semibold text-slate-900">Install on Android (Chrome / Edge):</p>
+            <ol class="list-decimal pl-4 space-y-1.5 text-slate-600">
+              <li>Open this page directly over <strong>HTTPS</strong> (not inside a preview iframe).</li>
+              <li>Tap the browser menu (<strong>⋮</strong>) in the top-right corner.</li>
+              <li>Tap <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+            </ol>
+          `;
+        } else {
+          stepsBox.innerHTML = `
+            <p class="font-semibold text-slate-900">Install on Desktop (Chrome / Edge / Brave):</p>
+            <ol class="list-decimal pl-4 space-y-1.5 text-slate-600">
+              <li>Make sure MeetNote is opened in its own <strong>HTTPS</strong> browser tab (browsers hide the install prompt inside embedded frames).</li>
+              <li>Click the <strong>Install MeetNote</strong> icon (<span class="inline-block px-1.5 py-0.5 bg-slate-100 rounded font-mono">⊕</span>) on the right side of the address bar, or open the browser menu (<strong>⋮</strong>) → <strong>Cast, save, and share</strong> → <strong>Install page as app</strong>.</li>
+            </ol>
+          `;
+        }
+      }
+      document.getElementById('pwaInstallModal')?.classList.remove('hidden');
+    }
+
+    function updateInstallButtonVisibility() {
+      const btn = document.getElementById('installPwaBtn');
+      if (!btn) return;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      if (isStandalone) {
+        btn.classList.add('hidden');
+      } else {
+        btn.classList.remove('hidden');
+        btn.classList.add('flex');
+      }
     }
 
     function startBackgroundWorkerTimer() {
@@ -2774,10 +2882,18 @@
       e.preventDefault();
       deferredInstallPrompt = e;
       const btn = document.getElementById('installPwaBtn');
+      const label = document.getElementById('installPwaLabel');
       if (btn) {
         btn.classList.remove('hidden');
         btn.classList.add('flex');
       }
+      if (label) label.textContent = 'Install App';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      document.getElementById('installPwaBtn')?.classList.add('hidden');
+      showToast('MeetNote app installed!');
     });
 
     document.addEventListener('mousedown', e => {
@@ -2808,6 +2924,7 @@
       loadNotesFromStorage();
       renderAllNotes();
       registerBackgroundServiceWorker();
+      updateInstallButtonVisibility();
       updateNotificationButtonState();
       startBackgroundWorkerTimer();
       if (supabaseConnected) {
