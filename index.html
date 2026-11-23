@@ -147,7 +147,7 @@
       padding: 0;
       min-width: 240px;
       min-height: 100dvh;
-      overflow-x: hidden;
+      overflow-x: auto;
     }
 
     /* Compact Header Dock when Desktop PWA window is resized very narrow (< 540px) */
@@ -187,7 +187,7 @@
     @media (max-width: 768px) {
       body {
         overflow-y: auto;
-        overflow-x: hidden;
+        overflow-x: auto;
         padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
       }
       /* Prevent iOS Safari auto-zoom on input focus */
@@ -260,8 +260,8 @@
         position: static !important;
         height: auto !important;
         min-height: 100dvh;
-        padding-top: calc(82px + var(--pwa-top-spacer)) !important;
-        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+        min-width: max-content;
+        padding: calc(82px + var(--pwa-top-spacer)) 12px calc(104px + env(safe-area-inset-bottom, 0px)) 12px !important;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -272,7 +272,6 @@
         left: auto !important;
         top: auto !important;
         min-width: 210px !important;
-        max-width: calc(100vw - 24px) !important;
         min-height: 145px !important;
         resize: both !important;
         border-radius: 10px !important;
@@ -1448,11 +1447,8 @@
         let changed = false;
         notes.forEach(n => {
           if (n.minimized) return;
-          const maxX = Math.max(12, window.innerWidth - Math.min(n.width || 340, window.innerWidth - 24));
-          const maxY = Math.max(minTopY, window.innerHeight - 120);
-          if (n.x > maxX) { n.x = maxX; changed = true; }
           if (n.y < minTopY) { n.y = minTopY; changed = true; }
-          if (n.y > maxY) { n.y = maxY; changed = true; }
+          if (n.x < 12) { n.x = 12; changed = true; }
         });
         if (changed) saveNotesToStorage(true);
       }
@@ -1870,13 +1866,13 @@
         card.dataset.noteId = note.id;
 
         if (isSmallView) {
-          card.style.width = note.mobileWidth ? `${note.mobileWidth}px` : 'calc(100vw - 24px)';
-          card.style.height = note.mobileHeight ? `${note.mobileHeight}px` : '215px';
+          card.style.width = `${note.width || 340}px`;
+          card.style.height = `${note.height || 360}px`;
         } else {
           card.style.left = `${note.x}px`;
           card.style.top = `${note.y}px`;
-          card.style.width = `${note.width}px`;
-          card.style.height = `${note.height}px`;
+          card.style.width = `${note.width || 340}px`;
+          card.style.height = `${note.height || 360}px`;
         }
 
         card.style.zIndex = note.zIndex || 10;
@@ -2027,21 +2023,14 @@
       const startResize = (clientX, clientY) => {
         const startW = card.offsetWidth;
         const startH = card.offsetHeight;
-        const isSmall = window.innerWidth <= 768;
 
         const onMove = (cx, cy) => {
-          const maxW = isSmall ? Math.max(210, window.innerWidth - 24) : window.innerWidth - 20;
-          const nextW = Math.max(210, Math.min(maxW, startW + (cx - clientX)));
+          const nextW = Math.max(210, startW + (cx - clientX));
           const nextH = Math.max(145, startH + (cy - clientY));
           card.style.width = `${nextW}px`;
           card.style.height = `${nextH}px`;
-          if (isSmall) {
-            note.mobileWidth = nextW;
-            note.mobileHeight = nextH;
-          } else {
-            note.width = nextW;
-            note.height = nextH;
-          }
+          note.width = nextW;
+          note.height = nextH;
         };
 
         const onMouseMove = (ev) => onMove(ev.clientX, ev.clientY);
@@ -2084,13 +2073,7 @@
         const w = card.offsetWidth;
         const h = card.offsetHeight;
         if (w < 200 || h < 140) return;
-        if (window.innerWidth <= 768) {
-          if (Math.abs(w - (note.mobileWidth || w)) > 4 || Math.abs(h - (note.mobileHeight || h)) > 4) {
-            note.mobileWidth = w;
-            note.mobileHeight = h;
-            saveNotesToStorage();
-          }
-        } else if (Math.abs(w - note.width) > 4 || Math.abs(h - note.height) > 4) {
+        if (Math.abs(w - note.width) > 4 || Math.abs(h - note.height) > 4) {
           note.width = w;
           note.height = h;
           saveNotesToStorage();
